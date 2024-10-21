@@ -1,5 +1,6 @@
 package org.example;
 
+import javax.swing.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -9,11 +10,11 @@ import java.sql.Statement;
 
 public class CrudMeal {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/c202301028/IdeaProjects/MavenProject/spykeDatabase.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/Final-Java-Project/Database.db";
 
     public void addMeal(String mealName, String category,int servingSize, String type,int nutritionalValue, String
             spice,double mealPrice, String ingredients) {
-        String insertSQL = "INSERT INTO Meals (Meal Name, Meal Category, Serving Size, Meal Type, Nutritional Value, Spice Level, Meal Price, Ingredients) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String insertSQL = "INSERT INTO Meals (meal_name, meal_category, serving_size, meal_type, nutritional_value, spicy_or_not_spicy, meal_price, ingredients) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = DriverManager.getConnection(DB_URL);
              PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
             preparedStatement.setString(1, mealName);
@@ -26,8 +27,10 @@ public class CrudMeal {
             preparedStatement.setString(8, ingredients);
 
             preparedStatement.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Meal added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Failed to add meal. Please check your input.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

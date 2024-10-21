@@ -6,6 +6,7 @@ import java.awt.*;
 public class MyFrame extends JFrame {
 
     public MyFrame() {
+        CrudMeal meal = new CrudMeal();
 
         JPanel panel1 = new JPanel();
         JPanel panel2 = new JPanel();
@@ -22,6 +23,8 @@ public class MyFrame extends JFrame {
         JButton listMeal = new JButton("List Meal");
         JButton deleteMeal = new JButton("Delete Meal");
         JButton editMeal = new JButton("Edit Meal");
+
+
 
         addMeal.setPreferredSize(new Dimension(100, 30));
         addMeal.setFocusable(false);
@@ -82,6 +85,19 @@ public class MyFrame extends JFrame {
         JTextField ingredientField = new JTextField();
         ingredientField.setPreferredSize(new Dimension(200, 35));
 
+        addMeal.addActionListener(e ->{
+            String mealNameText = nameField.getText();
+            String mealCategoryText = categoryField.getText();
+            int mealServingSizeText = Integer.parseInt(servingField.getText());
+            String mealTypeText = typeField.getText();
+            int nutritionalValueText = Integer.parseInt(nutritionField.getText());
+            String spiceText = spiceField.getText();
+            double mealPriceText = Double.parseDouble(priceField.getText());
+            String ingredientsText = ingredientField.getText();
+
+            meal.addMeal(mealNameText, mealCategoryText, mealServingSizeText, mealTypeText, nutritionalValueText, spiceText, mealPriceText, ingredientsText);
+        });
+
         GridBagConstraints gbc = new GridBagConstraints();
         panel1.setLayout(new GridBagLayout());
 
@@ -136,10 +152,10 @@ public class MyFrame extends JFrame {
         panel1.add(nutritionField, gbc);
 
         gbc.gridy++;
-        panel1.add(priceField, gbc);
+        panel1.add(spiceField, gbc);
 
         gbc.gridy++;
-        panel1.add(spiceField, gbc);
+        panel1.add(priceField, gbc);
 
         gbc.gridy++;
         panel1.add(ingredientField, gbc);

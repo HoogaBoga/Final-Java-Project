@@ -10,10 +10,12 @@ import java.sql.Statement;
 
 public class Main {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/c202301028/IdeaProjects/MavenProject/spykeDatabase.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/Final-Java-Project/Database.db";
 
     public static void main(String[] args) {
         new MyFrame();
+
+        createMealTable();
     }
 
     private static void createUsersTable() {
