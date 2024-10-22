@@ -1,58 +1,52 @@
 package org.example;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.IOException;
+import java.sql.*;
 
 
 public class Newframe extends JFrame {
-    public Newframe() throws IOException {
-        // Set layout
-        setLayout(new BorderLayout());
 
-        JLabel error = new JLabel("Wrong UserName or Password");
-        JLabel correct = new JLabel("Login Successful!");
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/c202301028/IdeaProjects/Final-Java-Project/Database.db";
 
-        JFrame frame2 = new JFrame();
-        JFrame frame3 = new JFrame();
-        JFrame frame = new JFrame();
-        // Create panel for frame
-        JPanel framePanel = new JPanel();
-        framePanel.setLayout(null);
-        framePanel.setBackground(new Color(0, 163, 108));
-        framePanel.setPreferredSize(new Dimension(621, 358));
+    public Newframe() throws IOException, SQLException {
 
-        frame2.setSize(500, 200);
-        frame2.setLayout(new GridBagLayout());
-        frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame2.setResizable(false);
-        frame2.setLocationRelativeTo(null);
-        frame2.add(error);
+        JPanel panel1 = new JPanel();
+        JTextArea textArea =  new JTextArea();
 
+        textArea.setEditable(false);
+        textArea.setText(listMeals());
+        panel1.add(textArea);
 
-        frame3.setSize(500, 200);
-        frame3.setLayout(new GridBagLayout());
-        frame3.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame3.setResizable(false);
-        frame3.setLocationRelativeTo(null);
-        frame3.add(correct);
+        this.add(panel1);
+        this.setVisible(true);
+        this.pack();
 
+    }
 
-        // Add welcome text
-        JLabel welcomeLabel = new JLabel("WELCOME!");
-        welcomeLabel.setForeground(Color.WHITE);
-        welcomeLabel.setFont(new Font("Readex Pro", Font.PLAIN, 35));
-        welcomeLabel.setBounds(380, 70, 200, 40);
-        framePanel.add(welcomeLabel);
+    public String listMeals() throws SQLException {
+        String query = "SELECT * FROM Meals";
+        StringBuilder mealList = new StringBuilder("Meals:\n");
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
 
-        // Add username label
-        JLabel usernameLabel = new JLabel("Username:");
-        usernameLabel.setForeground(Color.WHITE);
-        usernameLabel.setFont(new Font("Readex Pro", Font.PLAIN, 14));
-        usernameLabel.setBounds(329, 135, 100, 20);
-        framePanel.add(usernameLabel);
+            while (resultSet.next()) {
+                mealList.append("ID: ").append(resultSet.getInt("meal_id"))
+                        .append("\n Meal Name: ").append(resultSet.getString("meal_name"))
+                        .append("\n Meal Category: ").append(resultSet.getString("meal_category"))
+                        .append("\n Serving Size: ").append(resultSet.getString("meal_type"))
+                        .append("\n Meal Type: ").append(resultSet.getString("meal_type"))
+                        .append("\n Nutritional Value: ").append(resultSet.getString("nutritional_value"))
+                        .append("\n Spicy: ").append(resultSet.getString("spicy_or_not_spicy"))
+                        .append("\n Meal Price: ").append(resultSet.getString("meal_price"))
+                        .append("\n Ingredients: ").append(resultSet.getString("ingredients")).append("\n");
 
-        setVisible(true);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
+        return mealList.toString();
     }
 }

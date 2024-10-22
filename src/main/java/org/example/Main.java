@@ -11,13 +11,20 @@ import java.sql.Statement;
 
 public class Main {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/Final-Java-Project/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/c202301028/IdeaProjects/Final-Java-Project/Database.db";
 
     public static void main(String[] args) throws IOException {
 //        new MyFrame();
+
+        CrudMeal meal = new CrudMeal();
         new FigmaToCodeApp();
 
-        createMealTable();
+
+       // createUsersTable();
+        //createMealTable();
+        //addUser("Zoie", "Estorba", "Manager");
+        meal.addMeal("Spaghetti", "Dinner", 150, "Vegetarian", 300, "Spicy", 2000, "Chicken");
+//        createMealTable();
     }
 
     private static void createUsersTable() {
@@ -129,6 +136,26 @@ public class Main {
 
             statement.execute(createTableSQL);
             System.out.println("Table 'Sales' created successfully!");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void addUser(String username, String password, String role) {
+        String insertSQL = "INSERT INTO Users (username, password, role) VALUES (?, ?, ?)";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+            preparedStatement.setString(3, role);
+
+            int rowsAffected = preparedStatement.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("User '" + username + "' added successfully!");
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();

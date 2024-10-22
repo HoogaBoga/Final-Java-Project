@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class FigmaToCodeApp extends JFrame {
 
@@ -98,6 +99,8 @@ public class FigmaToCodeApp extends JFrame {
                         new Newframe();
                         dispose();
                     } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (SQLException ex) {
                         throw new RuntimeException(ex);
                     }
 
