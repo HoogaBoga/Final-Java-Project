@@ -1,5 +1,6 @@
 package org.example;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,8 +13,9 @@ public class Main {
 
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/Final-Java-Project/Database.db";
 
-    public static void main(String[] args) {
-        new MyFrame();
+    public static void main(String[] args) throws IOException {
+//        new MyFrame();
+        new FigmaToCodeApp();
 
         createMealTable();
     }
@@ -131,5 +133,33 @@ public class Main {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static boolean authenticateUser(String username, String password) {
+        String query = "SELECT * FROM Users WHERE username = ? AND password = ?";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            return resultSet.next();
+
+            /*if (resultSet.next()) {
+                // User is authenticated
+                System.out.println("Login successful! Role: " + resultSet.getString("role"));
+            } else {
+                // Invalid credentials
+                System.out.println("Invalid username or password.");
+            }*/
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }
