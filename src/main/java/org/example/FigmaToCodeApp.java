@@ -79,25 +79,9 @@ public class FigmaToCodeApp extends JFrame {
         // Create a rounded JTextField
         // Add username field
         // Add username field
-        JTextField usernameField = new JTextField(){
-                @Override protected void paintComponent(Graphics g) {
-                    if (!isOpaque() && getBorder() instanceof RoundedCornerBorder) {
-                        Graphics2D g2 = (Graphics2D) g.create();
-                        g2.setPaint(getBackground());
-                        g2.fill(((RoundedCornerBorder) getBorder()).getBorderShape(
-                                0, 0, getWidth() - 1, getHeight() - 1));
-                        g2.dispose();
-                    }
-                    super.paintComponent(g);
-                }
-                @Override public void updateUI() {
-                    super.updateUI();
-                    setOpaque(false);
-                    setBorder(new RoundedCornerBorder());
-                }
-        };
+        TextField usernameField = new TextField();
 
-        usernameField.setBounds(329, 153, 273, 28);
+        usernameField.setBounds(329, 153, 273, 42);
         usernameField.setBackground(new Color(251, 250, 242));
         usernameField.setForeground(Color.BLACK); // Text color
         usernameField.setFont(new Font("Readex Pro", Font.PLAIN, 14));
@@ -113,10 +97,9 @@ public class FigmaToCodeApp extends JFrame {
         backgroundPanel.add(passwordLabel);
 
         // Add password field
-        JPasswordField passwordField = new JPasswordField();
-        passwordField.setBounds(329, 218, 273, 28);
+        PasswordField passwordField = new PasswordField();
+        passwordField.setBounds(329, 218, 273, 42);
         passwordField.setBackground(new Color(251, 250, 242));
-        passwordField.setBorder(BorderFactory.createEmptyBorder());
         backgroundPanel.add(passwordField);
 
 
