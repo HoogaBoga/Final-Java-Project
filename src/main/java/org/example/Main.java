@@ -23,7 +23,6 @@ public class Main {
        // createUsersTable();
         //createMealTable();
         //addUser("Zoie", "Estorba", "Manager");
-        meal.addMeal("Spaghetti", "Dinner", 150, "Vegetarian", 300, "Spicy", 2000, "Chicken");
 //        createMealTable();
     }
 

@@ -25,7 +25,6 @@ public class MyFrame extends JFrame {
         JButton editMeal = new JButton("Edit Meal");
 
 
-
         addMeal.setPreferredSize(new Dimension(100, 30));
         addMeal.setFocusable(false);
 
