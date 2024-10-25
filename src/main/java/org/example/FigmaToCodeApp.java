@@ -16,7 +16,6 @@ public class FigmaToCodeApp extends JFrame {
 
         ImageIcon greeneryImage = new ImageIcon("Vector.png");
 
-        JLabel error = new JLabel("Wrong UserName or Password");
         JLabel correct = new JLabel("Login Successful!");
         JLabel greeneryyImage = new JLabel();
 
@@ -24,7 +23,6 @@ public class FigmaToCodeApp extends JFrame {
         greeneryyImage.setIcon(greeneryImage);
 
         JFrame frame2 = new JFrame();
-        JFrame frame3 = new JFrame();
         // Create panel for frame
         JPanel backgroundPanel = new JPanel() {
             @Override
@@ -50,15 +48,6 @@ public class FigmaToCodeApp extends JFrame {
         frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame2.setResizable(false);
         frame2.setLocationRelativeTo(null);
-        frame2.add(error);
-
-
-        frame3.setSize(500, 200);
-        frame3.setLayout(new GridBagLayout());
-        frame3.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame3.setResizable(false);
-        frame3.setLocationRelativeTo(null);
-        frame3.add(correct);
 
 
         // Add welcome text
@@ -131,8 +120,11 @@ public class FigmaToCodeApp extends JFrame {
                         throw new RuntimeException(ex);
                     }
 
-                } else
-                    frame2.setVisible(true);
+                } else{
+                    JOptionPane.showMessageDialog(FigmaToCodeApp.this, "Wrong Username or Password", "Error", JOptionPane.ERROR_MESSAGE);
+                    usernameField.setText("");
+                    passwordField.setText("");
+                }
 
             }
         });

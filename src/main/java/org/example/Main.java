@@ -11,7 +11,7 @@ import java.sql.Statement;
 
 public class Main {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/c202301028/IdeaProjects/Final-Java-Project/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
     public static void main(String[] args) throws IOException {
 //        new MyFrame();
@@ -20,9 +20,9 @@ public class Main {
         new FigmaToCodeApp();
 
 
-       // createUsersTable();
+        createUsersTable();
         //createMealTable();
-        //addUser("Zoie", "Estorba", "Manager");
+//        addUser("Zoie", "Estorba", "Manager");
 //        createMealTable();
     }
 
