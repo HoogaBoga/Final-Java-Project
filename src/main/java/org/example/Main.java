@@ -20,9 +20,9 @@ public class Main {
         new FigmaToCodeApp();
 
 
-        createUsersTable();
+//        createUsersTable();
         //createMealTable();
-//        addUser("Zoie", "Estorba", "Manager");
+//         addUser("Zoie", "Estorba", "Manager");
 //        createMealTable();
     }
 

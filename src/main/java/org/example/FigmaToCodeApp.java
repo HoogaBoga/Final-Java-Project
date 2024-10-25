@@ -9,6 +9,8 @@ import java.sql.SQLException;
 
 public class FigmaToCodeApp extends JFrame {
 
+    //TODO CREATE REGISTER BUTTON WITH FUNCTIONALITY TO ADD NEW USER
+    //TODO CREATE SECOND FRAME
 
     public FigmaToCodeApp() throws IOException {
         // Set layout
@@ -16,7 +18,6 @@ public class FigmaToCodeApp extends JFrame {
 
         ImageIcon greeneryImage = new ImageIcon("Vector.png");
 
-        JLabel correct = new JLabel("Login Successful!");
         JLabel greeneryyImage = new JLabel();
 
         greeneryyImage.setBounds(50, 50, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());
@@ -102,32 +103,8 @@ public class FigmaToCodeApp extends JFrame {
         backgroundPanel.add(greeneryyImage, BorderLayout.EAST);
 
         // Add login button
-        JButton loginButton = new JButton("LOGIN");
-        loginButton.setBounds(329, 261, 273, 28);
-        loginButton.setBackground(new Color(152, 130, 132));
-        loginButton.setForeground(Color.WHITE);
-        loginButton.setFont(new Font("Readex Pro", Font.PLAIN, 14));
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (Main.authenticateUser(usernameField.getText(), passwordField.getText())) {
-                    try {
-                        new Newframe();
-                        dispose();
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    } catch (SQLException ex) {
-                        throw new RuntimeException(ex);
-                    }
 
-                } else{
-                    JOptionPane.showMessageDialog(FigmaToCodeApp.this, "Wrong Username or Password", "Error", JOptionPane.ERROR_MESSAGE);
-                    usernameField.setText("");
-                    passwordField.setText("");
-                }
-
-            }
-        });
+        LoginButton loginButton = new LoginButton(usernameField, passwordField, this);
         backgroundPanel.add(loginButton);
 
         add(backgroundPanel, BorderLayout.CENTER);

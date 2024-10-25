@@ -7,7 +7,7 @@ import java.sql.*;
 
 public class Newframe extends JFrame {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/c202301028/IdeaProjects/Final-Java-Project/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:Final-Java-Project/Database.db";
 
     public Newframe() throws IOException, SQLException {
 
