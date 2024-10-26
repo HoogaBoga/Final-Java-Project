@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.sql.*;
 
 
-public class Newframe extends JFrame {
+public class HomeFrame extends JFrame {
 
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
-    public Newframe() throws IOException, SQLException {
+    public HomeFrame() throws IOException, SQLException {
 
         JPanel panel1 = new JPanel();
         JTextArea textArea =  new JTextArea();
@@ -20,6 +20,7 @@ public class Newframe extends JFrame {
 
         this.add(panel1);
         this.setVisible(true);
+        this.setLocationRelativeTo(null);
         this.pack();
 
     }

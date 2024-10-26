@@ -43,16 +43,13 @@ public class LoginButton extends JButton implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (Main.authenticateUser(usernameField.getText(), new String(passwordField.getPassword()))) {
             try {
-                new Newframe();
+                new HomeFrame();
                 parentFrame.dispose();
             } catch (IOException | SQLException ex) {
                 throw new RuntimeException(ex);
             }
         } else {
-//            JOptionPane.showMessageDialog(parentFrame, "Wrong Username or Password", "Error", JOptionPane.ERROR_MESSAGE);
             noUser.setVisible(true);
-            usernameField.setText("");
-            passwordField.setText("");
         }
     }
 

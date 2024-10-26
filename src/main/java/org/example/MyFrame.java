@@ -170,4 +170,9 @@ public class MyFrame extends JFrame {
         this.setLocationRelativeTo(null);
 
     }
+
+    public static void main(String[] args){
+        new MyFrame();
+    }
+
 }
