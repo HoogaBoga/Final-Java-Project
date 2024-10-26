@@ -11,7 +11,7 @@ import java.sql.Statement;
 
 public class Main {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/Final-Java-Project/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
     public static void main(String[] args) throws IOException {
 //        new MyFrame();

@@ -11,6 +11,7 @@ public class LoginButton extends JButton implements ActionListener {
     private TextField usernameField;
     private PasswordField passwordField;
     private JFrame parentFrame;
+    private JLabel noUser;
 
 
 
@@ -21,11 +22,17 @@ public class LoginButton extends JButton implements ActionListener {
         this.parentFrame = parentFrame;
 
         // Button settings
-        this.setBounds(329, 261, 273, 28);
+        this.setBounds(333, 261, 265, 28);
         this.setBackground(new Color(152, 130, 132));
         this.setForeground(Color.WHITE);
         this.setFont(new Font("Readex Pro", Font.PLAIN, 14));
         this.setFocusable(false);
+
+        noUser = new JLabel("Username or Password does not exist!");
+        noUser.setForeground(new Color(255, 0, 0));
+        noUser.setFont(new Font("Readex Pro", Font.PLAIN, 13));
+        noUser.setBounds(333, 295, 273, 15); // Adjust bounds as needed
+        noUser.setVisible(false); // Hide initially
 
         // Add ActionListener
         this.addActionListener(this);
@@ -36,16 +43,20 @@ public class LoginButton extends JButton implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (Main.authenticateUser(usernameField.getText(), new String(passwordField.getPassword()))) {
             try {
-                JOptionPane.showMessageDialog(parentFrame, "Login Successful!", "Success", JOptionPane.PLAIN_MESSAGE);
                 new Newframe();
                 parentFrame.dispose();
             } catch (IOException | SQLException ex) {
                 throw new RuntimeException(ex);
             }
         } else {
-            JOptionPane.showMessageDialog(parentFrame, "Wrong Username or Password", "Error", JOptionPane.ERROR_MESSAGE);
+//            JOptionPane.showMessageDialog(parentFrame, "Wrong Username or Password", "Error", JOptionPane.ERROR_MESSAGE);
+            noUser.setVisible(true);
             usernameField.setText("");
             passwordField.setText("");
         }
+    }
+
+    public JLabel getNoUser(){
+        return noUser;
     }
 }

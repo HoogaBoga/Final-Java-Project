@@ -97,8 +97,14 @@ public class FigmaToCodeApp extends JFrame {
         JLabel forgotPasswordLabel = new JLabel("Forgot Password");
         forgotPasswordLabel.setForeground(new Color(192, 191, 191));
         forgotPasswordLabel.setFont(new Font("Readex Pro", Font.PLAIN, 12));
-        forgotPasswordLabel.setBounds(505, 312, 100, 20);
+        forgotPasswordLabel.setBounds(505, 315, 100, 20);
         backgroundPanel.add(forgotPasswordLabel);
+
+        JLabel registerNewUser = new JLabel("Not a User? Register Here");
+        registerNewUser.setForeground(new Color(192, 191, 191));
+        registerNewUser.setFont(new Font("Readex Pro", Font.PLAIN, 12));
+        registerNewUser.setBounds(335, 315, 200, 20);
+        backgroundPanel.add(registerNewUser);
 
         backgroundPanel.add(greeneryyImage, BorderLayout.EAST);
 
@@ -107,11 +113,15 @@ public class FigmaToCodeApp extends JFrame {
         LoginButton loginButton = new LoginButton(usernameField, passwordField, this);
         backgroundPanel.add(loginButton);
 
+        backgroundPanel.add(loginButton.getNoUser());
+
         add(backgroundPanel, BorderLayout.CENTER);
 
         setTitle("Restaurant Management System");
         // Set default close operation
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        setIconImage(greeneryImage.getImage());
 
         // Pack frame
         pack();
