@@ -23,7 +23,6 @@ public class FigmaToCodeApp extends JFrame {
         greeneryyImage.setBounds(50, 50, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());
         greeneryyImage.setIcon(greeneryImage);
 
-        JFrame frame2 = new JFrame();
         // Create panel for frame
         JPanel backgroundPanel = new JPanel() {
             @Override
@@ -43,13 +42,6 @@ public class FigmaToCodeApp extends JFrame {
 
         backgroundPanel.setLayout(null);
         backgroundPanel.setPreferredSize(new Dimension(621, 358));
-        
-        frame2.setSize(500, 200);
-        frame2.setLayout(new GridBagLayout());
-        frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame2.setResizable(false);
-        frame2.setLocationRelativeTo(null);
-
 
         // Add welcome text
         ShadowLabel welcomeLabel = new ShadowLabel("WELCOME!");
