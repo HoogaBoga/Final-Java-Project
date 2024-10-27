@@ -12,7 +12,7 @@ public class HomeFrame extends JFrame {
 
     public HomeFrame() throws IOException, SQLException {
 
-        ImageIcon greeneryImage = new ImageIcon("Frame 12.png");
+        ImageIcon greeneryImage = new ImageIcon("Resources/Frame 12.png");
         JLabel greeneryImg = new JLabel();
 
         greeneryImg.setBounds(10,15, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());

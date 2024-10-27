@@ -16,7 +16,7 @@ public class FigmaToCodeApp extends JFrame {
         // Set layout
         setLayout(new BorderLayout());
 
-        ImageIcon greeneryImage = new ImageIcon("Vector.png");
+        ImageIcon greeneryImage = new ImageIcon("Resources/Vector.png");
 
         JLabel greeneryyImage = new JLabel();
 
@@ -29,7 +29,7 @@ public class FigmaToCodeApp extends JFrame {
             protected void paintComponent(Graphics g){
                 super.paintComponent(g);
 
-                ImageIcon imageIcon = new ImageIcon("Login Page.png");
+                ImageIcon imageIcon = new ImageIcon("Resources/Login Page.png");
                 Image image = imageIcon.getImage();
                 // Draw the image
                 g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
