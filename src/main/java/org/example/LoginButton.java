@@ -12,6 +12,7 @@ public class LoginButton extends JButton implements ActionListener {
     private PasswordField passwordField;
     private JFrame parentFrame;
     private JLabel noUser;
+    private int borderRadius = 30;
 
 
 
@@ -27,6 +28,8 @@ public class LoginButton extends JButton implements ActionListener {
         this.setForeground(Color.WHITE);
         this.setFont(new Font("Readex Pro", Font.PLAIN, 14));
         this.setFocusable(false);
+        this.setOpaque(false);
+        this.setBorder(new RoundedBorder(borderRadius));
 
         noUser = new JLabel("Username or Password does not exist!");
         noUser.setForeground(new Color(255, 0, 0));
@@ -38,6 +41,22 @@ public class LoginButton extends JButton implements ActionListener {
         this.addActionListener(this);
     }
 
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        // Set color and fill rounded rectangle
+        g.setColor(getBackground());
+        g.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10); // Rounded corners
+
+        super.paintComponent(g); // Paint the button text and icon
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        // Increase the size to accommodate the border radius
+        return new Dimension(super.getPreferredSize().width + borderRadius * 2,
+                super.getPreferredSize().height + borderRadius * 2);
+    }
 
     @Override
     public void actionPerformed(ActionEvent e) {

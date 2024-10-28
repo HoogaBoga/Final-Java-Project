@@ -15,12 +15,12 @@ public class RoundedBorder implements Border {
 
 
         public Insets getBorderInsets(Component c) {
-            return new Insets(this.radius+1, this.radius+1, this.radius+2, this.radius);
+            return new Insets(this.radius+3, this.radius+3, this.radius+3, this.radius+3);
         }
 
 
         public boolean isBorderOpaque() {
-            return true;
+            return false;
         }
 
 
