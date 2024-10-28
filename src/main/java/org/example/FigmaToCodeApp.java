@@ -20,6 +20,7 @@ public class FigmaToCodeApp extends JFrame {
 
         JLabel greeneryyImage = new JLabel();
 
+
         greeneryyImage.setBounds(50, 50, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());
         greeneryyImage.setIcon(greeneryImage);
 

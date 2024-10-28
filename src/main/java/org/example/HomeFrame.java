@@ -8,7 +8,7 @@ import java.sql.*;
 
 public class HomeFrame extends JFrame {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/c202301028/IdeaProjects/Final-Java-Project/Database.db";
 
     public HomeFrame() throws IOException, SQLException {
 
