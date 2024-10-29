@@ -11,7 +11,6 @@ public class DashBoardButton extends JButton {
 
     public static Font loadCustomFont(){
         try {
-            // Load Readex Pro font from Resources folder
             File fontFile = new File("Resources/Actor-Regular.ttf");
             Font actor = Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(14f);
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();

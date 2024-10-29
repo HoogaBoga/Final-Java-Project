@@ -1,6 +1,10 @@
 package org.example;
 
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -8,6 +12,8 @@ import javax.swing.plaf.basic.BasicTextFieldUI;
 
 public class RoundedTextField extends JTextField {
     private int round = 25;
+    private String placeholder;
+    private boolean isInitiallyFocusable = false;
 
     public int getRound() {
         return round;
@@ -18,10 +24,49 @@ public class RoundedTextField extends JTextField {
         repaint();
     }
 
+    public void setPlaceholder(String placeholder) {
+        this.placeholder = placeholder;
+        setText(placeholder);
+        setForeground(Color.GRAY);
+
+        addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (getText().equals(placeholder)) {
+                    setText("");
+                    setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (getText().isEmpty()) {
+                    setForeground(Color.GRAY);
+                    setText(placeholder);
+                }
+                setFocusable(false); // Make non-focusable again
+            }
+        });
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!isInitiallyFocusable) {
+                    setFocusable(true);
+                    requestFocusInWindow();
+                }
+            }
+        });
+
+        setFocusable(isInitiallyFocusable);
+    }
+
     public RoundedTextField() {
-        setUI(new TextUI()); setOpaque(false);
+        setUI(new TextUI());
+        setOpaque(false);
         setForeground(new Color(80, 80, 80));
-        setSelectedTextColor(Color.WHITE); setSelectionColor(new Color(133, 209, 255));
+        setSelectedTextColor(Color.WHITE);
+        setSelectionColor(new Color(133, 209, 255));
         setBorder(new EmptyBorder(5, 10, 5, 10));
     }
 

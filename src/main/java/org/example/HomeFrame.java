@@ -2,32 +2,30 @@ package org.example;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.sql.*;
-
+import java.sql.SQLException;
 
 public class HomeFrame extends JFrame {
-
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/Final-Java-Project/Database.db";
 
     public HomeFrame() throws IOException, SQLException {
-
         ImageIcon greeneryImage = new ImageIcon("Resources/Frame 12.png");
         JLabel greeneryImg = new JLabel();
-
         ImageIcon greeneryyImage = new ImageIcon("Resources/Vector.png");
-
-        greeneryImg.setBounds(11,15, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());
+        greeneryImg.setBounds(11, 15, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());
         greeneryImg.setIcon(greeneryImage);
 
         RoundedTextField searchBar = new RoundedTextField();
-
         searchBar.setBounds(24, 10, 304, 21);
         searchBar.setBackground(new Color(251, 250, 242));
-        searchBar.setForeground(Color.BLACK); // Text color
+        searchBar.setForeground(Color.BLACK);
         searchBar.setFont(DashBoardButton.ACTOR_REGULAR_FONT.deriveFont(10f));
-        searchBar.setOpaque(false); // Ensure it's opaque
-        searchBar.setMargin(new Insets(0,10,0,0));
+        searchBar.setOpaque(false);
+        searchBar.setMargin(new Insets(0, 10, 0, 0));
+        searchBar.setPlaceholder("Search");
+        
 
         JPanel panel1 = new JPanel();
         JPanel panel2 = new JPanel();
@@ -47,7 +45,6 @@ public class HomeFrame extends JFrame {
 
         panel2.add(greeneryImg);
         panel1.add(panel3, BorderLayout.NORTH);
-
         panel3.add(searchBar);
 
         DashBoardButton dashBoardButton = new DashBoardButton();
@@ -72,14 +69,29 @@ public class HomeFrame extends JFrame {
         this.setVisible(true);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
-
         this.pack();
         this.setLocationRelativeTo(null);
+
+        // Add a mouse listener to detect clicks outside the searchBar
+        MouseAdapter clickListener = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!searchBar.getBounds().contains(e.getPoint()) && searchBar.isFocusable()) {
+                    searchBar.setFocusable(false);
+                    panel1.requestFocusInWindow(); // Transfer focus to another component
+                }
+            }
+        };
+
+        panel1.addMouseListener(clickListener);
+        panel2.addMouseListener(clickListener);
+        panel3.addMouseListener(clickListener);
     }
 
     public static void main(String[] args) throws SQLException, IOException {
         new HomeFrame();
     }
+
 
 //    public String listMeals() throws SQLException {
 //        String query = "SELECT * FROM Meals";
