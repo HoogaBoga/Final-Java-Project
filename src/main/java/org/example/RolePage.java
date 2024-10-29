@@ -9,6 +9,7 @@ public class RolePage extends JFrame {
 
     public RolePage() throws IOException {
         // Set layout
+
         setLayout(new BorderLayout());
 
         ImageIcon greeneryImage = new ImageIcon("Resources/Vector.png");
@@ -43,14 +44,14 @@ public class RolePage extends JFrame {
 
         ShadowLabel Hello = new ShadowLabel("Hello!");
         Hello.setForeground(Color.WHITE);
-        Hello.setFont(new Font("Readex Pro", Font.PLAIN, 35));
-        Hello.setBounds(6, 70, 108, 50);
+        Hello.setFont(FigmaToCodeApp.READEX_PRO_FONT.deriveFont(35f));
+        Hello.setBounds(20, 70, 108, 50);
         backgroundPanel.add(Hello);
 
         ShadowLabel wru = new ShadowLabel("What are you?");
         wru.setForeground(Color.WHITE);
-        wru.setFont(new Font("Readex Pro", Font.PLAIN, 35));
-        wru.setBounds(6, 120, 275, 50);
+        wru.setFont(FigmaToCodeApp.READEX_PRO_FONT.deriveFont(35f));
+        wru.setBounds(20, 120, 275, 50);
         backgroundPanel.add(wru);
 
         ManagerButton managerButton = new ManagerButton(this);

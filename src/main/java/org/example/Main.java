@@ -1,5 +1,6 @@
 package org.example;
 
+import java.awt.*;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,9 +12,9 @@ import java.sql.Statement;
 
 public class Main {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/c202301028/IdeaProjects/Final-Java-Project/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, FontFormatException {
 //        new MyFrame();
 
         CrudMeal meal = new CrudMeal();

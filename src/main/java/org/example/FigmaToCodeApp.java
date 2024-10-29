@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -11,8 +12,23 @@ public class FigmaToCodeApp extends JFrame {
 
     //TODO CREATE REGISTER BUTTON WITH FUNCTIONALITY TO ADD NEW USER
     //TODO CREATE SECOND FRAME
+    public static final Font READEX_PRO_FONT = loadCustomFont();
 
-    public FigmaToCodeApp() throws IOException {
+    public static Font loadCustomFont() {
+        try {
+            // Load Readex Pro font from Resources folder
+            File fontFile = new File("Resources/ReadexPro-Regular.ttf");
+            Font readexPro = Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(14f);
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(readexPro);
+            return readexPro;
+        } catch (FontFormatException | IOException e) {
+            e.printStackTrace();
+            return new Font("SansSerif", Font.PLAIN, 14); // Fallback font
+        }
+    }
+
+    public FigmaToCodeApp() throws IOException, FontFormatException {
         // Set layout
         setLayout(new BorderLayout());
 
@@ -20,6 +36,7 @@ public class FigmaToCodeApp extends JFrame {
 
         JLabel greeneryyImage = new JLabel();
 
+        Font readexPro = loadCustomFont();
 
         greeneryyImage.setBounds(50, 50, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());
         greeneryyImage.setIcon(greeneryImage);
@@ -47,14 +64,14 @@ public class FigmaToCodeApp extends JFrame {
         // Add welcome text
         ShadowLabel welcomeLabel = new ShadowLabel("WELCOME!");
         welcomeLabel.setForeground(Color.WHITE);
-        welcomeLabel.setFont(new Font("Readex Pro", Font.PLAIN, 35));
-        welcomeLabel.setBounds(380, 70, 200, 40);
+        welcomeLabel.setFont(readexPro.deriveFont(35f));
+        welcomeLabel.setBounds(402, 70, 200, 40);
         backgroundPanel.add(welcomeLabel);
 
         // Add username label
         JLabel usernameLabel = new JLabel("Username:");
         usernameLabel.setForeground(Color.WHITE);
-        usernameLabel.setFont(new Font("Readex Pro", Font.PLAIN, 14));
+        usernameLabel.setFont(readexPro.deriveFont(14f));
         usernameLabel.setBounds(329, 135, 100, 20);
         backgroundPanel.add(usernameLabel);
 
@@ -67,7 +84,7 @@ public class FigmaToCodeApp extends JFrame {
         usernameField.setBounds(329, 153, 273, 42);
         usernameField.setBackground(new Color(251, 250, 242));
         usernameField.setForeground(Color.BLACK); // Text color
-        usernameField.setFont(new Font("Readex Pro", Font.PLAIN, 14));
+        usernameField.setFont(readexPro.deriveFont(14f));
         usernameField.setOpaque(true); // Ensure it's opaque
         usernameField.setMargin(new Insets(0,10,0,0));
         backgroundPanel.add(usernameField);
@@ -75,7 +92,7 @@ public class FigmaToCodeApp extends JFrame {
 
         JLabel passwordLabel = new JLabel("Password:");
         passwordLabel.setForeground(Color.WHITE);
-        passwordLabel.setFont(new Font("Readex Pro", Font.PLAIN, 14));
+        passwordLabel.setFont(readexPro.deriveFont(14f));
         passwordLabel.setBounds(329, 200, 100, 20);
         backgroundPanel.add(passwordLabel);
 
@@ -89,13 +106,13 @@ public class FigmaToCodeApp extends JFrame {
         // Add forgot password label
         JLabel forgotPasswordLabel = new JLabel("Forgot Password");
         forgotPasswordLabel.setForeground(new Color(192, 191, 191));
-        forgotPasswordLabel.setFont(new Font("Readex Pro", Font.PLAIN, 12));
+        forgotPasswordLabel.setFont(readexPro.deriveFont(12f));
         forgotPasswordLabel.setBounds(505, 315, 100, 20);
         backgroundPanel.add(forgotPasswordLabel);
 
         JLabel registerNewUser = new JLabel("Not a User? Register Here");
         registerNewUser.setForeground(new Color(192, 191, 191));
-        registerNewUser.setFont(new Font("Readex Pro", Font.PLAIN, 12));
+        registerNewUser.setFont(readexPro.deriveFont(12f));
         registerNewUser.setBounds(335, 315, 200, 20);
         backgroundPanel.add(registerNewUser);
 

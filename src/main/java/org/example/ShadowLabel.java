@@ -25,7 +25,7 @@ public class ShadowLabel extends JLabel {
     protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();
 
-        // Enable anti-aliasing for smoother text and shadow
+        // Enable antialiasing for smoother text and shadow
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         for (int i = 0; i < shadowBlur; i++) {

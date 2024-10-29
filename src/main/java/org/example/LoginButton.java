@@ -23,7 +23,7 @@ public class LoginButton extends JButton implements ActionListener {
         this.parentFrame = parentFrame;
 
         // Button settings
-        this.setBounds(333, 261, 265, 28);
+        this.setBounds(333, 263, 265, 28);
         this.setBackground(new Color(152, 130, 132));
         this.setForeground(Color.WHITE);
         this.setFont(new Font("Readex Pro", Font.PLAIN, 14));
@@ -62,9 +62,9 @@ public class LoginButton extends JButton implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (Main.authenticateUser(usernameField.getText(), new String(passwordField.getPassword()))) {
             try {
-                new HomeFrame();
+                new RolePage();
                 parentFrame.dispose();
-            } catch (IOException | SQLException ex) {
+            } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
         } else {

@@ -19,7 +19,7 @@ public class EmployeeButton extends JButton implements ActionListener {
         this.setBounds(30, 247, 251, 28);
         this.setBackground(new Color(0xFFFFFF));
         this.setForeground(new Color(0x987284));
-        this.setFont(new Font("Readex Pro", Font.PLAIN, 14));
+        this.setFont(FigmaToCodeApp.READEX_PRO_FONT.deriveFont(14f));
         this.setFocusable(false);
 
         // Add ActionListener

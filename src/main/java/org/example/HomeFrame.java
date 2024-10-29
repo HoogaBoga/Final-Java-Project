@@ -8,14 +8,14 @@ import java.sql.*;
 
 public class HomeFrame extends JFrame {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/c202301028/IdeaProjects/Final-Java-Project/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
     public HomeFrame() throws IOException, SQLException {
 
         ImageIcon greeneryImage = new ImageIcon("Resources/Frame 12.png");
         JLabel greeneryImg = new JLabel();
 
-        greeneryImg.setBounds(10,15, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());
+        greeneryImg.setBounds(11,15, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());
         greeneryImg.setIcon(greeneryImage);
 
         JPanel panel1 = new JPanel();
@@ -30,6 +30,9 @@ public class HomeFrame extends JFrame {
         panel2.setPreferredSize(new Dimension(105, 358));
 
         panel2.add(greeneryImg);
+
+        DashBoardButton dashBoardButton = new DashBoardButton();
+        panel2.add(dashBoardButton);
 
         this.add(panel1, BorderLayout.EAST);
         this.add(panel2, BorderLayout.WEST);
