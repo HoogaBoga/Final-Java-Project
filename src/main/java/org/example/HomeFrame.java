@@ -8,32 +8,65 @@ import java.sql.*;
 
 public class HomeFrame extends JFrame {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/Final-Java-Project/Database.db";
 
     public HomeFrame() throws IOException, SQLException {
 
         ImageIcon greeneryImage = new ImageIcon("Resources/Frame 12.png");
         JLabel greeneryImg = new JLabel();
 
+        ImageIcon greeneryyImage = new ImageIcon("Resources/Vector.png");
+
         greeneryImg.setBounds(11,15, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());
         greeneryImg.setIcon(greeneryImage);
 
+        RoundedTextField searchBar = new RoundedTextField();
+
+        searchBar.setBounds(24, 10, 304, 21);
+        searchBar.setBackground(new Color(251, 250, 242));
+        searchBar.setForeground(Color.BLACK); // Text color
+        searchBar.setFont(DashBoardButton.ACTOR_REGULAR_FONT.deriveFont(10f));
+        searchBar.setOpaque(false); // Ensure it's opaque
+        searchBar.setMargin(new Insets(0,10,0,0));
+
         JPanel panel1 = new JPanel();
         JPanel panel2 = new JPanel();
+        JPanel panel3 = new JPanel();
 
+        panel1.setLayout(null);
         panel2.setLayout(null);
+        panel3.setLayout(null);
 
         panel1.setBackground(new Color(0xE8E8E8));
         panel2.setBackground(Color.WHITE);
+        panel3.setBackground(new Color(0xE8E8E8));
 
         panel1.setPreferredSize(new Dimension(516, 358));
         panel2.setPreferredSize(new Dimension(105, 358));
+        panel3.setBounds(0, 0, 516, 72);
 
         panel2.add(greeneryImg);
+        panel1.add(panel3, BorderLayout.NORTH);
+
+        panel3.add(searchBar);
 
         DashBoardButton dashBoardButton = new DashBoardButton();
         panel2.add(dashBoardButton);
 
+        OrdersButton ordersButton = new OrdersButton();
+        panel2.add(ordersButton);
+
+        SalesButton salesButton = new SalesButton();
+        panel2.add(salesButton);
+
+        PromotionsButton promotionsButton = new PromotionsButton();
+        panel2.add(promotionsButton);
+
+        SettingsButton settingsButton = new SettingsButton();
+        panel2.add(settingsButton);
+
+        this.setTitle("Restaurant Management System");
+        this.setIconImage(greeneryyImage.getImage());
         this.add(panel1, BorderLayout.EAST);
         this.add(panel2, BorderLayout.WEST);
         this.setVisible(true);
