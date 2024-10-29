@@ -13,9 +13,12 @@ public class HomeFrame extends JFrame {
     public HomeFrame() throws IOException, SQLException {
         ImageIcon greeneryImage = new ImageIcon("Resources/Frame 12.png");
         JLabel greeneryImg = new JLabel();
+
         ImageIcon greeneryyImage = new ImageIcon("Resources/Vector.png");
         greeneryImg.setBounds(11, 15, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());
         greeneryImg.setIcon(greeneryImage);
+
+        ScrollPanel scrollPanel = new ScrollPanel();
 
         RoundedTextField searchBar = new RoundedTextField();
         searchBar.setBounds(24, 10, 304, 21);
@@ -41,10 +44,11 @@ public class HomeFrame extends JFrame {
 
         panel1.setPreferredSize(new Dimension(516, 358));
         panel2.setPreferredSize(new Dimension(105, 358));
-        panel3.setBounds(0, 0, 516, 72);
+        panel3.setBounds(0, 0, 516, 36);
 
         panel2.add(greeneryImg);
         panel1.add(panel3, BorderLayout.NORTH);
+        panel1.add(scrollPanel, BorderLayout.CENTER);
         panel3.add(searchBar);
 
         DashBoardButton dashBoardButton = new DashBoardButton();
