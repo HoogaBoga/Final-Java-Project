@@ -2,10 +2,12 @@ package org.example;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 
-public class DashBoardButton extends JButton {
+public class DashBoardButton extends JButton{
 
     public static final Font ACTOR_REGULAR_FONT = loadCustomFont();
 
@@ -22,7 +24,7 @@ public class DashBoardButton extends JButton {
         }
     }
 
-    public DashBoardButton(){
+    public DashBoardButton(CardLayout cardLayout, JPanel cardPanel, String panelName){
         super("Dashboard");
 
         ImageIcon dashBoardIcon = new ImageIcon("Resources/DashBoardGreen.png");
@@ -37,5 +39,13 @@ public class DashBoardButton extends JButton {
         this.setFocusable(false);
         this.setOpaque(false);
         this.setBorder(BorderFactory.createLineBorder(new Color(0xBCBCBC)));
+
+        this.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, panelName);
+            }
+        });
     }
+
 }

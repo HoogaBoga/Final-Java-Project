@@ -14,11 +14,15 @@ public class HomeFrame extends JFrame {
         ImageIcon greeneryImage = new ImageIcon("Resources/Frame 12.png");
         JLabel greeneryImg = new JLabel();
 
+        CardLayout cardLayout = new CardLayout();
+        JPanel cardPanel = new JPanel(cardLayout);
+
+        cardPanel.add(new DashBoardPanel(), "Dashboard");
+        cardPanel.setBounds(25, 40, 484, 318);
+
         ImageIcon greeneryyImage = new ImageIcon("Resources/Vector.png");
         greeneryImg.setBounds(11, 15, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());
         greeneryImg.setIcon(greeneryImage);
-
-        ScrollPanel scrollPanel = new ScrollPanel();
 
         RoundedTextField searchBar = new RoundedTextField();
         searchBar.setBounds(24, 10, 304, 21);
@@ -48,10 +52,10 @@ public class HomeFrame extends JFrame {
 
         panel2.add(greeneryImg);
         panel1.add(panel3, BorderLayout.NORTH);
-        panel1.add(scrollPanel, BorderLayout.CENTER);
         panel3.add(searchBar);
+        panel1.add(cardPanel);
 
-        DashBoardButton dashBoardButton = new DashBoardButton();
+        DashBoardButton dashBoardButton = new DashBoardButton(cardLayout, cardPanel, "Dashboard");
         panel2.add(dashBoardButton);
 
         OrdersButton ordersButton = new OrdersButton();
