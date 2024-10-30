@@ -1,5 +1,6 @@
 package org.example.Buttons;
 
+import org.example.Frames.AddMealFrame;
 import org.example.Misc.OvalButton;
 
 import java.awt.event.ActionEvent;
@@ -25,6 +26,8 @@ public class PlusAddButton extends OvalButton implements ActionListener {
             e.printStackTrace();
             image = null;
         }
+
+        this.addActionListener(this);
     }
 
     @Override
@@ -34,7 +37,7 @@ public class PlusAddButton extends OvalButton implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        new AddMealFrame();
     }
 }
 
