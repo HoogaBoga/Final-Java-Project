@@ -1,11 +1,7 @@
 package org.example.Frames;
 
-import org.example.Buttons.DashBoardButton;
-import org.example.Buttons.OrdersButton;
-import org.example.Buttons.SalesButton;
-import org.example.Buttons.SettingsButton;
+import org.example.Buttons.*;
 import org.example.Panels.*;
-import org.example.Buttons.PromotionsButton;
 import org.example.TextFields.RoundedTextField;
 
 import javax.swing.*;
@@ -24,6 +20,11 @@ public class HomeFrame extends JFrame {
 
         CardLayout cardLayout = new CardLayout();
         JPanel cardPanel = new JPanel(cardLayout);
+        PlusAddButton plusAddButton = new PlusAddButton();
+
+        plusAddButton.setBounds(37, 308, 31, 31);
+
+        plusAddButton.setOpaque(false);
 
         cardPanel.add(new DashBoardPanel(), "Dashboard");
         cardPanel.add(new OrdersPanel(), "Orders");
@@ -63,6 +64,7 @@ public class HomeFrame extends JFrame {
         panel3.setBounds(0, 0, 516, 36);
 
         panel2.add(greeneryImg);
+        panel2.add(plusAddButton);
         panel1.add(panel3, BorderLayout.NORTH);
         panel3.add(searchBar);
         panel1.add(cardPanel);
