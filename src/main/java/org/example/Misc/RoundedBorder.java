@@ -1,4 +1,4 @@
-package org.example;
+package org.example.Misc;
 
 import javax.swing.border.Border;
 import java.awt.*;
@@ -9,7 +9,7 @@ public class RoundedBorder implements Border {
         private int radius;
 
 
-        RoundedBorder(int radius) {
+        public RoundedBorder(int radius) {
             this.radius = radius;
         }
 

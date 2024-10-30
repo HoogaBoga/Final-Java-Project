@@ -1,4 +1,6 @@
-package org.example;
+package org.example.TextFields;
+
+import org.example.Misc.ShadowRenderer;
 
 import java.awt.Color;
 import java.awt.Graphics;

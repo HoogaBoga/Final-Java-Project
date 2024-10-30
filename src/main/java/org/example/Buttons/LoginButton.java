@@ -1,11 +1,16 @@
-package org.example;
+package org.example.Buttons;
+
+import org.example.*;
+import org.example.Frames.RolePage;
+import org.example.Misc.RoundedBorder;
+import org.example.TextFields.PasswordField;
+import org.example.TextFields.TextField;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.sql.SQLException;
 
 public class LoginButton extends JButton implements ActionListener {
     private TextField usernameField;

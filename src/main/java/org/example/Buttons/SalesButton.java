@@ -1,11 +1,11 @@
-package org.example;
+package org.example.Buttons;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class SalesButton extends JButton {
 
-    public SalesButton(){
+    public SalesButton(CardLayout cardLayout, JPanel cardPanel, String panelName){
         super("Sales    ");
 
         ImageIcon salesIcon = new ImageIcon("Resources/SalesGreen.png");
@@ -20,5 +20,7 @@ public class SalesButton extends JButton {
         this.setBorder(BorderFactory.createLineBorder(new Color(0xBCBCBC)));
 
         this.setIconTextGap(14);
+
+        this.addActionListener(e -> cardLayout.show(cardPanel, "Sales"));
     }
 }

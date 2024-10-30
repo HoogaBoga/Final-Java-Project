@@ -1,11 +1,11 @@
-package org.example;
+package org.example.Buttons;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class PromotionsButton extends JButton {
 
-    public PromotionsButton(){
+    public PromotionsButton(CardLayout cardLayout, JPanel cardPanel, String panelName){
         super("   Promotions");
 
         ImageIcon promotionsIcon = new ImageIcon("Resources/PromotionGreen.png");
@@ -20,5 +20,7 @@ public class PromotionsButton extends JButton {
         this.setBorder(BorderFactory.createLineBorder(new Color(0xBCBCBC)));
 
         this.setIconTextGap(-2);
+
+        this.addActionListener(e -> cardLayout.show(cardPanel, "Promotions"));
     }
 }

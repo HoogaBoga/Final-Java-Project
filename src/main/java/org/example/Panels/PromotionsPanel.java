@@ -1,12 +1,12 @@
-package org.example;
+package org.example.Panels;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class DashBoardPanel extends JScrollPane {
+public class PromotionsPanel extends JScrollPane{
     private JPanel contentPanel;
 
-    public DashBoardPanel() {
+    public PromotionsPanel() {
         // Create the content panel to hold all components
         contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
@@ -28,5 +28,8 @@ public class DashBoardPanel extends JScrollPane {
 
         // Set the content panel as the viewport view of the JScrollPane
         this.setViewportView(contentPanel);
+
+        this.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
+        this.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
     }
 }

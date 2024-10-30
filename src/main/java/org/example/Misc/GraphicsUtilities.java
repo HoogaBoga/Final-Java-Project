@@ -1,4 +1,4 @@
-package org.example;
+package org.example.Misc;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;

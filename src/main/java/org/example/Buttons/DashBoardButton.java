@@ -1,4 +1,4 @@
-package org.example;
+package org.example.Buttons;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,12 +40,7 @@ public class DashBoardButton extends JButton{
         this.setOpaque(false);
         this.setBorder(BorderFactory.createLineBorder(new Color(0xBCBCBC)));
 
-        this.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, panelName);
-            }
-        });
+        this.addActionListener(e -> cardLayout.show(cardPanel, panelName));
     }
 
 }

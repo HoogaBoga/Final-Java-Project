@@ -1,11 +1,12 @@
-package org.example;
+package org.example.Buttons;
 
+import javax.smartcardio.Card;
 import javax.swing.*;
 import java.awt.*;
 
 public class SettingsButton extends JButton {
 
-    public SettingsButton(){
+    public SettingsButton(CardLayout cardLayout, JPanel cardPanel, String panelName){
         super("Settings   ");
 
         ImageIcon settingsIcon = new ImageIcon("Resources/SettingsGreen.png");
@@ -20,5 +21,7 @@ public class SettingsButton extends JButton {
         this.setBorder(BorderFactory.createLineBorder(new Color(0xBCBCBC)));
 
         this.setIconTextGap(8);
+
+        this.addActionListener(e -> cardLayout.show(cardPanel, "Settings"));
     }
 }

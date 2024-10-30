@@ -1,4 +1,7 @@
-package org.example;
+package org.example.Buttons;
+
+import org.example.Frames.FigmaToCodeApp;
+import org.example.Frames.HomeFrame;
 
 import javax.swing.*;
 import java.awt.*;

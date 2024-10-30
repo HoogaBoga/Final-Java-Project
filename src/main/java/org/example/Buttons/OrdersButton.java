@@ -1,11 +1,13 @@
-package org.example;
+package org.example.Buttons;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class OrdersButton extends JButton {
 
-    public OrdersButton(){
+    public OrdersButton(CardLayout cardLayout, JPanel cardPanel, String panelName){
         super("Orders    ");
 
         ImageIcon ordersIcon = new ImageIcon("Resources/OrdersGreen.png");
@@ -20,5 +22,7 @@ public class OrdersButton extends JButton {
         this.setBorder(BorderFactory.createLineBorder(new Color(0xBCBCBC)));
 
         this.setIconTextGap(7);
+
+        this.addActionListener(e -> cardLayout.show(cardPanel, panelName));
     }
 }

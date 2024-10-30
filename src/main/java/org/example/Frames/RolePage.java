@@ -1,4 +1,8 @@
-package org.example;
+package org.example.Frames;
+
+import org.example.Buttons.EmployeeButton;
+import org.example.Buttons.ManagerButton;
+import org.example.Misc.ShadowLabel;
 
 import javax.swing.*;
 import java.awt.*;

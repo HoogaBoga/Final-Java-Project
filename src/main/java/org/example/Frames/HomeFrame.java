@@ -1,4 +1,12 @@
-package org.example;
+package org.example.Frames;
+
+import org.example.Buttons.DashBoardButton;
+import org.example.Buttons.OrdersButton;
+import org.example.Buttons.SalesButton;
+import org.example.Buttons.SettingsButton;
+import org.example.Panels.*;
+import org.example.Buttons.PromotionsButton;
+import org.example.TextFields.RoundedTextField;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,6 +26,10 @@ public class HomeFrame extends JFrame {
         JPanel cardPanel = new JPanel(cardLayout);
 
         cardPanel.add(new DashBoardPanel(), "Dashboard");
+        cardPanel.add(new OrdersPanel(), "Orders");
+        cardPanel.add(new SalesPanel(), "Sales");
+        cardPanel.add(new PromotionsPanel(), "Promotions");
+        cardPanel.add(new SettingsPanel(), "Settings");
         cardPanel.setBounds(25, 40, 484, 318);
 
         ImageIcon greeneryyImage = new ImageIcon("Resources/Vector.png");
@@ -58,16 +70,16 @@ public class HomeFrame extends JFrame {
         DashBoardButton dashBoardButton = new DashBoardButton(cardLayout, cardPanel, "Dashboard");
         panel2.add(dashBoardButton);
 
-        OrdersButton ordersButton = new OrdersButton();
+        OrdersButton ordersButton = new OrdersButton(cardLayout, cardPanel, "Orders");
         panel2.add(ordersButton);
 
-        SalesButton salesButton = new SalesButton();
+        SalesButton salesButton = new SalesButton(cardLayout, cardPanel, "Sales");
         panel2.add(salesButton);
 
-        PromotionsButton promotionsButton = new PromotionsButton();
+        PromotionsButton promotionsButton = new PromotionsButton(cardLayout, cardPanel, "Promotions");
         panel2.add(promotionsButton);
 
-        SettingsButton settingsButton = new SettingsButton();
+        SettingsButton settingsButton = new SettingsButton(cardLayout, cardPanel, "Settings");
         panel2.add(settingsButton);
 
         this.setTitle("Restaurant Management System");

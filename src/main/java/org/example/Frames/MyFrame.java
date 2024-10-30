@@ -1,4 +1,6 @@
-package org.example;
+package org.example.Frames;
+
+import org.example.Misc.CrudMeal;
 
 import javax.swing.*;
 import java.awt.*;

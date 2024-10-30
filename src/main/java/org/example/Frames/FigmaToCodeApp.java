@@ -1,12 +1,14 @@
-package org.example;
+package org.example.Frames;
+
+import org.example.Buttons.LoginButton;
+import org.example.TextFields.PasswordField;
+import org.example.Misc.ShadowLabel;
+import org.example.TextFields.TextField;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 
 public class FigmaToCodeApp extends JFrame {
 
