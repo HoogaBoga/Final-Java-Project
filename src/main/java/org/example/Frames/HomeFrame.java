@@ -39,7 +39,7 @@ public class HomeFrame extends JFrame {
 
         RoundedTextField searchBar = new RoundedTextField();
         searchBar.setBounds(24, 10, 304, 21);
-        searchBar.setBackground(new Color(251, 250, 242));
+        searchBar.setBackground(Color.WHITE);
         searchBar.setForeground(Color.BLACK);
         searchBar.setFont(DashBoardButton.ACTOR_REGULAR_FONT.deriveFont(10f));
         searchBar.setOpaque(false);
