@@ -184,11 +184,17 @@ public class OvalButton extends JButton implements MouseListener, MouseMotionLis
     @Override
     public void addActionListener(ActionListener l) {
         super.addActionListener(e -> {
-            if (isValidClickPosition(MouseInfo.getPointerInfo().getLocation())) {
-                l.actionPerformed(e);
-            }
+            SwingUtilities.invokeLater(() -> {
+                Point screenPosition = MouseInfo.getPointerInfo().getLocation();
+
+                // Check if the click position is within the button's shape.
+                if (isValidClickPosition(screenPosition)) {
+                    l.actionPerformed(e); // Trigger the action if valid click position
+                }
+            });
         });
     }
+
 
     //=========
     // GETTERS:

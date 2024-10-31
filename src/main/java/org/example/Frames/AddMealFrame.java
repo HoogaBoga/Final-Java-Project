@@ -21,6 +21,7 @@ public class AddMealFrame extends JFrame {
     private JLabel ingredientsNeed = new JLabel("Ingredients");
     private JLabel priceFood = new JLabel("Price");
     private JLabel amountFood = new JLabel("Amount");
+    private JLabel addImg = new JLabel("Add Image +");
 
     public static Font loadCustomFont(){
         try {
@@ -109,8 +110,10 @@ public class AddMealFrame extends JFrame {
 
         addMeal.setFont(inter.deriveFont(Font.BOLD,12f));
         addMeal.setForeground(Color.WHITE);
+        addMeal.setHorizontalAlignment(SwingConstants.CENTER);
 
         closeAddButton.setPreferredSize(new Dimension(19, 19));
+        closeAddButton.setMaximumSize(new Dimension(19, 19));
 
         dishName.setFont(inter.deriveFont(12f));
         dishName.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
@@ -122,7 +125,7 @@ public class AddMealFrame extends JFrame {
         serveSize.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 3));
 
         spicyLevel.setFont(inter.deriveFont(12f));
-        spicyLevel.setBorder(BorderFactory.createEmptyBorder(0, 1, 0, 19));
+        spicyLevel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 19));
 
         ingredientsNeed.setFont(inter.deriveFont(12f));
         ingredientsNeed.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
@@ -134,9 +137,21 @@ public class AddMealFrame extends JFrame {
         amountFood.setBorder(BorderFactory.createEmptyBorder(0,0,0,30 ));
 
         topPanel.setBackground(new Color(0x58A558));
-        topPanel.setLayout(new BorderLayout());
-        topPanel.add(addMeal, BorderLayout.CENTER);
-        topPanel.add(closeAddButton, BorderLayout.EAST);
+        topPanel.setPreferredSize(new Dimension(241, 25));
+        topPanel.setLayout(new GridBagLayout());
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0; // First column
+        gbc.weightx = 1.0; // Allow to grow
+        gbc.insets = new Insets(0, 10, 0, 0);
+        topPanel.add(addMeal, gbc);
+
+        gbc.gridx = 1; // Second column for the button
+        gbc.weightx = 0; // Fixed size
+        gbc.insets = new Insets(0, 0, 0, 5);
+        topPanel.add(closeAddButton, gbc);
+
+
 
         centerPanel.setLayout(new FlowLayout());
         centerPanel.setBackground(Color.WHITE);

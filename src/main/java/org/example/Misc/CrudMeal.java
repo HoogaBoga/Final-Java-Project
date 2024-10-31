@@ -10,7 +10,7 @@ import java.sql.Statement;
 
 public class CrudMeal {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/c202301028/IdeaProjects/Final-Java-Project/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
     public void addMeal(String mealName, String category,int servingSize, String type,int nutritionalValue, String
             spice,double mealPrice, String ingredients) {
