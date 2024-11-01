@@ -21,7 +21,7 @@ public class DashBoardPanel extends JScrollPane {
         this.setViewportView(contentPanel);
         this.setBorder(BorderFactory.createEmptyBorder());
         this.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
-        this.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED);
+        this.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
     }
 
     private JPanel createItemPanel(String itemName, String itemPrice, String imagePath) {

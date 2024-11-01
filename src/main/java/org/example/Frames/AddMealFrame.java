@@ -1,7 +1,11 @@
 package org.example.Frames;
 
+import org.example.Buttons.AddImageLabel;
 import org.example.Buttons.CloseAddButton;
 import org.example.Buttons.DashBoardButton;
+import org.example.Buttons.FinalAddButton;
+import org.example.Misc.CrudInventory;
+import org.example.Misc.CrudMeal;
 import org.example.TextFields.RoundedTextField;
 
 import javax.swing.*;
@@ -15,13 +19,32 @@ public class AddMealFrame extends JFrame {
     private JPanel centerPanel = new JPanel();
     private JLabel addMeal = new JLabel("Add Meal");
     private JLabel dishName = new JLabel("Dish Name");
+    private JLabel mealCategory = new JLabel("Category");
     private JLabel mealType = new JLabel("Meal Type");
+    private JLabel nutritional = new JLabel("Nutrition");
     private JLabel serveSize = new JLabel("Serving Size");
     private JLabel spicyLevel = new JLabel("Spiciness");
     private JLabel ingredientsNeed = new JLabel("Ingredients");
     private JLabel priceFood = new JLabel("Price");
     private JLabel amountFood = new JLabel("Amount");
-    private JLabel addImg = new JLabel("Add Image +");
+    private JLabel mealID = new JLabel("Meal ID");
+    private AddImageLabel addImageLabel = new AddImageLabel();
+    private JLabel spacer = new JLabel();
+    private JLabel spacer2 = new JLabel();
+    private FinalAddButton finalAddButton = new FinalAddButton();
+    private RoundedTextField mealName = new RoundedTextField();
+    private RoundedTextField mealCategories = new RoundedTextField();
+    private RoundedTextField serveSizeText = new RoundedTextField();
+    private RoundedTextField mealTypeText = new RoundedTextField();
+    private RoundedTextField nutritionalValue = new RoundedTextField();
+    private RoundedTextField spiceLevelText = new RoundedTextField();
+    private RoundedTextField ingredientsNeedText = new RoundedTextField();
+    private RoundedTextField priceFoodText = new RoundedTextField();
+    private RoundedTextField amountFoodText = new RoundedTextField();
+    private RoundedTextField mealIDText = new RoundedTextField();
+    private CrudMeal addMeals = new CrudMeal();
+    private CrudInventory addInventory = new CrudInventory();
+
 
     public static Font loadCustomFont(){
         try {
@@ -41,7 +64,6 @@ public class AddMealFrame extends JFrame {
         Font inter = loadCustomFont();
         CloseAddButton closeAddButton = new CloseAddButton(this);
 
-        RoundedTextField mealName = new RoundedTextField();
         mealName.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
         mealName.setBackground(new Color(251, 250, 242));
         mealName.setForeground(Color.BLACK);
@@ -50,7 +72,14 @@ public class AddMealFrame extends JFrame {
         mealName.setMargin(new Insets(0, 10, 0, 0));
         mealName.setPlaceholder("Enter dish name");
 
-        RoundedTextField mealTypeText = new RoundedTextField();
+        mealCategories.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
+        mealCategories.setBackground(new Color(251, 250, 242));
+        mealCategories.setForeground(Color.BLACK);
+        mealCategories.setFont(inter.deriveFont(9f));
+        mealCategories.setOpaque(false);
+        mealCategories.setMargin(new Insets(0, 10, 0, 0));
+        mealCategories.setPlaceholder("Enter meal category");
+
         mealTypeText.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
         mealTypeText.setBackground(new Color(251, 250, 242));
         mealTypeText.setForeground(Color.BLACK);
@@ -59,7 +88,14 @@ public class AddMealFrame extends JFrame {
         mealTypeText.setMargin(new Insets(0, 10, 0, 0));
         mealTypeText.setPlaceholder("Enter meal type");
 
-        RoundedTextField serveSizeText = new RoundedTextField();
+        nutritionalValue.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
+        nutritionalValue.setBackground(new Color(251, 250, 242));
+        nutritionalValue.setForeground(Color.BLACK);
+        nutritionalValue.setFont(inter.deriveFont(9f));
+        nutritionalValue.setOpaque(false);
+        nutritionalValue.setMargin(new Insets(0, 10, 0, 0));
+        nutritionalValue.setPlaceholder("Enter nutritional value");
+
         serveSizeText.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
         serveSizeText.setBackground(new Color(251, 250, 242));
         serveSizeText.setForeground(Color.BLACK);
@@ -68,7 +104,6 @@ public class AddMealFrame extends JFrame {
         serveSizeText.setMargin(new Insets(0, 10, 0, 0));
         serveSizeText.setPlaceholder("Enter serving size");
 
-        RoundedTextField spiceLevelText = new RoundedTextField();
         spiceLevelText.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
         spiceLevelText.setBackground(new Color(251, 250, 242));
         spiceLevelText.setForeground(Color.BLACK);
@@ -77,7 +112,6 @@ public class AddMealFrame extends JFrame {
         spiceLevelText.setMargin(new Insets(0, 10, 0, 0));
         spiceLevelText.setPlaceholder("Enter spiciness");
 
-        RoundedTextField ingredientsNeedText = new RoundedTextField();
         ingredientsNeedText.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
         ingredientsNeedText.setBackground(new Color(251, 250, 242));
         ingredientsNeedText.setForeground(Color.BLACK);
@@ -86,7 +120,6 @@ public class AddMealFrame extends JFrame {
         ingredientsNeedText.setMargin(new Insets(0, 10, 0, 0));
         ingredientsNeedText.setPlaceholder("Enter ingredients");
 
-        RoundedTextField priceFoodText = new RoundedTextField();
         priceFoodText.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
         priceFoodText.setBackground(new Color(251, 250, 242));
         priceFoodText.setForeground(Color.BLACK);
@@ -95,18 +128,41 @@ public class AddMealFrame extends JFrame {
         priceFoodText.setMargin(new Insets(0, 10, 0, 0));
         priceFoodText.setPlaceholder("Enter price");
 
-        RoundedTextField amountFoodText = new RoundedTextField();
         amountFoodText.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
         amountFoodText.setBackground(new Color(251, 250, 242));
         amountFoodText.setForeground(Color.BLACK);
         amountFoodText.setFont(inter.deriveFont(9f));
         amountFoodText.setOpaque(false);
         amountFoodText.setMargin(new Insets(0, 10, 0, 0));
-        amountFoodText.setPlaceholder("Enter price");
+        amountFoodText.setPlaceholder("Enter amount");
 
-
-        // Set BorderLayout for AddMealFrame
+        mealIDText.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
+        mealIDText.setBackground(new Color(251, 250, 242));
+        mealIDText.setForeground(Color.BLACK);
+        mealIDText.setFont(inter.deriveFont(9f));
+        mealIDText.setOpaque(false);
+        mealIDText.setMargin(new Insets(0, 10, 0, 0));
+        mealIDText.setPlaceholder("Enter amount");
+        
         this.setLayout(new BorderLayout());
+
+        finalAddButton.addActionListener(e -> {
+            String mealNameInput = mealName.getText();
+            String mealCategoryInput = mealCategories.getText();
+            int serveSizeInput = Integer.parseInt(serveSizeText.getText());
+            String mealTypeInput = mealTypeText.getText();
+            int mealNutritionalInput = Integer.parseInt(nutritionalValue.getText());
+            String spiceLevelInput = spiceLevelText.getText();
+            String ingredientsInput = ingredientsNeedText.getText();
+            File imageFile = addImageLabel.getSelectedImageFile();
+
+            double mealPriceInput = Double.parseDouble(priceFoodText.getText());
+            int amountInput = Integer.parseInt(amountFoodText.getText());
+            int mealIDInput = Integer.parseInt(mealIDText.getText());
+
+            addMeals.addMeal(mealNameInput, mealCategoryInput, serveSizeInput, mealTypeInput, mealNutritionalInput, spiceLevelInput, ingredientsInput,imageFile);
+            addInventory.addInventory(amountInput, mealPriceInput, mealIDInput);
+        });
 
         addMeal.setFont(inter.deriveFont(Font.BOLD,12f));
         addMeal.setForeground(Color.WHITE);
@@ -117,12 +173,18 @@ public class AddMealFrame extends JFrame {
 
         dishName.setFont(inter.deriveFont(12f));
         dishName.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
+        
+        mealCategory.setFont(inter.deriveFont(12f));
+        mealCategory.setBorder(BorderFactory.createEmptyBorder(0,0,0,20));
 
         mealType.setFont(inter.deriveFont(12f));
         mealType.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 14));
 
         serveSize.setFont(inter.deriveFont(12f));
         serveSize.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 3));
+
+        nutritional.setFont(inter.deriveFont(12f));
+        nutritional.setBorder(BorderFactory.createEmptyBorder(0,0,0,25));
 
         spicyLevel.setFont(inter.deriveFont(12f));
         spicyLevel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 19));
@@ -135,6 +197,12 @@ public class AddMealFrame extends JFrame {
 
         amountFood.setFont(inter.deriveFont(12f));
         amountFood.setBorder(BorderFactory.createEmptyBorder(0,0,0,30 ));
+
+        mealID.setFont(inter.deriveFont(12f));
+        mealID.setBorder(BorderFactory.createEmptyBorder(0,0,0,30));
+
+        spacer.setPreferredSize(new Dimension(241, 5));
+        spacer2.setPreferredSize(new Dimension(241, 5));
 
         topPanel.setBackground(new Color(0x58A558));
         topPanel.setPreferredSize(new Dimension(241, 25));
@@ -151,16 +219,18 @@ public class AddMealFrame extends JFrame {
         gbc.insets = new Insets(0, 0, 0, 5);
         topPanel.add(closeAddButton, gbc);
 
-
-
         centerPanel.setLayout(new FlowLayout());
         centerPanel.setBackground(Color.WHITE);
         centerPanel.add(dishName);
         centerPanel.add(mealName);
-        centerPanel.add(mealType);
-        centerPanel.add(mealTypeText);
+        centerPanel.add(mealCategory);
+        centerPanel.add(mealCategories);
         centerPanel.add(serveSize);
         centerPanel.add(serveSizeText);
+        centerPanel.add(mealType);
+        centerPanel.add(mealTypeText);
+        centerPanel.add(nutritional);
+        centerPanel.add(nutritionalValue);
         centerPanel.add(spicyLevel);
         centerPanel.add(spiceLevelText);
         centerPanel.add(ingredientsNeed);
@@ -169,11 +239,17 @@ public class AddMealFrame extends JFrame {
         centerPanel.add(priceFoodText);
         centerPanel.add(amountFood);
         centerPanel.add(amountFoodText);
+        centerPanel.add(mealID);
+        centerPanel.add(mealIDText);
+        centerPanel.add(spacer);
+        centerPanel.add(addImageLabel);
+        centerPanel.add(spacer2);
+        centerPanel.add(finalAddButton);
 
         this.add(topPanel, BorderLayout.NORTH);
         this.add(centerPanel, BorderLayout.CENTER);
 
-        this.setSize(241, 326); // Set a fixed size for the frame
+        this.setSize(241, 400); // Set a fixed size for the frame
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setUndecorated(true);
         this.setLocationRelativeTo(null);

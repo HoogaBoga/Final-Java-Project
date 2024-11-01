@@ -5,12 +5,13 @@ import java.sql.*;
 public class CrudInventory {
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
-    public void addInventory(int quantity,int mealID) {
-        String insertSQL = "INSERT INTO Inventory (quantity, meal_id) VALUES (?, ?)";
+    public void addInventory(int quantity, double mealPrice, int mealID) {
+        String insertSQL = "INSERT INTO Inventory (quantity, meal_price, meal_id) VALUES (?, ?, ?)";
         try (Connection connection = DriverManager.getConnection(DB_URL);
              PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
             preparedStatement.setInt(1, quantity);
-            preparedStatement.setInt(2, mealID);
+            preparedStatement.setDouble(2, mealPrice);
+            preparedStatement.setInt(3, mealID);
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {

@@ -22,6 +22,7 @@ public class HomeFrame extends JFrame {
         JPanel cardPanel = new JPanel(cardLayout);
         PlusAddButton plusAddButton = new PlusAddButton();
 
+
         plusAddButton.setBounds(37, 308, 31, 31);
 
         plusAddButton.setOpaque(false);
@@ -45,7 +46,6 @@ public class HomeFrame extends JFrame {
         searchBar.setOpaque(false);
         searchBar.setMargin(new Insets(0, 10, 0, 0));
         searchBar.setPlaceholder("Search");
-        
 
         JPanel panel1 = new JPanel();
         JPanel panel2 = new JPanel();

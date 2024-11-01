@@ -18,16 +18,14 @@ public class Main {
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
     public static void main(String[] args) throws IOException, FontFormatException {
-//        new MyFrame();
 
-        CrudMeal meal = new CrudMeal();
         new FigmaToCodeApp();
 
+        createUsersTable();
+        createMealTable();
+        createInventoryTable();
 
-//        createUsersTable();
-        //createMealTable();
-//         addUser("Zoie", "Estorba", "Manager");
-//        createMealTable();
+        addUser("Zoie", "Estorba", "Manager");
     }
 
     private static void createUsersTable() {
@@ -96,8 +94,8 @@ public class Main {
                 + "meal_type TEXT NOT NULL, "
                 + "nutritional_value TEXT NOT NULL, "
                 + "spicy_or_not_spicy TEXT NOT NULL, "
-                + "meal_price TEXT NOT NULL, "
-                + "ingredients TEXT NOT NULL)";
+                + "ingredients TEXT NOT NULL, "
+                + "image BLOB)";
 
         try (Connection connection = DriverManager.getConnection(DB_URL);
              Statement statement = connection.createStatement()) {
@@ -114,6 +112,7 @@ public class Main {
         String createTableSQL = "CREATE TABLE IF NOT EXISTS Inventory ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "quantity INTEGER NOT NULL, "
+                + "meal_price DOUBLE NOT NULL, "
                 + "meal_id INTEGER NOT NULL)";
 
         try (Connection connection = DriverManager.getConnection(DB_URL);
