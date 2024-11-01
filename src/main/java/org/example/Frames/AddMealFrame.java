@@ -45,6 +45,8 @@ public class AddMealFrame extends JFrame {
     private CrudMeal addMeals = new CrudMeal();
     private CrudInventory addInventory = new CrudInventory();
 
+    public static final Font INTER_FONT = loadCustomFont();
+
 
     public static Font loadCustomFont(){
         try {

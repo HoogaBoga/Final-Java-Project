@@ -16,7 +16,7 @@ public class AddImageLabel extends JLabel {
     public AddImageLabel(){
 
         this.setText("Add Image +");
-        this.setFont(AddMealFrame.loadCustomFont().deriveFont(12f));
+        this.setFont(AddMealFrame.INTER_FONT.deriveFont(12f));
         this.setForeground(new Color(0x9E9E9E));
         this.setPreferredSize(new Dimension(204, 35));
         this.setOpaque(true);

@@ -4,15 +4,22 @@ import org.example.Buttons.EmployeeButton;
 import org.example.Buttons.ManagerButton;
 import org.example.Misc.ShadowLabel;
 
+import javax.management.relation.Role;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.sql.SQLException;
 
 public class RolePage extends JFrame {
 
+    private JLabel backButton = new JLabel("Back");
+
     public RolePage() throws IOException {
         // Set layout
+
 
         setLayout(new BorderLayout());
 
@@ -39,6 +46,23 @@ public class RolePage extends JFrame {
             }
         };
 
+        backButton.setFont(FigmaToCodeApp.READEX_PRO_FONT.deriveFont(14f));
+        backButton.setForeground(Color.WHITE);
+        backButton.setBounds(20, 328, 33, 18);
+        backButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                RolePage.this.dispose();
+                try {
+                    new FigmaToCodeApp();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (FontFormatException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
         backgroundPanel.setLayout(null);
         backgroundPanel.setPreferredSize(new Dimension(621, 358));
 
@@ -63,6 +87,8 @@ public class RolePage extends JFrame {
 
         EmployeeButton employeeButton = new EmployeeButton(this);
         backgroundPanel.add(employeeButton);
+
+        backgroundPanel.add(backButton);
 
         setTitle("Restaurant Management System");
         // Set default close operation

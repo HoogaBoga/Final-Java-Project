@@ -21,11 +21,11 @@ public class Main {
 
         new FigmaToCodeApp();
 
-        createUsersTable();
-        createMealTable();
-        createInventoryTable();
-
-        addUser("Zoie", "Estorba", "Manager");
+//        createUsersTable();
+//        createMealTable();
+//        createInventoryTable();
+//
+//        addUser("Zoie", "Estorba", "Manager");
     }
 
     private static void createUsersTable() {
