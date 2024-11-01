@@ -107,8 +107,4 @@ public class RolePage extends JFrame {
 
         setResizable(false);
     }
-
-    public static void main(String[] args) throws SQLException, IOException{
-        new RolePage();
-    }
 }

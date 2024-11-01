@@ -20,12 +20,6 @@ public class Main {
     public static void main(String[] args) throws IOException, FontFormatException {
 
         new FigmaToCodeApp();
-
-//        createUsersTable();
-//        createMealTable();
-//        createInventoryTable();
-//
-//        addUser("Zoie", "Estorba", "Manager");
     }
 
     private static void createUsersTable() {
@@ -176,14 +170,6 @@ public class Main {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             return resultSet.next();
-
-            /*if (resultSet.next()) {
-                // User is authenticated
-                System.out.println("Login successful! Role: " + resultSet.getString("role"));
-            } else {
-                // Invalid credentials
-                System.out.println("Invalid username or password.");
-            }*/
 
         } catch (SQLException e) {
             e.printStackTrace();
