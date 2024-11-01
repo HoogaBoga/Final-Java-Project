@@ -7,6 +7,8 @@ import org.example.TextFields.TextField;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 
@@ -89,6 +91,7 @@ public class FigmaToCodeApp extends JFrame {
         usernameField.setFont(readexPro.deriveFont(14f));
         usernameField.setOpaque(true); // Ensure it's opaque
         usernameField.setMargin(new Insets(0,10,0,0));
+        usernameField.setPlaceholder("");
         backgroundPanel.add(usernameField);
 
 
@@ -102,8 +105,9 @@ public class FigmaToCodeApp extends JFrame {
         PasswordField passwordField = new PasswordField();
         passwordField.setBounds(329, 218, 273, 42);
         passwordField.setBackground(new Color(251, 250, 242));
-        backgroundPanel.add(passwordField);
+        passwordField.setPlaceholder("");
 
+        backgroundPanel.add(passwordField);
 
         // Add forgot password label
         JLabel forgotPasswordLabel = new JLabel("Forgot Password");
@@ -117,6 +121,13 @@ public class FigmaToCodeApp extends JFrame {
         registerNewUser.setFont(readexPro.deriveFont(12f));
         registerNewUser.setBounds(335, 315, 200, 20);
         backgroundPanel.add(registerNewUser);
+
+        registerNewUser.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new RegisterFrame();
+            }
+        });
 
         backgroundPanel.add(greeneryyImage, BorderLayout.EAST);
 

@@ -7,6 +7,10 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.RenderingHints;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
@@ -15,6 +19,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicPasswordFieldUI;
 
 public class PasswordField extends JPasswordField {
+
+    private String placeholder;
+    private boolean isInitiallyFocusable = false;
 
     public int getRound() {
         return round;
@@ -102,6 +109,46 @@ public class PasswordField extends JPasswordField {
         } else {
             return null;
         }
+    }
+    public void setPlaceholder(String placeholder) {
+        this.placeholder = placeholder;
+        setText(placeholder);
+        setForeground(Color.GRAY);
+
+        // Focus listener to manage placeholder text and color
+        addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (new String(getPassword()).equals(placeholder)) {
+                    setText("");
+                    setForeground(Color.BLACK);
+                    setEchoChar('\u2022'); // Set echo character when focused
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (new String(getPassword()).isEmpty()) {
+                    setForeground(Color.GRAY);
+                    setText(placeholder);
+                    setEchoChar((char) 0); // Remove echo character to show placeholder
+                }
+                setFocusable(false); // Make non-focusable again
+            }
+        });
+
+        // Mouse listener to allow click-to-focus
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!isInitiallyFocusable) {
+                    setFocusable(true);
+                    requestFocusInWindow();
+                }
+            }
+        });
+
+        setFocusable(isInitiallyFocusable); // Initially non-focusable
     }
 
     private class TextUI extends BasicPasswordFieldUI {
