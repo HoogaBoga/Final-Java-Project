@@ -13,6 +13,7 @@ import java.sql.SQLException;
 public class ManagerButton extends JButton implements ActionListener {
 
     private JFrame parentFrame;
+    private int managerCode = 1108;
 
     public ManagerButton(JFrame parentFrame) {
         super("Manager");
@@ -31,8 +32,22 @@ public class ManagerButton extends JButton implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
+            String manager = JOptionPane.showInputDialog("Please enter the manager code: ");
+
+            if (manager == null || manager.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(parentFrame, "Manager Code is required.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+
+            if (!manager.equals(String.valueOf(managerCode))) {
+                JOptionPane.showMessageDialog(parentFrame, "Incorrect Manager Code. Registration failed.", "Authorization Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             new HomeFrame();
             parentFrame.dispose();
+
         } catch (IOException | SQLException ex) {
             throw new RuntimeException(ex);
         }

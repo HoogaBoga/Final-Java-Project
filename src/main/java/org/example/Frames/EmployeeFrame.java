@@ -11,10 +11,10 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.sql.SQLException;
 
-public class HomeFrame extends JFrame {
+public class EmployeeFrame extends JFrame {
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
-    public HomeFrame() throws IOException, SQLException {
+    public EmployeeFrame() throws IOException, SQLException {
         ImageIcon greeneryImage = new ImageIcon("Resources/Frame 12.png");
         JLabel greeneryImg = new JLabel();
 
@@ -30,8 +30,6 @@ public class HomeFrame extends JFrame {
         cardPanel.add(new DashBoardPanel(), "Dashboard");
         cardPanel.add(new OrdersPanel(), "Orders");
         cardPanel.add(new InventoryPanel(), "Inventory");
-        cardPanel.add(new SalesPanel(), "Sales");
-        cardPanel.add(new PromotionsPanel(), "Promotions");
         cardPanel.add(new SettingsPanel(), "Settings");
         cardPanel.setBounds(25, 40, 484, 318);
 
@@ -79,13 +77,8 @@ public class HomeFrame extends JFrame {
         InventoryButton inventoryButton = new InventoryButton(cardLayout, cardPanel, "Inventory");
         panel2.add(inventoryButton);
 
-        SalesButton salesButton = new SalesButton(cardLayout, cardPanel, "Sales");
-        panel2.add(salesButton);
-
-        PromotionsButton promotionsButton = new PromotionsButton(cardLayout, cardPanel, "Promotions");
-        panel2.add(promotionsButton);
-
         SettingsButton settingsButton = new SettingsButton(cardLayout, cardPanel, "Settings");
+        settingsButton.setBounds(12, 124, 86, 16);
         panel2.add(settingsButton);
 
         this.setTitle("Restaurant Management System");

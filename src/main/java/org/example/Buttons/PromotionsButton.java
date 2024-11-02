@@ -10,7 +10,7 @@ public class PromotionsButton extends JButton {
 
         ImageIcon promotionsIcon = new ImageIcon("Resources/PromotionGreen.png");
 
-        this.setBounds(12, 124, 86, 16);
+        this.setBounds(12, 147, 86, 16);
         this.setBackground(new Color(152, 130, 132));
         this.setForeground(Color.BLACK);
         this.setIcon(promotionsIcon);

@@ -1,5 +1,6 @@
 package org.example.Buttons;
 
+import org.example.Frames.EmployeeFrame;
 import org.example.Frames.FigmaToCodeApp;
 import org.example.Frames.HomeFrame;
 
@@ -31,7 +32,7 @@ public class EmployeeButton extends JButton implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            new HomeFrame();
+            new EmployeeFrame();
             parentFrame.dispose();
         } catch (IOException | SQLException ex) {
             throw new RuntimeException(ex);

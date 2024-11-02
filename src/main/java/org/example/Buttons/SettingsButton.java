@@ -11,7 +11,7 @@ public class SettingsButton extends JButton {
 
         ImageIcon settingsIcon = new ImageIcon("Resources/SettingsGreen.png");
 
-        this.setBounds(12, 147, 86, 16);
+        this.setBounds(12, 170, 86, 16);
         this.setBackground(new Color(152, 130, 132));
         this.setForeground(Color.BLACK);
         this.setIcon(settingsIcon);
