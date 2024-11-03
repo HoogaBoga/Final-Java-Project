@@ -177,4 +177,63 @@ public class Main {
 
         return false;
     }
+
+    public class SalesAnalysis {
+
+        private static final String DB_URL = "jdbc:sqlite:C:/Users/stakezy/IdeaProjects/MavenProject/Database.db";
+
+        public void getTopSellingMeals() {
+            String query = "SELECT meal_id, SUM(quantity) AS total_quantity FROM Sales " +
+                    "GROUP BY meal_id ORDER BY total_quantity DESC LIMIT 5";
+
+            try (Connection connection = DriverManager.getConnection(DB_URL);
+                 PreparedStatement preparedStatement = connection.prepareStatement(query);
+                 ResultSet resultSet = preparedStatement.executeQuery()) {
+
+                while (resultSet.next()) {
+                    System.out.println("Meal ID: " + resultSet.getInt("meal_id") +
+                            ", Total Sold: " + resultSet.getInt("total_quantity"));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void getSalesByDateRange(String startDate, String endDate) {
+            String query = "SELECT sales_date, SUM(amount) AS total_sales FROM Sales " +
+                    "WHERE sales_date BETWEEN ? AND ? GROUP BY sales_date";
+
+            try (Connection connection = DriverManager.getConnection(DB_URL);
+                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+                preparedStatement.setString(1, startDate);
+                preparedStatement.setString(2, endDate);
+                ResultSet resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next()) {
+                    System.out.println("Date: " + resultSet.getString("sales_date") +
+                            ", Total Sales: " + resultSet.getDouble("total_sales"));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void getLowSellingMeals() {
+            String query = "SELECT meal_id, SUM(quantity) AS total_quantity FROM Sales " +
+                    "GROUP BY meal_id ORDER BY total_quantity ASC LIMIT 5";
+
+            try (Connection connection = DriverManager.getConnection(DB_URL);
+                 PreparedStatement preparedStatement = connection.prepareStatement(query);
+                 ResultSet resultSet = preparedStatement.executeQuery()) {
+
+                while (resultSet.next()) {
+                    System.out.println("Meal ID: " + resultSet.getInt("meal_id") +
+                            ", Total Sold: " + resultSet.getInt("total_quantity"));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
