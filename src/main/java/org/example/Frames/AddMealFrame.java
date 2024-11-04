@@ -40,7 +40,7 @@ public class AddMealFrame extends JFrame {
     private RoundedTextField spiceLevelText = new RoundedTextField();
     private RoundedTextField ingredientsNeedText = new RoundedTextField();
     private RoundedTextField priceFoodText = new RoundedTextField();
-    private RoundedTextField amountFoodText = new RoundedTextField();
+ //   private RoundedTextField amountFoodText = new RoundedTextField();
     private RoundedTextField mealIDText = new RoundedTextField();
     private CrudMeal addMeals = new CrudMeal();
     private CrudInventory addInventory = new CrudInventory();
@@ -130,13 +130,13 @@ public class AddMealFrame extends JFrame {
         priceFoodText.setMargin(new Insets(0, 10, 0, 0));
         priceFoodText.setPlaceholder("Enter price");
 
-        amountFoodText.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
-        amountFoodText.setBackground(new Color(251, 250, 242));
-        amountFoodText.setForeground(Color.BLACK);
-        amountFoodText.setFont(inter.deriveFont(9f));
-        amountFoodText.setOpaque(false);
-        amountFoodText.setMargin(new Insets(0, 10, 0, 0));
-        amountFoodText.setPlaceholder("Enter amount");
+     //   amountFoodText.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
+     //   amountFoodText.setBackground(new Color(251, 250, 242));
+     //   amountFoodText.setForeground(Color.BLACK);
+     //   amountFoodText.setFont(inter.deriveFont(9f));
+     //   amountFoodText.setOpaque(false);
+     //   amountFoodText.setMargin(new Insets(0, 10, 0, 0));
+     //   amountFoodText.setPlaceholder("Enter amount");
 
         mealIDText.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
         mealIDText.setBackground(new Color(251, 250, 242));
@@ -159,11 +159,11 @@ public class AddMealFrame extends JFrame {
             File imageFile = addImageLabel.getSelectedImageFile();
 
             double mealPriceInput = Double.parseDouble(priceFoodText.getText());
-            int amountInput = Integer.parseInt(amountFoodText.getText());
-            int mealIDInput = Integer.parseInt(mealIDText.getText());
+  //          int amountInput = Integer.parseInt(amountFoodText.getText());
+//            int mealIDInput = Integer.parseInt(mealIDText.getText());
 
             addMeals.addMeal(mealNameInput, mealCategoryInput, serveSizeInput, mealTypeInput, mealNutritionalInput, spiceLevelInput, ingredientsInput,imageFile);
-            addInventory.addInventory(amountInput, mealPriceInput, mealIDInput);
+//            addInventory.addInventory(mealPriceInput, mealIDInput);
         });
 
         addMeal.setFont(inter.deriveFont(Font.BOLD,12f));
@@ -197,8 +197,8 @@ public class AddMealFrame extends JFrame {
         priceFood.setFont(inter.deriveFont(12f));
         priceFood.setBorder(BorderFactory.createEmptyBorder(0,0,0,45));
 
-        amountFood.setFont(inter.deriveFont(12f));
-        amountFood.setBorder(BorderFactory.createEmptyBorder(0,0,0,30 ));
+     //   amountFood.setFont(inter.deriveFont(12f));
+     //   amountFood.setBorder(BorderFactory.createEmptyBorder(0,0,0,30 ));
 
         mealID.setFont(inter.deriveFont(12f));
         mealID.setBorder(BorderFactory.createEmptyBorder(0,0,0,30));
@@ -239,10 +239,10 @@ public class AddMealFrame extends JFrame {
         centerPanel.add(ingredientsNeedText);
         centerPanel.add(priceFood);
         centerPanel.add(priceFoodText);
-        centerPanel.add(amountFood);
-        centerPanel.add(amountFoodText);
-        centerPanel.add(mealID);
-        centerPanel.add(mealIDText);
+//        centerPanel.add(amountFood);
+//        centerPanel.add(amountFoodText);
+//        centerPanel.add(mealID);
+//        centerPanel.add(mealIDText);
         centerPanel.add(spacer);
         centerPanel.add(addImageLabel);
         centerPanel.add(spacer2);
@@ -251,7 +251,7 @@ public class AddMealFrame extends JFrame {
         this.add(topPanel, BorderLayout.NORTH);
         this.add(centerPanel, BorderLayout.CENTER);
 
-        this.setSize(241, 400); // Set a fixed size for the frame
+        this.setSize(241, 360); // Set a fixed size for the frame
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setUndecorated(true);
         this.setLocationRelativeTo(null);
