@@ -82,6 +82,10 @@ public class DashBoardPanel extends JScrollPane {
         }
     }
 
+    public void displayPrice(int inventory_id, JLabel priceLabel){
+        String query = "SELECT meal_price FROM Inventory WHERE inventory_id = >";
+    }
+
     private JPanel createItemPanel(int mealID, String itemName, String itemPrice, String imagePath) {
         JPanel itemPanel = new JPanel();
         itemPanel.setBackground(Color.WHITE);
