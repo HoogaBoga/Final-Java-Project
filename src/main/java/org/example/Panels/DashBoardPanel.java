@@ -1,10 +1,17 @@
 package org.example.Panels;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.sql.*;
 
 public class DashBoardPanel extends JScrollPane {
     private JPanel contentPanel;
+
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
     public DashBoardPanel() {
         // Create the content panel to hold all components
@@ -14,7 +21,7 @@ public class DashBoardPanel extends JScrollPane {
 
         // Add sample items to the content panel
         for (int i = 0; i < 9; i++) {
-            contentPanel.add(createItemPanel("Item " + (i + 1), "₱" + (90 + i * 10), "path_to_image_" + i + ".png"));
+            contentPanel.add(createItemPanel(i + 1,"Item " + (i + 1), "₱" + (90 + i * 10), "path_to_image_" + i + ".png"));
         }
 
         // Set the content panel as the viewport view of the JScrollPane
@@ -24,17 +31,47 @@ public class DashBoardPanel extends JScrollPane {
         this.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
     }
 
-    private JPanel createItemPanel(String itemName, String itemPrice, String imagePath) {
+    public void displayImage(int meal_id, JLabel imageLabel){
+        String query = "SELECT image FROM Meals WHERE meal_id = ?";
+
+        try(Connection connection = DriverManager.getConnection(DB_URL);
+            PreparedStatement preparedStatement = connection.prepareStatement(query)){
+
+            preparedStatement.setInt(1, meal_id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if(resultSet.next()){
+                byte[] imageBytes = resultSet.getBytes("image");
+
+                if(imageBytes != null){
+
+                    BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
+                    ImageIcon images = new ImageIcon(img.getScaledInstance(147, 191, Image.SCALE_SMOOTH));
+                    imageLabel.setIcon(images);
+                    imageLabel.setText("");
+
+                }
+            }
+        } catch (SQLException | IOException e){
+                e.printStackTrace();
+        }
+    }
+
+    private JPanel createItemPanel(int mealID, String itemName, String itemPrice, String imagePath) {
         JPanel itemPanel = new JPanel();
         itemPanel.setPreferredSize(new Dimension(147, 191)); // Set fixed size for consistency
         itemPanel.setLayout(new BorderLayout());
-        itemPanel.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true)); // Rounded border
+
+        itemPanel.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 2, true)); // Rounded border
 
         // Image label (Placeholder for item image)
-        JLabel imageLabel = new JLabel(new ImageIcon(imagePath)); // Use actual image path here
+        JLabel imageLabel = new JLabel();
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         imageLabel.setPreferredSize(new Dimension(100, 100));
         itemPanel.add(imageLabel, BorderLayout.NORTH);
+
+        displayImage(mealID, imageLabel);
 
         // Text panel for item name and price
         JPanel textPanel = new JPanel();

@@ -9,10 +9,11 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class HomeFrame extends JFrame {
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+
 
     public HomeFrame() throws IOException, SQLException {
         ImageIcon greeneryImage = new ImageIcon("Resources/Frame 12.png");
@@ -21,6 +22,7 @@ public class HomeFrame extends JFrame {
         CardLayout cardLayout = new CardLayout();
         JPanel cardPanel = new JPanel(cardLayout);
         PlusAddButton plusAddButton = new PlusAddButton();
+        FilterButton filterButton = new FilterButton();
 
 
         plusAddButton.setBounds(37, 308, 31, 31);
@@ -68,6 +70,7 @@ public class HomeFrame extends JFrame {
         panel2.add(plusAddButton);
         panel1.add(panel3, BorderLayout.NORTH);
         panel3.add(searchBar);
+        panel3.add(filterButton);
         panel1.add(cardPanel);
 
         DashBoardButton dashBoardButton = new DashBoardButton(cardLayout, cardPanel, "Dashboard");
