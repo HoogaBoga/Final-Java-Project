@@ -20,6 +20,8 @@ public class Main {
     public static void main(String[] args) throws IOException, FontFormatException {
 
         new FigmaToCodeApp();
+
+
     }
 
     private static void createUsersTable() {
@@ -236,4 +238,5 @@ public class Main {
             }
         }
     }
+
 }

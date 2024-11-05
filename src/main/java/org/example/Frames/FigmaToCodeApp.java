@@ -9,8 +9,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
 
 public class FigmaToCodeApp extends JFrame {
 
@@ -19,10 +20,12 @@ public class FigmaToCodeApp extends JFrame {
     public static final Font READEX_PRO_FONT = loadCustomFont();
 
     public static Font loadCustomFont() {
-        try {
-            // Load Readex Pro font from Resources folder
-            File fontFile = new File("Resources/ReadexPro-Regular.ttf");
-            Font readexPro = Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(14f);
+        try (InputStream is = FigmaToCodeApp.class.getResourceAsStream("/ReadexPro-Regular.ttf")) {
+            if (is == null) {
+                System.err.println("Font file not found in resources.");
+                return new Font("SansSerif", Font.PLAIN, 14); // Fallback font
+            }
+            Font readexPro = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(14f);
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(readexPro);
             return readexPro;
@@ -36,7 +39,7 @@ public class FigmaToCodeApp extends JFrame {
         // Set layout
         setLayout(new BorderLayout());
 
-        ImageIcon greeneryImage = new ImageIcon("Resources/Vector.png");
+        ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(FigmaToCodeApp.class.getResource("/Vector.png")));
 
         JLabel greeneryyImage = new JLabel();
 
@@ -51,7 +54,7 @@ public class FigmaToCodeApp extends JFrame {
             protected void paintComponent(Graphics g){
                 super.paintComponent(g);
 
-                ImageIcon imageIcon = new ImageIcon("Resources/Login Page.png");
+                ImageIcon imageIcon = new ImageIcon(Objects.requireNonNull(FigmaToCodeApp.class.getResource("/Login Page.png")));
                 Image image = imageIcon.getImage();
                 // Draw the image
                 g.drawImage(image, 0, 0, getWidth(), getHeight(), this);

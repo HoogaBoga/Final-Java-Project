@@ -3,13 +3,14 @@ package org.example.Buttons;
 import javax.smartcardio.Card;
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 public class SettingsButton extends JButton {
 
     public SettingsButton(CardLayout cardLayout, JPanel cardPanel, String panelName){
         super("Settings   ");
 
-        ImageIcon settingsIcon = new ImageIcon("Resources/SettingsGreen.png");
+        ImageIcon settingsIcon = new ImageIcon(Objects.requireNonNull(SettingsButton.class.getResource("/SettingsGreen.png")));
 
         this.setBounds(12, 170, 86, 16);
         this.setBackground(new Color(152, 130, 132));

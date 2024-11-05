@@ -1,5 +1,6 @@
 package org.example.Frames;
 
+import org.example.Buttons.FilterButton;
 import org.example.Buttons.RegisterButton;
 import org.example.TextFields.RoundedPassWordField;
 import org.example.TextFields.RoundedTextField;
@@ -8,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
 public class RegisterFrame extends JFrame {
 
@@ -15,7 +17,7 @@ public class RegisterFrame extends JFrame {
 
         JLabel backButton = new JLabel("Back");
 
-        ImageIcon registerLogo = new ImageIcon("Resources/RegisterLogo.png");
+        ImageIcon registerLogo = new ImageIcon(Objects.requireNonNull(RegisterFrame.class.getResource("/RegisterLogo.png")));
         
         String[] roles = {"  Manager", "  Employee", "  Select Role"};
         
@@ -81,7 +83,7 @@ public class RegisterFrame extends JFrame {
             protected void paintComponent(Graphics g){
                 super.paintComponent(g);
 
-                ImageIcon imageIcon = new ImageIcon("Resources/Register.png");
+                ImageIcon imageIcon = new ImageIcon(Objects.requireNonNull(RegisterFrame.class.getResource("/Register.png")));
                 Image image = imageIcon.getImage();
                 // Draw the image
                 g.drawImage(image, 0, 0, getWidth(), getHeight(), this);

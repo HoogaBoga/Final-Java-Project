@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import javax.imageio.ImageIO;
 
 public class CloseAddButton extends OvalButton implements ActionListener {
@@ -22,7 +23,7 @@ public class CloseAddButton extends OvalButton implements ActionListener {
         setBorderThickness(0); // Oval buttons have some border by default.
 
         try {
-            image = ImageIO.read(new File("Resources/x.png")); // Replace with the path to your image.
+            image = ImageIO.read(Objects.requireNonNull(CloseAddButton.class.getResource("/x.png"))); // Replace with the path to your image.
         }
         catch (IOException e) {
             e.printStackTrace();

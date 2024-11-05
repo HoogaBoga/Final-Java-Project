@@ -1,6 +1,7 @@
 package org.example.Buttons;
 
 import org.example.Frames.AddMealFrame;
+import org.example.Frames.FigmaToCodeApp;
 import org.example.Misc.OvalButton;
 
 import java.awt.event.ActionEvent;
@@ -8,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import javax.imageio.ImageIO;
 
 public class PlusAddButton extends OvalButton implements ActionListener {
@@ -20,7 +22,7 @@ public class PlusAddButton extends OvalButton implements ActionListener {
         setBorderThickness(0); // Oval buttons have some border by default.
 
         try {
-            image = ImageIO.read(new File("Resources/AddImage.png")); // Replace with the path to your image.
+            image = ImageIO.read(Objects.requireNonNull(PlusAddButton.class.getResource("/AddImage.png"))); // Replace with the path to your image.
         }
         catch (IOException e) {
             e.printStackTrace();

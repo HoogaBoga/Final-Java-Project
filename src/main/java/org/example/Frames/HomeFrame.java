@@ -10,13 +10,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.sql.*;
+import java.util.Objects;
 
 public class HomeFrame extends JFrame {
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
 
     public HomeFrame() throws IOException, SQLException {
-        ImageIcon greeneryImage = new ImageIcon("Resources/Frame 12.png");
+        ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(HomeFrame.class.getResource("/Frame 12.png")));
         JLabel greeneryImg = new JLabel();
 
         CardLayout cardLayout = new CardLayout();

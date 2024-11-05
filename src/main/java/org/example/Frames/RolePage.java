@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Objects;
 
 public class RolePage extends JFrame {
 
@@ -23,7 +24,7 @@ public class RolePage extends JFrame {
 
         setLayout(new BorderLayout());
 
-        ImageIcon greeneryImage = new ImageIcon("Resources/Vector.png");
+        ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(RolePage.class.getResource("/Vector.png")));
 
         JLabel greeneryyImage = new JLabel();
 
@@ -36,7 +37,7 @@ public class RolePage extends JFrame {
             protected void paintComponent(Graphics g){
                 super.paintComponent(g);
 
-                ImageIcon imageIcon = new ImageIcon("Resources/Role Page.png");
+                ImageIcon imageIcon = new ImageIcon(Objects.requireNonNull(RolePage.class.getResource("/Role Page.png")));
                 Image image = imageIcon.getImage();
                 // Draw the image
                 g.drawImage(image, 0, 0, getWidth(), getHeight(), this);

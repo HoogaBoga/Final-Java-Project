@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public class FilterButton extends JButton implements ActionListener {
 
@@ -18,7 +19,7 @@ public class FilterButton extends JButton implements ActionListener {
         this.setBounds(337, 15, 15, 15 );
 
         try{
-            image = ImageIO.read(new File("Resources/filter.png"));
+            image = ImageIO.read(Objects.requireNonNull(FilterButton.class.getResource("/filter.png")));
         } catch (IOException e) {
             e.printStackTrace();
             image = null;
