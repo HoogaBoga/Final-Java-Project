@@ -4,15 +4,19 @@ import org.example.Buttons.*;
 import org.example.Panels.*;
 import org.example.TextFields.RoundedTextField;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class HomeFrame extends JFrame {
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+
 
     public HomeFrame() throws IOException, SQLException {
         ImageIcon greeneryImage = new ImageIcon("Resources/Frame 12.png");
