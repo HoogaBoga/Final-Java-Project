@@ -1,5 +1,7 @@
 package org.example.Panels;
 
+import org.example.Frames.AddMealFrame;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -58,51 +60,71 @@ public class DashBoardPanel extends JScrollPane {
         }
     }
 
+    public void displayName(int meal_id, JLabel nameLabel){
+        String query = "SELECT meal_name FROM Meals WHERE meal_id = ?";
+
+        try(Connection connection = DriverManager.getConnection(DB_URL);
+            PreparedStatement preparedStatement = connection.prepareStatement(query)){
+
+            preparedStatement.setInt(1, meal_id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if(resultSet.next()){
+                String mealName =  resultSet.getString("meal_name");
+
+                nameLabel.setText(mealName);
+            } else {
+                nameLabel.setText("Meal Not Found");
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
     private JPanel createItemPanel(int mealID, String itemName, String itemPrice, String imagePath) {
         JPanel itemPanel = new JPanel();
+        itemPanel.setBackground(Color.WHITE);
         itemPanel.setPreferredSize(new Dimension(147, 191)); // Set fixed size for consistency
-        itemPanel.setLayout(new BorderLayout());
+        itemPanel.setLayout(null); // Use null layout for custom positioning
 
         itemPanel.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 2, true)); // Rounded border
 
         // Image label (Placeholder for item image)
         JLabel imageLabel = new JLabel();
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        imageLabel.setPreferredSize(new Dimension(100, 100));
-        itemPanel.add(imageLabel, BorderLayout.NORTH);
-
+        imageLabel.setBounds(10, 10, 121, 91); // Correct bounds for imageLabel
+        itemPanel.add(imageLabel);
         displayImage(mealID, imageLabel);
 
-        // Text panel for item name and price
-        JPanel textPanel = new JPanel();
-        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
-        textPanel.setBackground(Color.WHITE);
+        // Create nameLabel
+        JLabel nameLabel = new JLabel();
+        nameLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(14f));
+        nameLabel.setBounds(10, 111, 100, 15); // Set bounds for nameLabel
+        itemPanel.add(nameLabel);
+        displayName(mealID, nameLabel);
 
-        JLabel nameLabel = new JLabel(itemName);
-        nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        textPanel.add(nameLabel);
-
+        // Create priceLabel
         JLabel priceLabel = new JLabel(itemPrice);
-        priceLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        priceLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(14f));
         priceLabel.setForeground(new Color(0x4CAF50));
-        priceLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        textPanel.add(priceLabel);
+        priceLabel.setBounds(10, 136, 49, 15); // Set bounds for priceLabel
+        itemPanel.add(priceLabel);
 
-        itemPanel.add(textPanel, BorderLayout.CENTER);
-
-        // Button panel
+        // Button for viewing
         JButton viewButton = new JButton("View");
         viewButton.setBackground(new Color(0x4CAF50));
+        viewButton.setFont(AddMealFrame.INTER_FONT.deriveFont(12f));
         viewButton.setForeground(Color.WHITE);
         viewButton.setFocusPainted(false);
-        viewButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        viewButton.setBounds(10, 161, 130, 15); // Set bounds for the button
+        itemPanel.add(viewButton);
 
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setBackground(Color.WHITE);
-        buttonPanel.add(viewButton);
-        itemPanel.add(buttonPanel, BorderLayout.SOUTH);
+        // Call revalidate and repaint to ensure visibility
+        itemPanel.revalidate();
+        itemPanel.repaint();
 
         return itemPanel;
     }
+
 }
