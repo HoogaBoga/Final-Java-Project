@@ -1,23 +1,27 @@
 package org.example.Buttons;
 
+import org.example.Frames.FigmaToCodeApp;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
 
 public class DashBoardButton extends JButton{
 
     public static final Font ACTOR_REGULAR_FONT = loadCustomFont();
 
-    public static Font loadCustomFont(){
-        try {
-            File fontFile = new File("Resources/Actor-Regular.ttf");
-            Font actor = Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(14f);
+    public static Font loadCustomFont() {
+        try (InputStream is = DashBoardButton.class.getResourceAsStream("/Actor-Regular.ttf")) {
+            if (is == null) {
+                System.err.println("Font file not found in resources.");
+                return new Font("SansSerif", Font.PLAIN, 14); // Fallback font
+            }
+            Font actorRegular = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(14f);
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(actor);
-            return actor;
+            ge.registerFont(actorRegular);
+            return actorRegular;
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
             return new Font("SansSerif", Font.PLAIN, 14); // Fallback font
@@ -27,7 +31,7 @@ public class DashBoardButton extends JButton{
     public DashBoardButton(CardLayout cardLayout, JPanel cardPanel, String panelName){
         super("Dashboard");
 
-        ImageIcon dashBoardIcon = new ImageIcon("Resources/DashBoardGreen.png");
+        ImageIcon dashBoardIcon = new ImageIcon(Objects.requireNonNull(FigmaToCodeApp.class.getResource("/DashBoardGreen.png")));
 
         Font actor = loadCustomFont();
 

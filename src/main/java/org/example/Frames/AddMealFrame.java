@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class AddMealFrame extends JFrame {
 
@@ -48,10 +49,13 @@ public class AddMealFrame extends JFrame {
     public static final Font INTER_FONT = loadCustomFont();
 
 
-    public static Font loadCustomFont(){
-        try {
-            File fontFile = new File("Resources/Inter-VariableFont_opsz,wght.ttf");
-            Font inter = Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(14f);
+    public static Font loadCustomFont() {
+        try (InputStream is = AddMealFrame.class.getResourceAsStream("/Inter-VariableFont_opsz,wght.ttf")) {
+            if (is == null) {
+                System.err.println("Font file not found in resources.");
+                return new Font("SansSerif", Font.PLAIN, 14); // Fallback font
+            }
+            Font inter = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(14f);
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(inter);
             return inter;

@@ -4,13 +4,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Objects;
 
 public class OrdersButton extends JButton {
 
     public OrdersButton(CardLayout cardLayout, JPanel cardPanel, String panelName){
         super("Orders    ");
 
-        ImageIcon ordersIcon = new ImageIcon("Resources/OrdersGreen.png");
+        ImageIcon ordersIcon = new ImageIcon(Objects.requireNonNull(OrdersButton.class.getResource("/OrdersGreen.png")));
 
         this.setBounds(12, 78, 86, 16);
         this.setBackground(new Color(152, 130, 132));

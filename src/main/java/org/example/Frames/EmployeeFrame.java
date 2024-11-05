@@ -10,12 +10,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Objects;
 
 public class EmployeeFrame extends JFrame {
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
     public EmployeeFrame() throws IOException, SQLException {
-        ImageIcon greeneryImage = new ImageIcon("Resources/Frame 12.png");
+        ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(EmployeeFrame.class.getResource("/Frame 12.png")));
         JLabel greeneryImg = new JLabel();
 
         CardLayout cardLayout = new CardLayout();
@@ -105,10 +106,6 @@ public class EmployeeFrame extends JFrame {
         panel1.addMouseListener(clickListener);
         panel2.addMouseListener(clickListener);
         panel3.addMouseListener(clickListener);
-    }
-
-    public static void main(String[] args) throws SQLException, IOException {
-        new HomeFrame();
     }
 
 

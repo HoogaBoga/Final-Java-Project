@@ -4,13 +4,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Objects;
 
 public class InventoryButton extends JButton {
 
     public InventoryButton(CardLayout cardLayout, JPanel cardPanel, String panelName){
         super(" Inventory  ");
 
-        ImageIcon ordersIcon = new ImageIcon("Resources/InventoryGreen.png");
+        ImageIcon ordersIcon = new ImageIcon(Objects.requireNonNull(InventoryButton.class.getResource("/InventoryGreen.png")));
 
         this.setBounds(12, 101, 86, 16);
         this.setBackground(new Color(152, 130, 132));
