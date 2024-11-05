@@ -4,13 +4,10 @@ import org.example.Buttons.*;
 import org.example.Panels.*;
 import org.example.TextFields.RoundedTextField;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.*;
 
@@ -25,6 +22,7 @@ public class HomeFrame extends JFrame {
         CardLayout cardLayout = new CardLayout();
         JPanel cardPanel = new JPanel(cardLayout);
         PlusAddButton plusAddButton = new PlusAddButton();
+        FilterButton filterButton = new FilterButton();
 
 
         plusAddButton.setBounds(37, 308, 31, 31);
@@ -72,6 +70,7 @@ public class HomeFrame extends JFrame {
         panel2.add(plusAddButton);
         panel1.add(panel3, BorderLayout.NORTH);
         panel3.add(searchBar);
+        panel3.add(filterButton);
         panel1.add(cardPanel);
 
         DashBoardButton dashBoardButton = new DashBoardButton(cardLayout, cardPanel, "Dashboard");
