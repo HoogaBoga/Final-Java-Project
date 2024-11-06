@@ -56,7 +56,7 @@ public class DashBoardPanel extends JScrollPane {
                 }
             }
         } catch (SQLException | IOException e){
-                e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
@@ -82,8 +82,25 @@ public class DashBoardPanel extends JScrollPane {
         }
     }
 
-    public void displayPrice(int inventory_id, JLabel priceLabel){
-        String query = "SELECT meal_price FROM Inventory WHERE inventory_id = >";
+    public String displayPrice(int meal_id){
+        String query = "SELECT meal_price FROM Inventory WHERE meal_id = ?";
+        String price = "₱0.00";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setInt(1, meal_id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                price = "₱" + resultSet.getString("meal_price");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return price;
     }
 
     private JPanel createItemPanel(int mealID, String itemName, String itemPrice, String imagePath) {
@@ -131,4 +148,27 @@ public class DashBoardPanel extends JScrollPane {
         return itemPanel;
     }
 
+    public void refreshMealsDisplay() {
+        // Clear current panels or reset the content
+        contentPanel.removeAll();
+
+        // Fetch meals again from the database
+        String query = "SELECT * FROM Meals";
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                int mealId = resultSet.getInt("meal_id");
+                String mealName = resultSet.getString("meal_name");
+                String mealPrice = displayPrice(mealId); // Get meal price from Inventory table
+                String imagePath = resultSet.getString("image");  // Assuming image path or BLOB data
+                contentPanel.add(createItemPanel(mealId, mealName, mealPrice, imagePath)); // Add to content panel
+            }
+            contentPanel.revalidate();  // Refresh the layout
+            contentPanel.repaint();  // Repaint the panel to show updated content
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

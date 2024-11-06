@@ -109,7 +109,8 @@ public class Main {
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "quantity INTEGER NOT NULL, "
                 + "meal_price DOUBLE NOT NULL, "
-                + "meal_id INTEGER NOT NULL)";
+                + "meal_id INTEGER, "
+                + "FOREIGN KEY (meal_id) REFERENCES Meals(meal_id) ON DELETE CASCADE ON UPDATE CASCADE)";
 
         try (Connection connection = DriverManager.getConnection(DB_URL);
              Statement statement = connection.createStatement()) {

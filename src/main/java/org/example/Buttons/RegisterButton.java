@@ -16,10 +16,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class RegisterButton extends JButton implements ActionListener {
     private RoundedTextField usernameField;
@@ -125,6 +122,7 @@ public class RegisterButton extends JButton implements ActionListener {
             int rowsAffected = preparedStatement.executeUpdate();
             if (rowsAffected > 0) {
                 System.out.println("User '" + username + "' added successfully!");
+                refreshUserList();
                 return true;
             }
 
@@ -133,4 +131,24 @@ public class RegisterButton extends JButton implements ActionListener {
         }
         return false;
     }
+
+    private void refreshUserList() {
+        // Re-fetch users from the database
+        String query = "SELECT * FROM Users";
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                String username = resultSet.getString("username");
+                String password = resultSet.getString("password");
+                String role = resultSet.getString("role");
+                // Add user to in-memory list or session storage
+                // e.g., userList.add(new User(username, password, role));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
