@@ -6,6 +6,7 @@ import org.example.Buttons.DashBoardButton;
 import org.example.Buttons.FinalAddButton;
 import org.example.Misc.CrudInventory;
 import org.example.Misc.CrudMeal;
+import org.example.Panels.DashBoardPanel;
 import org.example.TextFields.RoundedTextField;
 
 import javax.swing.*;
@@ -47,7 +48,7 @@ public class AddMealFrame extends JFrame {
     private CrudInventory addInventory = new CrudInventory();
 
     public static final Font INTER_FONT = loadCustomFont();
-
+    private static DashBoardPanel dashBoardPanel = new DashBoardPanel();
 
     public static Font loadCustomFont() {
         try (InputStream is = AddMealFrame.class.getResourceAsStream("/Inter-VariableFont_opsz,wght.ttf")) {
@@ -167,7 +168,7 @@ public class AddMealFrame extends JFrame {
 //            int mealIDInput = Integer.parseInt(mealIDText.getText());
 
             addMeals.addMeal(mealNameInput, mealCategoryInput, serveSizeInput, mealTypeInput, mealNutritionalInput, spiceLevelInput, ingredientsInput,imageFile);
-//            addInventory.addInventory(mealPriceInput, mealIDInput);
+            dashBoardPanel.refreshMealsDisplay();
         });
 
         addMeal.setFont(inter.deriveFont(Font.BOLD,12f));
@@ -261,4 +262,6 @@ public class AddMealFrame extends JFrame {
         this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
+
+
 }
