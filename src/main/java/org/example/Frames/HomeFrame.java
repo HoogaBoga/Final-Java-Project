@@ -14,7 +14,7 @@ import java.util.Objects;
 
 public class HomeFrame extends JFrame {
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
-
+    DashBoardPanel dashBoardPanel = new DashBoardPanel();
 
     public HomeFrame() throws IOException, SQLException {
         ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(HomeFrame.class.getResource("/Frame 12.png")));
@@ -24,6 +24,9 @@ public class HomeFrame extends JFrame {
         JPanel cardPanel = new JPanel(cardLayout);
         PlusAddButton plusAddButton = new PlusAddButton();
         FilterButton filterButton = new FilterButton();
+        RefreshButton refreshButton = new RefreshButton();
+
+        refreshButton.addActionListener(e -> dashBoardPanel.refreshMealsDisplay());
 
 
         plusAddButton.setBounds(37, 308, 31, 31);
@@ -72,6 +75,7 @@ public class HomeFrame extends JFrame {
         panel1.add(panel3, BorderLayout.NORTH);
         panel3.add(searchBar);
         panel3.add(filterButton);
+        panel3.add(refreshButton);
         panel1.add(cardPanel);
 
         DashBoardButton dashBoardButton = new DashBoardButton(cardLayout, cardPanel, "Dashboard");

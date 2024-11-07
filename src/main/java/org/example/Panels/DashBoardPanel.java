@@ -1,7 +1,5 @@
 package org.example.Panels;
 
-import org.example.Frames.AddMealFrame;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -9,151 +7,49 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DashBoardPanel extends JScrollPane {
     private JPanel contentPanel;
-
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private Map<Integer, ImageIcon> imageCache;  // Cache for images to avoid reloading
 
     public DashBoardPanel() {
-        // Create the content panel to hold all components
-        contentPanel = new JPanel();
-        contentPanel.setLayout(new GridLayout(0, 3, 12, 12)); // 3 columns with spacing
+        contentPanel = new JPanel(new GridLayout(0, 3, 12, 12));
         contentPanel.setBackground(new Color(0xE8E8E8));
-
-        // Add sample items to the content panel
-        for (int i = 0; i < 9; i++) {
-            contentPanel.add(createItemPanel(i + 1,"Item " + (i + 1), "₱" + (90 + i * 10), "path_to_image_" + i + ".png"));
-        }
-
-        // Set the content panel as the viewport view of the JScrollPane
+        contentPanel.setDoubleBuffered(true);
         this.setViewportView(contentPanel);
         this.setBorder(BorderFactory.createEmptyBorder());
         this.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
         this.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
+        imageCache = new HashMap<>();
+
+        // Start background loading
+        loadDataInBackground();
     }
 
-    public void displayImage(int meal_id, JLabel imageLabel){
-        String query = "SELECT image FROM Meals WHERE meal_id = ?";
-
-        try(Connection connection = DriverManager.getConnection(DB_URL);
-            PreparedStatement preparedStatement = connection.prepareStatement(query)){
-
-            preparedStatement.setInt(1, meal_id);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if(resultSet.next()){
-                byte[] imageBytes = resultSet.getBytes("image");
-
-                if(imageBytes != null){
-
-                    BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
-                    ImageIcon images = new ImageIcon(img.getScaledInstance(147, 191, Image.SCALE_SMOOTH));
-                    imageLabel.setIcon(images);
-                    imageLabel.setText("");
-
-                }
+    private void loadDataInBackground() {
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() {
+                loadMeals();
+                return null;
             }
-        } catch (SQLException | IOException e){
-            e.printStackTrace();
-        }
-    }
 
-    public void displayName(int meal_id, JLabel nameLabel){
-        String query = "SELECT meal_name FROM Meals WHERE meal_id = ?";
-
-        try(Connection connection = DriverManager.getConnection(DB_URL);
-            PreparedStatement preparedStatement = connection.prepareStatement(query)){
-
-            preparedStatement.setInt(1, meal_id);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if(resultSet.next()){
-                String mealName =  resultSet.getString("meal_name");
-
-                nameLabel.setText(mealName);
-            } else {
-                nameLabel.setText("Meal Not Found");
+            @Override
+            protected void done() {
+                contentPanel.revalidate();
+                contentPanel.repaint();
             }
-        } catch (SQLException e){
-            e.printStackTrace();
-        }
+        };
+        worker.execute();
     }
 
-    public String displayPrice(int meal_id){
-        String query = "SELECT meal_price FROM Inventory WHERE meal_id = ?";
-        String price = "₱0.00";
-
-        try (Connection connection = DriverManager.getConnection(DB_URL);
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
-            preparedStatement.setInt(1, meal_id);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                price = "₱" + resultSet.getString("meal_price");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return price;
-    }
-
-    private JPanel createItemPanel(int mealID, String itemName, String itemPrice, String imagePath) {
-        JPanel itemPanel = new JPanel();
-        itemPanel.setBackground(Color.WHITE);
-        itemPanel.setPreferredSize(new Dimension(147, 191)); // Set fixed size for consistency
-        itemPanel.setLayout(null); // Use null layout for custom positioning
-
-        itemPanel.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 2, true)); // Rounded border
-
-        // Image label (Placeholder for item image)
-        JLabel imageLabel = new JLabel();
-        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        imageLabel.setBounds(10, 10, 121, 91); // Correct bounds for imageLabel
-        itemPanel.add(imageLabel);
-        displayImage(mealID, imageLabel);
-
-        // Create nameLabel
-        JLabel nameLabel = new JLabel();
-        nameLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(14f));
-        nameLabel.setBounds(10, 111, 100, 15); // Set bounds for nameLabel
-        itemPanel.add(nameLabel);
-        displayName(mealID, nameLabel);
-
-        // Create priceLabel
-        JLabel priceLabel = new JLabel(itemPrice);
-        priceLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(14f));
-        priceLabel.setForeground(new Color(0x4CAF50));
-        priceLabel.setBounds(10, 136, 49, 15); // Set bounds for priceLabel
-        itemPanel.add(priceLabel);
-
-        // Button for viewing
-        JButton viewButton = new JButton("View");
-        viewButton.setBackground(new Color(0x4CAF50));
-        viewButton.setFont(AddMealFrame.INTER_FONT.deriveFont(12f));
-        viewButton.setForeground(Color.WHITE);
-        viewButton.setFocusPainted(false);
-        viewButton.setBounds(10, 161, 130, 15); // Set bounds for the button
-        itemPanel.add(viewButton);
-
-        // Call revalidate and repaint to ensure visibility
-        itemPanel.revalidate();
-        itemPanel.repaint();
-
-        return itemPanel;
-    }
-
-    public void refreshMealsDisplay() {
-        // Clear current panels or reset the content
+    private void loadMeals() {
         contentPanel.removeAll();
-
-        // Fetch meals again from the database
         String query = "SELECT * FROM Meals";
+
         try (Connection connection = DriverManager.getConnection(DB_URL);
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
@@ -161,14 +57,75 @@ public class DashBoardPanel extends JScrollPane {
             while (resultSet.next()) {
                 int mealId = resultSet.getInt("meal_id");
                 String mealName = resultSet.getString("meal_name");
-                String mealPrice = displayPrice(mealId); // Get meal price from Inventory table
-                String imagePath = resultSet.getString("image");  // Assuming image path or BLOB data
-                contentPanel.add(createItemPanel(mealId, mealName, mealPrice, imagePath)); // Add to content panel
+                String mealPrice = displayPrice(mealId);
+                byte[] imageBytes = resultSet.getBytes("image");
+
+                ImageIcon mealImage = imageCache.computeIfAbsent(mealId, id -> getImageIcon(imageBytes));
+                contentPanel.add(createItemPanel(mealId, mealName, mealPrice, mealImage));
             }
-            contentPanel.revalidate();  // Refresh the layout
-            contentPanel.repaint();  // Repaint the panel to show updated content
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private ImageIcon getImageIcon(byte[] imageBytes) {
+        if (imageBytes == null) return new ImageIcon(); // Default empty icon if no image
+        try {
+            BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
+            return new ImageIcon(img.getScaledInstance(121, 91, Image.SCALE_SMOOTH));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new ImageIcon();
+        }
+    }
+
+    private JPanel createItemPanel(int mealID, String itemName, String itemPrice, ImageIcon imageIcon) {
+        JPanel itemPanel = new JPanel(null);
+        itemPanel.setBackground(Color.WHITE);
+        itemPanel.setPreferredSize(new Dimension(147, 191));
+        itemPanel.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 2, true));
+
+        JLabel imageLabel = new JLabel(imageIcon, JLabel.CENTER);
+        imageLabel.setBounds(10, 10, 121, 91);
+        itemPanel.add(imageLabel);
+
+        JLabel nameLabel = new JLabel(itemName);
+        nameLabel.setFont(new Font("Inter", Font.PLAIN, 14));
+        nameLabel.setBounds(10, 111, 100, 18);
+        itemPanel.add(nameLabel);
+
+        JLabel priceLabel = new JLabel(itemPrice);
+        priceLabel.setFont(new Font("Inter", Font.PLAIN, 12));
+        priceLabel.setForeground(new Color(0x4CAF50));
+        priceLabel.setBounds(10, 136, 70, 15);
+        itemPanel.add(priceLabel);
+
+        JButton viewButton = new JButton("View");
+        viewButton.setBackground(new Color(0x4CAF50));
+        viewButton.setForeground(Color.WHITE);
+        viewButton.setBounds(10, 161, 130, 15);
+        itemPanel.add(viewButton);
+
+        return itemPanel;
+    }
+
+    public String displayPrice(int meal_id) {
+        String query = "SELECT meal_price FROM Inventory WHERE meal_id = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, meal_id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return "₱" + resultSet.getString("meal_price");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "₱0.00";
+    }
+
+    public void refreshMealsDisplay() {
+        imageCache.clear();  // Clear cache to reload images
+        loadDataInBackground();
     }
 }

@@ -15,7 +15,7 @@ public class CrudMeal {
 
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
-    public void addMeal(String mealName, String category, int servingSize, String type, int nutritionalValue,
+    public int addMeal(String mealName, String category, int servingSize, String type, int nutritionalValue,
                         String spice, String ingredients, File imageFile) {
         String insertSQL = "INSERT INTO Meals (meal_name, meal_category, serving_size, meal_type, nutritional_value, "
                 + "spicy_or_not_spicy, ingredients, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -40,16 +40,22 @@ public class CrudMeal {
                 preparedStatement.setNull(8, java.sql.Types.BLOB);
             }
 
-            preparedStatement.executeUpdate();
-            JOptionPane.showMessageDialog(null, "Meal added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-
-        } catch (SQLException e) {
+            int affectedRows = preparedStatement.executeUpdate();
+            if (affectedRows > 0) {
+                // Retrieve the generated meal_id
+                try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int mealId = generatedKeys.getInt(1);
+                        JOptionPane.showMessageDialog(null, "Meal added successfully! Meal ID: " + mealId, "Success", JOptionPane.INFORMATION_MESSAGE);
+                        return mealId; // Return the generated meal_id
+                    }
+                }
+            }
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Failed to add meal. Please check your input.", "Error", JOptionPane.ERROR_MESSAGE);
-        } catch (IOException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Failed to read image file.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+        return -1;
     }
 
     public void editMeal(int meal_id, String meal_name, String meal_category,

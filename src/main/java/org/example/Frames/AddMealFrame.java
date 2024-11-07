@@ -42,7 +42,7 @@ public class AddMealFrame extends JFrame {
     private RoundedTextField spiceLevelText = new RoundedTextField();
     private RoundedTextField ingredientsNeedText = new RoundedTextField();
     private RoundedTextField priceFoodText = new RoundedTextField();
- //   private RoundedTextField amountFoodText = new RoundedTextField();
+    private RoundedTextField amountFoodText = new RoundedTextField();
     private RoundedTextField mealIDText = new RoundedTextField();
     private CrudMeal addMeals = new CrudMeal();
     private CrudInventory addInventory = new CrudInventory();
@@ -135,41 +135,50 @@ public class AddMealFrame extends JFrame {
         priceFoodText.setMargin(new Insets(0, 10, 0, 0));
         priceFoodText.setPlaceholder("Enter price");
 
-     //   amountFoodText.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
-     //   amountFoodText.setBackground(new Color(251, 250, 242));
-     //   amountFoodText.setForeground(Color.BLACK);
-     //   amountFoodText.setFont(inter.deriveFont(9f));
-     //   amountFoodText.setOpaque(false);
-     //   amountFoodText.setMargin(new Insets(0, 10, 0, 0));
-     //   amountFoodText.setPlaceholder("Enter amount");
-
-        mealIDText.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
-        mealIDText.setBackground(new Color(251, 250, 242));
-        mealIDText.setForeground(Color.BLACK);
-        mealIDText.setFont(inter.deriveFont(9f));
-        mealIDText.setOpaque(false);
-        mealIDText.setMargin(new Insets(0, 10, 0, 0));
-        mealIDText.setPlaceholder("Enter amount");
+        amountFoodText.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
+        amountFoodText.setBackground(new Color(251, 250, 242));
+        amountFoodText.setForeground(Color.BLACK);
+        amountFoodText.setFont(inter.deriveFont(9f));
+        amountFoodText.setOpaque(false);
+        amountFoodText.setMargin(new Insets(0, 10, 0, 0));
+        amountFoodText.setPlaceholder("Enter amount");
         
         this.setLayout(new BorderLayout());
 
         finalAddButton.addActionListener(e -> {
-            String mealNameInput = mealName.getText();
-            String mealCategoryInput = mealCategories.getText();
-            int serveSizeInput = Integer.parseInt(serveSizeText.getText());
-            String mealTypeInput = mealTypeText.getText();
-            int mealNutritionalInput = Integer.parseInt(nutritionalValue.getText());
-            String spiceLevelInput = spiceLevelText.getText();
-            String ingredientsInput = ingredientsNeedText.getText();
-            File imageFile = addImageLabel.getSelectedImageFile();
+            try {
+                String mealNameInput = mealName.getText();
+                String mealCategoryInput = mealCategories.getText();
+                int servingSizeInput = Integer.parseInt(serveSizeText.getText());
+                String mealTypeInput = mealTypeText.getText();
+                int mealNutritionalInput = Integer.parseInt(nutritionalValue.getText());
+                String spiceLevelInput = spiceLevelText.getText();
+                String ingredientsInput = ingredientsNeedText.getText();
+                File imageFile = addImageLabel.getSelectedImageFile();
 
-            double mealPriceInput = Double.parseDouble(priceFoodText.getText());
-  //          int amountInput = Integer.parseInt(amountFoodText.getText());
-//            int mealIDInput = Integer.parseInt(mealIDText.getText());
+                double mealPriceInput = Double.parseDouble(priceFoodText.getText());
+                int quantityInput = Integer.parseInt(amountFoodText.getText());
 
-            addMeals.addMeal(mealNameInput, mealCategoryInput, serveSizeInput, mealTypeInput, mealNutritionalInput, spiceLevelInput, ingredientsInput,imageFile);
-            dashBoardPanel.refreshMealsDisplay();
+                // Add meal and retrieve generated mealID
+                int mealID = addMeals.addMeal(mealNameInput, mealCategoryInput, servingSizeInput, mealTypeInput,
+                        mealNutritionalInput, spiceLevelInput, ingredientsInput, imageFile);
+
+                if (mealID != -1) {
+                    // Use the retrieved mealID to add to inventory
+                    addInventory.addInventory(quantityInput, mealPriceInput, mealID);
+
+                } else {
+                    System.out.println("Failed to add meal. Inventory entry was not created.");
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Please enter valid numeric values for serving size, nutritional value, price, and quantity.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "An unexpected error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
+
+
 
         addMeal.setFont(inter.deriveFont(Font.BOLD,12f));
         addMeal.setForeground(Color.WHITE);
@@ -202,11 +211,8 @@ public class AddMealFrame extends JFrame {
         priceFood.setFont(inter.deriveFont(12f));
         priceFood.setBorder(BorderFactory.createEmptyBorder(0,0,0,45));
 
-     //   amountFood.setFont(inter.deriveFont(12f));
-     //   amountFood.setBorder(BorderFactory.createEmptyBorder(0,0,0,30 ));
-
-        mealID.setFont(inter.deriveFont(12f));
-        mealID.setBorder(BorderFactory.createEmptyBorder(0,0,0,30));
+        amountFood.setFont(inter.deriveFont(12f));
+        amountFood.setBorder(BorderFactory.createEmptyBorder(0,0,0,30 ));
 
         spacer.setPreferredSize(new Dimension(241, 5));
         spacer2.setPreferredSize(new Dimension(241, 5));
@@ -244,10 +250,8 @@ public class AddMealFrame extends JFrame {
         centerPanel.add(ingredientsNeedText);
         centerPanel.add(priceFood);
         centerPanel.add(priceFoodText);
-//        centerPanel.add(amountFood);
-//        centerPanel.add(amountFoodText);
-//        centerPanel.add(mealID);
-//        centerPanel.add(mealIDText);
+        centerPanel.add(amountFood);
+        centerPanel.add(amountFoodText);
         centerPanel.add(spacer);
         centerPanel.add(addImageLabel);
         centerPanel.add(spacer2);
