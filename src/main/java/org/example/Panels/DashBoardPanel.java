@@ -125,7 +125,10 @@ public class DashBoardPanel extends JScrollPane {
     }
 
     public void refreshMealsDisplay() {
-        imageCache.clear();  // Clear cache to reload images
+        imageCache.clear();
+        contentPanel.removeAll(); // Remove existing items from the panel
+        contentPanel.revalidate();  // Refresh the layout
+        contentPanel.repaint();
         loadDataInBackground();
     }
 }
