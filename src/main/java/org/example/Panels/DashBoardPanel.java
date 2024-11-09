@@ -1,8 +1,12 @@
 package org.example.Panels;
 
+import org.example.Frames.ViewFrame;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -13,7 +17,7 @@ import java.util.Map;
 public class DashBoardPanel extends JScrollPane {
     private JPanel contentPanel;
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
-    private Map<Integer, ImageIcon> imageCache;  // Cache for images to avoid reloading
+    private Map<Integer, ImageIcon> imageCache;// Cache for images to avoid reloading
 
     public DashBoardPanel() {
         contentPanel = new JPanel(new GridLayout(0, 3, 12, 12));
@@ -104,6 +108,14 @@ public class DashBoardPanel extends JScrollPane {
         viewButton.setBackground(new Color(0x4CAF50));
         viewButton.setForeground(Color.WHITE);
         viewButton.setBounds(10, 161, 130, 15);
+
+        viewButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new ViewFrame();
+            }
+        });
+
         itemPanel.add(viewButton);
 
         return itemPanel;

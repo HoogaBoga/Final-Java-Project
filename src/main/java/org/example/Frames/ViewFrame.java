@@ -30,6 +30,8 @@ public class ViewFrame extends JFrame {
         add(scrollPane);
         loadMeals();
         setVisible(true);
+
+        setLocationRelativeTo(null);
     }
 
     private void loadMeals() {
