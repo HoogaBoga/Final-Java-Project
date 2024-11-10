@@ -1,5 +1,8 @@
 package org.example.Frames;
 
+import org.example.Panels.DashBoardPanel;
+import org.sqlite.core.DB;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -20,27 +23,35 @@ public class ViewFrame extends JFrame {
 
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
-    public ViewFrame() {
+    public ViewFrame(int mealID) {
         setTitle("Meal Viewer");
-        setSize(403, 646);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        setSize(300, 480);
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         add(scrollPane);
-        loadMeals();
+        loadMeals(mealID);
+        setUndecorated(true);
+        getContentPane().setBackground(Color.WHITE);
         setVisible(true);
 
+
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
         setLocationRelativeTo(null);
+
     }
 
-    private void loadMeals() {
+    private void loadMeals(int mealID) {
         contentPanel.removeAll();
-        String query = "SELECT * FROM Meals";
+        String query = "SELECT * FROM Meals WHERE meal_id = ?";
 
         try (Connection connection = DriverManager.getConnection(DB_URL);
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(query)){
+
+            preparedStatement.setInt(1, mealID);
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 int mealId = resultSet.getInt("meal_id");
@@ -86,72 +97,67 @@ public class ViewFrame extends JFrame {
 
     private JPanel createItemPanel(int mealId, String mealName, String mealPrice, ImageIcon mealImage) {
         JPanel mealPanel = new JPanel();
-        mealPanel.setLayout(new BorderLayout());
+        mealPanel.setLayout(null);
         mealPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        mealPanel.setBackground(Color.WHITE);
 
-        // Top Section with Image
         JLabel imageLabel = new JLabel(mealImage);
-        mealPanel.add(imageLabel, BorderLayout.NORTH);
+        imageLabel.setBounds(15, 0, 274, 149);
+        mealPanel.add(imageLabel);
 
-        // Center Section with Name and Price
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         JLabel nameLabel = new JLabel(mealName);
-        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        nameLabel.setBounds(50, 125, 100, 50);
+        mealPanel.add(nameLabel);
+
         JLabel priceLabel = new JLabel(mealPrice);
-        priceLabel.setForeground(new Color(0, 128, 0)); // Green color for price
+        priceLabel.setForeground(new Color(0, 128, 0));
         priceLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        priceLabel.setBounds(50, 150, 100, 50);
+        mealPanel.add(priceLabel);
 
-        infoPanel.add(nameLabel);
-        infoPanel.add(priceLabel);
-
-        JButton editButton = new JButton("Edit");
-        editButton.setForeground(new Color(0, 128, 0)); // Green color for Edit
-        infoPanel.add(editButton);
-
-        mealPanel.add(infoPanel, BorderLayout.CENTER);
-
-        // Table for Ingredients with ScrollPane
+        // Ingredients table
         String[] columnNames = {"Ingredients", "Volume", "Unit"};
         DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
         JTable ingredientTable = new JTable(tableModel);
-        ingredientTable.setPreferredScrollableViewportSize(new Dimension(380, 100)); // Set preferred size for visibility
+        ingredientTable.setPreferredScrollableViewportSize(new Dimension(250, 100));
+        ingredientTable.setFillsViewportHeight(true);
 
         JScrollPane tableScroll = new JScrollPane(ingredientTable);
-        tableScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        tableScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        tableScroll.setBounds(15, 200, 274, 270);
+        mealPanel.add(tableScroll);
 
-        // Dummy data - replace with database query
-        tableModel.addRow(new Object[]{"Pancit Bihon", "1", "pounds"});
-        tableModel.addRow(new Object[]{"Pork", "1/2", "pounds"});
-        tableModel.addRow(new Object[]{"Chicken", "1/2", "pounds"});
-        tableModel.addRow(new Object[]{"Snow Peas", "1/8", "pounds"});
-        tableModel.addRow(new Object[]{"Carrot", "1", "cup"});
-        tableModel.addRow(new Object[]{"Cabbage", "1/2", "cup"});
-        tableModel.addRow(new Object[]{"Chicken Powder", "1/2", "tbsp"});
-
-        mealPanel.add(tableScroll, BorderLayout.SOUTH);
-
-        // Footer Section with "View Inventory" and "Add" Button
-        JPanel footerPanel = new JPanel();
-        JButton viewInventoryButton = new JButton("View Inventory");
-        JButton addButton = new JButton("Add");
-
-        footerPanel.add(viewInventoryButton);
-        footerPanel.add(addButton);
-        mealPanel.add(footerPanel, BorderLayout.PAGE_END);
+        // Load and split ingredients from database string
+        String ingredientsString = getIngredients(mealId); // Method to retrieve ingredients as a single string
+        if (ingredientsString != null) {
+            String[] ingredientsArray = ingredientsString.split(","); // Adjust delimiter if needed
+            for (String ingredient : ingredientsArray) {
+                // Add each ingredient with default "Volume" and "Unit" as editable fields
+                tableModel.addRow(new Object[]{ingredient.trim(), "", ""});
+            }
+        }
 
         return mealPanel;
     }
 
-    public void refreshMeasslsDisplay() {
-        imageCache.clear();
-        contentPanel.removeAll(); // Remove existing items from the panel
-        contentPanel.revalidate();  // Refresh the layout
-        contentPanel.repaint();
+    // Method to retrieve ingredients as a single string from the database
+    private String getIngredients(int mealId) {
+        String query = "SELECT ingredients FROM Meals WHERE meal_id = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, mealId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getString("ingredients");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-     public static void main(String[] args){
-        new ViewFrame();
-     }
+
+//    public static void main(String[] args){
+//        new ViewFrame();
+//     }
 }

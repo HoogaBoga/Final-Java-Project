@@ -112,7 +112,7 @@ public class DashBoardPanel extends JScrollPane {
         viewButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new ViewFrame();
+                new ViewFrame(mealID);
             }
         });
 
