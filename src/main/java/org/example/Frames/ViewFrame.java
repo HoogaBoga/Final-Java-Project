@@ -1,5 +1,6 @@
 package org.example.Frames;
 
+import org.example.Panels.DashBoardPanel;
 import org.sqlite.core.DB;
 
 import javax.imageio.ImageIO;
@@ -24,17 +25,22 @@ public class ViewFrame extends JFrame {
 
     public ViewFrame(int mealID) {
         setTitle("Meal Viewer");
-        setSize(403, 646);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        setSize(300, 480);
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         add(scrollPane);
         loadMeals(mealID);
+        setUndecorated(true);
+        getContentPane().setBackground(Color.WHITE);
         setVisible(true);
+
+
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         setLocationRelativeTo(null);
+
     }
 
     private void loadMeals(int mealID) {
@@ -91,29 +97,63 @@ public class ViewFrame extends JFrame {
 
     private JPanel createItemPanel(int mealId, String mealName, String mealPrice, ImageIcon mealImage) {
         JPanel mealPanel = new JPanel();
-        mealPanel.setLayout(new BorderLayout());
+        mealPanel.setLayout(null);
         mealPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        mealPanel.setBackground(Color.WHITE);
 
         JLabel imageLabel = new JLabel(mealImage);
-        mealPanel.add(imageLabel, BorderLayout.NORTH);
+        imageLabel.setBounds(15, 0, 274, 149);
+        mealPanel.add(imageLabel);
 
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         JLabel nameLabel = new JLabel(mealName);
-        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        nameLabel.setBounds(50, 125, 100, 50);
+        mealPanel.add(nameLabel);
+
         JLabel priceLabel = new JLabel(mealPrice);
         priceLabel.setForeground(new Color(0, 128, 0));
         priceLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        priceLabel.setBounds(50, 150, 100, 50);
+        mealPanel.add(priceLabel);
 
-        infoPanel.add(nameLabel);
-        infoPanel.add(priceLabel);
+        // Ingredients table
+        String[] columnNames = {"Ingredients", "Volume", "Unit"};
+        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
+        JTable ingredientTable = new JTable(tableModel);
+        ingredientTable.setPreferredScrollableViewportSize(new Dimension(250, 100));
+        ingredientTable.setFillsViewportHeight(true);
 
-        JButton viewButton = new JButton("View");
-        viewButton.addActionListener(e -> new ViewFrame(mealId)); // Pass mealId
-        infoPanel.add(viewButton);
+        JScrollPane tableScroll = new JScrollPane(ingredientTable);
+        tableScroll.setBounds(15, 200, 274, 270);
+        mealPanel.add(tableScroll);
 
-        mealPanel.add(infoPanel, BorderLayout.CENTER);
+        // Load and split ingredients from database string
+        String ingredientsString = getIngredients(mealId); // Method to retrieve ingredients as a single string
+        if (ingredientsString != null) {
+            String[] ingredientsArray = ingredientsString.split(","); // Adjust delimiter if needed
+            for (String ingredient : ingredientsArray) {
+                // Add each ingredient with default "Volume" and "Unit" as editable fields
+                tableModel.addRow(new Object[]{ingredient.trim(), "", ""});
+            }
+        }
+
         return mealPanel;
+    }
+
+    // Method to retrieve ingredients as a single string from the database
+    private String getIngredients(int mealId) {
+        String query = "SELECT ingredients FROM Meals WHERE meal_id = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, mealId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getString("ingredients");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 
