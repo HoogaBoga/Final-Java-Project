@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -61,9 +62,9 @@ public class CrudMeal {
     public void editMeal(int meal_id, String meal_name, String meal_category,
                                  String meal_type, String nutritional_value,
                                  String spicy_or_not_spicy, float meal_price,
-                                 String ingredients) {
+                                 String ingredients, File imageFile) {
         String updateSQL = "UPDATE Meals SET meal_name = ?, meal_category = ?, meal_type = ?, " +
-                "nutritional_value = ?, spicy_or_not_spicy = ?, meal_price = ?, ingredients = ? " +
+                "nutritional_value = ?, spicy_or_not_spicy = ?, meal_price = ?, ingredients = ?, image_file = ? " +
                 "WHERE meal_id = ?";
 
         try (Connection connection = DriverManager.getConnection(DB_URL);
@@ -76,7 +77,8 @@ public class CrudMeal {
             preparedStatement.setString(5, spicy_or_not_spicy);
             preparedStatement.setFloat(6, meal_price);
             preparedStatement.setString(7, ingredients);
-            preparedStatement.setInt(8, meal_id); // Use the provided meal ID
+            preparedStatement.setBytes(8, Files.readAllBytes(imageFile.toPath()));
+            preparedStatement.setInt(9, meal_id); // Use the provided meal ID
 
             int rowsAffected = preparedStatement.executeUpdate(); // Execute the update
             if (rowsAffected > 0) {
@@ -84,8 +86,11 @@ public class CrudMeal {
             } else {
                 System.out.println("No meal found with the provided ID.");
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -13,7 +13,6 @@ import java.sql.*;
 import java.util.Objects;
 
 public class HomeFrame extends JFrame {
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
     DashBoardPanel dashBoardPanel = new DashBoardPanel();
 
     public HomeFrame() throws IOException, SQLException {
@@ -125,31 +124,4 @@ public class HomeFrame extends JFrame {
     public static void main(String[] args) throws SQLException, IOException {
         new HomeFrame();
     }
-
-
-//    public String listMeals() throws SQLException {
-//        String query = "SELECT * FROM Meals";
-//        StringBuilder mealList = new StringBuilder("Meals:\n");
-//        try (Connection connection = DriverManager.getConnection(DB_URL);
-//             Statement statement = connection.createStatement();
-//             ResultSet resultSet = statement.executeQuery(query)) {
-//
-//            while (resultSet.next()) {
-//                mealList.append("ID: ").append(resultSet.getInt("meal_id"))
-//                        .append("\n Meal Name: ").append(resultSet.getString("meal_name"))
-//                        .append("\n Meal Category: ").append(resultSet.getString("meal_category"))
-//                        .append("\n Serving Size: ").append(resultSet.getString("meal_type"))
-//                        .append("\n Meal Type: ").append(resultSet.getString("meal_type"))
-//                        .append("\n Nutritional Value: ").append(resultSet.getString("nutritional_value"))
-//                        .append("\n Spicy: ").append(resultSet.getString("spicy_or_not_spicy"))
-//                        .append("\n Meal Price: ").append(resultSet.getString("meal_price"))
-//                        .append("\n Ingredients: ").append(resultSet.getString("ingredients")).append("\n");
-//
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return mealList.toString();
-//    }
 }
