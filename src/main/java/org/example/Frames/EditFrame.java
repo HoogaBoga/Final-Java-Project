@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class EditFrame extends JFrame {
-
+    private DashBoardPanel dashBoardPanel = new DashBoardPanel();
     private JPanel topPanel = new JPanel();
     private JPanel centerPanel = new JPanel();
     private JLabel addMeal = new JLabel("Edit Meal");
@@ -41,11 +41,10 @@ public class EditFrame extends JFrame {
     private RoundedTextField ingredientsNeedText = new RoundedTextField();
     private RoundedTextField priceFoodText = new RoundedTextField();
     private RoundedTextField amountFoodText = new RoundedTextField();
-    private CrudMeal addMeals = new CrudMeal();
-    private CrudInventory addInventory = new CrudInventory();
+    private CrudMeal editMeals = new CrudMeal(dashBoardPanel);
+    private CrudInventory editInventory = new CrudInventory();
 
-    public static final Font INTER_FONT = loadCustomFont();
-    private static DashBoardPanel dashBoardPanel = new DashBoardPanel();
+
 
     public static Font loadCustomFont() {
         try (InputStream is = AddMealFrame.class.getResourceAsStream("/Inter-VariableFont_opsz,wght.ttf")) {
@@ -63,7 +62,7 @@ public class EditFrame extends JFrame {
         }
     }
 
-    public EditFrame(int mealID) {
+    public EditFrame(int mealID, DashBoardPanel dashBoardPanel) {
 
         Font inter = loadCustomFont();
         CloseAddButton2 closeAddButton = new CloseAddButton2(this);
@@ -158,11 +157,27 @@ public class EditFrame extends JFrame {
                 double mealPriceInput = Double.parseDouble(priceFoodText.getText());
                 int quantityInput = Integer.parseInt(amountFoodText.getText());
 
+                editMeals.editMeal(mealID, mealNameInput, mealCategoryInput, servingSizeInput,
+                        mealTypeInput, mealNutritionalInput, spiceLevelInput, ingredientsInput, imageFile);
+
+                editInventory.editInventory(quantityInput, mealPriceInput, mealID);
+
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(null, "Please enter valid numeric values for serving size, nutritional value, price, and quantity.", "Input Error", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(null, "An unexpected error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        deleteButton.addActionListener(e -> {
+            try {
+                editMeals.deleteMeal(mealID);
+
+                editInventory.deleteInventory(mealID);
+
+        } catch (Exception ex) {
+                throw new RuntimeException(ex);
             }
         });
 

@@ -11,7 +11,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DashBoardPanel extends JScrollPane {
@@ -37,18 +39,26 @@ public class DashBoardPanel extends JScrollPane {
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
-                loadMeals();
+                loadMeals(); // Load meals in the background
                 return null;
             }
 
             @Override
             protected void done() {
-                contentPanel.revalidate();
-                contentPanel.repaint();
+                // Ensure UI updates happen on the EDT
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Revalidate and repaint the contentPanel to reflect the changes
+                        contentPanel.revalidate();
+                        contentPanel.repaint();
+                    }
+                });
             }
         };
-        worker.execute();
+        worker.execute(); // Start the SwingWorker
     }
+
 
     private void loadMeals() {
         contentPanel.removeAll();
@@ -137,10 +147,38 @@ public class DashBoardPanel extends JScrollPane {
     }
 
     public void refreshMealsDisplay() {
+        // Clear the cache of images
         imageCache.clear();
-        contentPanel.removeAll(); // Remove existing items from the panel
-        contentPanel.revalidate();  // Refresh the layout
+
+        // Clear existing items from the panel
+        contentPanel.removeAll();
+
+        // Revalidate and repaint the contentPanel to ensure it's refreshed
+        contentPanel.revalidate();
         contentPanel.repaint();
+
+        // Load the data again in the background, ensuring the UI is updated
         loadDataInBackground();
     }
+
+
+    public List<String> getMealNames() {
+        List<String> mealNames = new ArrayList<>();
+        String query = "SELECT meal_name FROM Meals";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                String mealName = resultSet.getString("meal_name");
+                mealNames.add(mealName);  // Add each meal name to the list
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return mealNames;  // Return the list of meal names
+    }
+
 }

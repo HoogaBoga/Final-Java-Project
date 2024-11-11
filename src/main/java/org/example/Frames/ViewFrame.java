@@ -44,7 +44,7 @@ public class ViewFrame extends JFrame {
 
     }
 
-    private void loadMeals(int mealID) {
+    public void loadMeals(int mealID) {
         contentPanel.removeAll();
         String query = "SELECT * FROM Meals WHERE meal_id = ?";
 
@@ -128,7 +128,7 @@ public class ViewFrame extends JFrame {
 
         JLabel nameLabel = new JLabel(mealName);
         nameLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.BOLD, 18f));
-        nameLabel.setBounds(25, 125, 100, 50);
+        nameLabel.setBounds(25, 125, 200, 50);
         mealPanel.add(nameLabel);
 
         JLabel typeLabel = new JLabel(mealType);
@@ -166,7 +166,8 @@ public class ViewFrame extends JFrame {
         edit.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                new EditFrame(mealId);
+                DashBoardPanel dashBoardPanel = new DashBoardPanel();
+                new EditFrame(mealId, dashBoardPanel);
             }
         });
 
