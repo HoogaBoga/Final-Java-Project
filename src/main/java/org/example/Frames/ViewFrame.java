@@ -8,6 +8,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,7 +34,6 @@ public class ViewFrame extends JFrame {
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         add(scrollPane);
         loadMeals(mealID);
-        setUndecorated(true);
         getContentPane().setBackground(Color.WHITE);
         setVisible(true);
 
@@ -55,12 +56,16 @@ public class ViewFrame extends JFrame {
 
             while (resultSet.next()) {
                 int mealId = resultSet.getInt("meal_id");
+                String mealCategory = resultSet.getString("meal_category");
+                String spicy = resultSet.getString("spicy_or_not_spicy");
+                String mealType = resultSet.getString("meal_type");
                 String mealName = resultSet.getString("meal_name");
                 String mealPrice = displayPrice(mealId);
+                String mealQuantity = displayAmount(mealID);
                 byte[] imageBytes = resultSet.getBytes("image");
 
                 ImageIcon mealImage = imageCache.computeIfAbsent(mealId, id -> getImageIcon(imageBytes));
-                contentPanel.add(createItemPanel(mealId, mealName, mealPrice, mealImage));
+                contentPanel.add(createItemPanel(mealId, mealName, mealCategory, spicy, mealType, mealPrice, mealQuantity, mealImage));
             }
             contentPanel.revalidate();
             contentPanel.repaint();
@@ -84,6 +89,22 @@ public class ViewFrame extends JFrame {
         return "₱0.00";
     }
 
+    public String displayAmount(int mealId) {
+        String query = "SELECT quantity FROM Inventory WHERE meal_id = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, mealId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getString("quantity");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return "0";
+    }
+
     private ImageIcon getImageIcon(byte[] imageBytes) {
         if (imageBytes == null) return new ImageIcon();
         try {
@@ -95,26 +116,63 @@ public class ViewFrame extends JFrame {
         }
     }
 
-    private JPanel createItemPanel(int mealId, String mealName, String mealPrice, ImageIcon mealImage) {
+    private JPanel createItemPanel(int mealId, String mealName, String mealCategory, String spicy, String mealType, String mealPrice, String mealQuantity, ImageIcon mealImage) {
         JPanel mealPanel = new JPanel();
         mealPanel.setLayout(null);
         mealPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
         mealPanel.setBackground(Color.WHITE);
 
         JLabel imageLabel = new JLabel(mealImage);
-        imageLabel.setBounds(15, 0, 274, 149);
+        imageLabel.setBounds(5, 0, 274, 149);
         mealPanel.add(imageLabel);
 
         JLabel nameLabel = new JLabel(mealName);
-        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
-        nameLabel.setBounds(50, 125, 100, 50);
+        nameLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.BOLD, 18f));
+        nameLabel.setBounds(25, 125, 100, 50);
         mealPanel.add(nameLabel);
 
-        JLabel priceLabel = new JLabel(mealPrice);
-        priceLabel.setForeground(new Color(0, 128, 0));
-        priceLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
-        priceLabel.setBounds(50, 150, 100, 50);
-        mealPanel.add(priceLabel);
+        JLabel typeLabel = new JLabel(mealType);
+        typeLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.ITALIC, 11f));
+        typeLabel.setForeground(new Color(0x2F632C));
+        typeLabel.setBounds(25, 142, 100, 50);
+        mealPanel.add(typeLabel);
+
+        JLabel spicyLabel = new JLabel(spicy);
+        spicyLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.ITALIC, 11f));
+        spicyLabel.setForeground(new Color(0xE5380C));
+        spicyLabel.setBounds(25, 154, 100, 50);
+        mealPanel.add(spicyLabel);
+
+        JLabel categoryLabel = new JLabel(mealCategory);
+        categoryLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.ITALIC, 11f));
+        categoryLabel.setBounds(25, 166, 100, 50);
+        mealPanel.add(categoryLabel);
+
+        JLabel mealLabel = new JLabel(mealPrice);
+        mealLabel.setForeground(new Color(0, 128, 0));
+        mealLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.BOLD, 18f));
+        mealLabel.setBounds(25, 190, 100, 50);
+        mealPanel.add(mealLabel);
+
+        JLabel quantityLabel = new JLabel("Stocks Left: " + mealQuantity);
+        quantityLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.PLAIN, 11f));
+        quantityLabel.setBounds(200, 215, 100, 50);
+        mealPanel.add(quantityLabel);
+
+        JLabel edit = new JLabel("Edit");
+        edit.setFont(FigmaToCodeApp.READEX_PRO_FONT.deriveFont(12f));
+        edit.setForeground(new Color(0x65B265));
+        edit.setBounds(250, 125, 100, 50);
+        edit.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new EditFrame(mealId);
+            }
+        });
+
+        mealPanel.add(edit);
+
+
 
         // Ingredients table
         String[] columnNames = {"Ingredients", "Volume", "Unit"};
@@ -124,7 +182,7 @@ public class ViewFrame extends JFrame {
         ingredientTable.setFillsViewportHeight(true);
 
         JScrollPane tableScroll = new JScrollPane(ingredientTable);
-        tableScroll.setBounds(15, 200, 274, 270);
+        tableScroll.setBounds(7, 250, 274, 200);
         mealPanel.add(tableScroll);
 
         // Load and split ingredients from database string

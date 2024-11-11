@@ -31,6 +31,7 @@ public class EditFrame extends JFrame {
     private JLabel spacer = new JLabel();
     private JLabel spacer2 = new JLabel();
     private FinalAddButton finalAddButton = new FinalAddButton();
+    private DeleteButton deleteButton = new DeleteButton();
     private RoundedTextField mealName = new RoundedTextField();
     private RoundedTextField mealCategories = new RoundedTextField();
     private RoundedTextField serveSizeText = new RoundedTextField();
@@ -40,7 +41,6 @@ public class EditFrame extends JFrame {
     private RoundedTextField ingredientsNeedText = new RoundedTextField();
     private RoundedTextField priceFoodText = new RoundedTextField();
     private RoundedTextField amountFoodText = new RoundedTextField();
-    private RoundedTextField mealIDText = new RoundedTextField();
     private CrudMeal addMeals = new CrudMeal();
     private CrudInventory addInventory = new CrudInventory();
 
@@ -63,7 +63,7 @@ public class EditFrame extends JFrame {
         }
     }
 
-    public EditFrame() {
+    public EditFrame(int mealID) {
 
         Font inter = loadCustomFont();
         CloseAddButton2 closeAddButton = new CloseAddButton2(this);
@@ -142,6 +142,8 @@ public class EditFrame extends JFrame {
 
         this.setLayout(new BorderLayout());
 
+        finalAddButton.setPreferredSize(new Dimension(91, 25));
+
         finalAddButton.addActionListener(e -> {
             try {
                 String mealNameInput = mealName.getText();
@@ -156,17 +158,6 @@ public class EditFrame extends JFrame {
                 double mealPriceInput = Double.parseDouble(priceFoodText.getText());
                 int quantityInput = Integer.parseInt(amountFoodText.getText());
 
-                // Add meal and retrieve generated mealID
-                int mealID = addMeals.addMeal(mealNameInput, mealCategoryInput, servingSizeInput, mealTypeInput,
-                        mealNutritionalInput, spiceLevelInput, ingredientsInput, imageFile);
-
-                if (mealID != -1) {
-                    // Use the retrieved mealID to add to inventory
-                    addInventory.addInventory(quantityInput, mealPriceInput, mealID);
-
-                } else {
-                    System.out.println("Failed to edit meal. Inventory entry was not created.");
-                }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(null, "Please enter valid numeric values for serving size, nutritional value, price, and quantity.", "Input Error", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
@@ -174,8 +165,6 @@ public class EditFrame extends JFrame {
                 JOptionPane.showMessageDialog(null, "An unexpected error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-
-
 
         addMeal.setFont(inter.deriveFont(Font.BOLD,12f));
         addMeal.setForeground(Color.WHITE);
@@ -253,6 +242,7 @@ public class EditFrame extends JFrame {
         centerPanel.add(addImageLabel);
         centerPanel.add(spacer2);
         centerPanel.add(finalAddButton);
+        centerPanel.add(deleteButton);
 
         this.add(topPanel, BorderLayout.NORTH);
         this.add(centerPanel, BorderLayout.CENTER);
@@ -264,5 +254,7 @@ public class EditFrame extends JFrame {
         this.setVisible(true);
     }
 
+    public void editMeals(int mealID){
 
+    }
 }
