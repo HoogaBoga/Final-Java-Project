@@ -2,6 +2,7 @@ package org.example.Buttons;
 
 import org.example.Frames.FigmaToCodeApp;
 import org.example.Frames.HomeFrame;
+import org.example.Panels.DashBoardPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,7 +46,8 @@ public class ManagerButton extends JButton implements ActionListener {
                 return;
             }
 
-            new HomeFrame();
+            DashBoardPanel dashBoardPanel = new DashBoardPanel();
+            new HomeFrame(dashBoardPanel);
             parentFrame.dispose();
 
         } catch (IOException | SQLException ex) {

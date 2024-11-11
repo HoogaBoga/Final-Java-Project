@@ -17,6 +17,8 @@ import java.io.InputStream;
 
 public class AddMealFrame extends JFrame {
 
+    private DashBoardPanel dashBoardPanel = new DashBoardPanel();
+
     private JPanel topPanel = new JPanel();
     private JPanel centerPanel = new JPanel();
     private JLabel addMeal = new JLabel("Add Meal");
@@ -44,11 +46,11 @@ public class AddMealFrame extends JFrame {
     private RoundedTextField priceFoodText = new RoundedTextField();
     private RoundedTextField amountFoodText = new RoundedTextField();
     private RoundedTextField mealIDText = new RoundedTextField();
-    private CrudMeal addMeals = new CrudMeal();
+    private CrudMeal addMeals = new CrudMeal(dashBoardPanel);
     private CrudInventory addInventory = new CrudInventory();
 
     public static final Font INTER_FONT = loadCustomFont();
-    private static DashBoardPanel dashBoardPanel = new DashBoardPanel();
+
 
     public static Font loadCustomFont() {
         try (InputStream is = AddMealFrame.class.getResourceAsStream("/Inter-VariableFont_opsz,wght.ttf")) {
@@ -66,7 +68,7 @@ public class AddMealFrame extends JFrame {
         }
     }
 
-    public AddMealFrame() {
+    public AddMealFrame(DashBoardPanel dashBoardPanel) {
 
         Font inter = loadCustomFont();
         CloseAddButton closeAddButton = new CloseAddButton(this);
@@ -167,6 +169,11 @@ public class AddMealFrame extends JFrame {
                     // Use the retrieved mealID to add to inventory
                     addInventory.addInventory(quantityInput, mealPriceInput, mealID);
 
+                    SwingUtilities.invokeLater(() -> {
+                        dashBoardPanel.refreshMealsDisplay();
+                        dashBoardPanel.revalidate();
+                        dashBoardPanel.repaint();
+                    });
                 } else {
                     System.out.println("Failed to add meal. Inventory entry was not created.");
                 }

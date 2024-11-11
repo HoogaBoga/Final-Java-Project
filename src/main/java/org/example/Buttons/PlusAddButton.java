@@ -3,6 +3,7 @@ package org.example.Buttons;
 import org.example.Frames.AddMealFrame;
 import org.example.Frames.FigmaToCodeApp;
 import org.example.Misc.OvalButton;
+import org.example.Panels.DashBoardPanel;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -39,7 +40,8 @@ public class PlusAddButton extends OvalButton implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        new AddMealFrame();
+        DashBoardPanel dashBoardPanel = new DashBoardPanel();
+        new AddMealFrame(dashBoardPanel);
     }
 }
 

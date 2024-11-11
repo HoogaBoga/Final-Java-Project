@@ -6,6 +6,8 @@ import org.example.TextFields.RoundedTextField;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -14,10 +16,14 @@ import java.util.Objects;
 
 public class HomeFrame extends JFrame {
     DashBoardPanel dashBoardPanel = new DashBoardPanel();
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
-    public HomeFrame() throws IOException, SQLException {
+
+    public HomeFrame(DashBoardPanel dashBoardPanel) throws IOException, SQLException {
         ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(HomeFrame.class.getResource("/Frame 12.png")));
         JLabel greeneryImg = new JLabel();
+
+        DashBoardPanel getMealName = new DashBoardPanel();
 
         CardLayout cardLayout = new CardLayout();
         JPanel cardPanel = new JPanel(cardLayout);
@@ -52,6 +58,9 @@ public class HomeFrame extends JFrame {
         searchBar.setOpaque(false);
         searchBar.setMargin(new Insets(0, 10, 0, 0));
         searchBar.setPlaceholder("Search");
+
+        searchBar.addActionListener(e -> searchMeals(searchBar.getText()));
+
 
         JPanel panel1 = new JPanel();
         JPanel panel2 = new JPanel();
@@ -121,7 +130,33 @@ public class HomeFrame extends JFrame {
         panel3.addMouseListener(clickListener);
     }
 
+    public void searchMeals(String searchText) {
+        // Convert the search text to lowercase for case-insensitive comparison
+        String searchQuery = "%" + searchText.toLowerCase() + "%";
+
+        // Query to search for meals with names matching the search text
+        String query = "SELECT meal_name FROM Meals WHERE LOWER(meal_name) LIKE ?";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, searchQuery);  // Set the search text in the query
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String mealName = resultSet.getString("meal_name");
+                    // Display or add meal names to a list in the UI
+                    System.out.println("Found meal: " + mealName);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public static void main(String[] args) throws SQLException, IOException {
-        new HomeFrame();
+        DashBoardPanel dashBoardPanel = new DashBoardPanel();
+        new HomeFrame(dashBoardPanel);
     }
 }
