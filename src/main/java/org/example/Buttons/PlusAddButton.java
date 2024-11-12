@@ -16,10 +16,10 @@ import javax.imageio.ImageIO;
 public class PlusAddButton extends OvalButton implements ActionListener {
 
     private BufferedImage image;
-
-    public PlusAddButton() {
+    public DashBoardPanel panel;
+    public PlusAddButton(DashBoardPanel panel) {
         super(); // Default is oval/circle shape.
-
+        this.panel = panel;
         setBorderThickness(0); // Oval buttons have some border by default.
 
         try {
@@ -40,8 +40,7 @@ public class PlusAddButton extends OvalButton implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        DashBoardPanel dashBoardPanel = new DashBoardPanel();
-        new AddMealFrame(dashBoardPanel);
+        new AddMealFrame(panel);
     }
 }
 

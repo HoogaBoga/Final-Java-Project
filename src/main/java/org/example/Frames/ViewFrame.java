@@ -23,7 +23,7 @@ public class ViewFrame extends JFrame {
     private JPanel contentPanel;
     private Map<Integer, ImageIcon> imageCache = new HashMap<>();
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:/Users/matty/IdeaProjects/Final-Java-Project/Database.db";
 
     public ViewFrame(int mealID) {
         setTitle("Meal Viewer");
