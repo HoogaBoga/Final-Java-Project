@@ -1,7 +1,68 @@
 package org.example.Panels;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+//public class InventoryPanel extends JScrollPane{
+//    private static String itemName;
+//    private DefaultTableModel model;
+//    private JTable table;
+//
+//
+//    public void InventoryTable(String[] args) {
+//        // Column Names
+//        String[] columnNames = {"Items", "Meal ID", "Quantity", "Meal Price"};
+//        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+//        JTable table = new JTable(model);
+//        JScrollPane scrollPane = new JScrollPane(table);
+//        table.setFillsViewportHeight(true);
+//
+//        JPanel textPanel = new JPanel();
+//        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
+//        textPanel.setBackground(Color.WHITE);
+//
+//
+//        JLabel nameLabel = new JLabel(itemName);
+//        nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
+//        nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+//        textPanel.add(nameLabel);
+//
+//    }
+//
+//        public String DisplayItem(int meal_id) {
+//            try (Connection conn = DriverManager.getConnection("jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db");
+//                 Statement stmt = conn.createStatement();
+//                 ResultSet rs = stmt.executeQuery("SELECT id, quantity, price, meal_id FROM Inventory")) {
+//
+//
+//                while (rs.next()) {
+//                    int id = rs.getInt("Meal ID");
+//                    int quantity = rs.getInt("Quantity");
+//                    int price = rs.getInt("Price");
+//                    model.addRow(new Object[]{id, quantity, price});
+//                }
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
+//
+//        };
+//
+//
+//        // Set up Table
+//
+//        JFrame frame = new JFrame("Inventory");
+//        frame.add(scrollPane);
+//        frame.setSize(130, 150);
+//        frame.setVisible(true);
+//
+//    };
+
+
+
 
 public class InventoryPanel extends JScrollPane {
     private JPanel contentPanel;

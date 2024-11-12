@@ -109,7 +109,7 @@
             String createTableSQL = "CREATE TABLE IF NOT EXISTS Inventory ("
                     + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                     + "quantity INTEGER NOT NULL, "
-                    + "meal_price DOUBLE NOT NULL, "
+                    + "meal_price INTEGER NOT NULL, "
                     + "meal_id INTEGER, "
                     + "FOREIGN KEY (meal_id) REFERENCES Meals(meal_id) ON DELETE CASCADE ON UPDATE CASCADE)";
 
