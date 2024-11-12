@@ -6,6 +6,8 @@ import org.example.TextFields.RoundedTextField;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -13,27 +15,31 @@ import java.sql.*;
 import java.util.Objects;
 
 public class HomeFrame extends JFrame {
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
-    DashBoardPanel dashBoardPanel = new DashBoardPanel();
+    DashBoardPanel dashBoardPanel;
+    private static final String DB_URL = "jdbc:sqlite:/Users/matty/IdeaProjects/Final-Java-Project/Database.db";
+
 
     public HomeFrame() throws IOException, SQLException {
         ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(HomeFrame.class.getResource("/Frame 12.png")));
         JLabel greeneryImg = new JLabel();
 
+        DashBoardPanel getMealName = new DashBoardPanel();
+
         CardLayout cardLayout = new CardLayout();
         JPanel cardPanel = new JPanel(cardLayout);
-        PlusAddButton plusAddButton = new PlusAddButton();
+        dashBoardPanel = new DashBoardPanel();
+        PlusAddButton plusAddButton = new PlusAddButton(dashBoardPanel);
         FilterButton filterButton = new FilterButton();
         RefreshButton refreshButton = new RefreshButton();
 
-        refreshButton.addActionListener(e -> dashBoardPanel.refreshMealsDisplay());
+        refreshButton.addActionListener(_ -> dashBoardPanel.refreshMealsDisplay());
 
 
         plusAddButton.setBounds(37, 308, 31, 31);
 
         plusAddButton.setOpaque(false);
 
-        cardPanel.add(new DashBoardPanel(), "Dashboard");
+        cardPanel.add(dashBoardPanel, "Dashboard");
         cardPanel.add(new OrdersPanel(), "Orders");
         cardPanel.add(new InventoryPanel(), "Inventory");
         cardPanel.add(new SalesPanel(), "Sales");
@@ -53,6 +59,9 @@ public class HomeFrame extends JFrame {
         searchBar.setOpaque(false);
         searchBar.setMargin(new Insets(0, 10, 0, 0));
         searchBar.setPlaceholder("Search");
+
+        searchBar.addActionListener(e -> searchMeals(searchBar.getText()));
+
 
         JPanel panel1 = new JPanel();
         JPanel panel2 = new JPanel();
@@ -122,34 +131,33 @@ public class HomeFrame extends JFrame {
         panel3.addMouseListener(clickListener);
     }
 
-    public static void main(String[] args) throws SQLException, IOException {
-        new HomeFrame();
+    public void searchMeals(String searchText) {
+        // Convert the search text to lowercase for case-insensitive comparison
+        String searchQuery = "%" + searchText.toLowerCase() + "%";
+
+        // Query to search for meals with names matching the search text
+        String query = "SELECT meal_name FROM Meals WHERE LOWER(meal_name) LIKE ?";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, searchQuery);  // Set the search text in the query
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String mealName = resultSet.getString("meal_name");
+                    // Display or add meal names to a list in the UI
+                    System.out.println("Found meal: " + mealName);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 
-//    public String listMeals() throws SQLException {
-//        String query = "SELECT * FROM Meals";
-//        StringBuilder mealList = new StringBuilder("Meals:\n");
-//        try (Connection connection = DriverManager.getConnection(DB_URL);
-//             Statement statement = connection.createStatement();
-//             ResultSet resultSet = statement.executeQuery(query)) {
-//
-//            while (resultSet.next()) {
-//                mealList.append("ID: ").append(resultSet.getInt("meal_id"))
-//                        .append("\n Meal Name: ").append(resultSet.getString("meal_name"))
-//                        .append("\n Meal Category: ").append(resultSet.getString("meal_category"))
-//                        .append("\n Serving Size: ").append(resultSet.getString("meal_type"))
-//                        .append("\n Meal Type: ").append(resultSet.getString("meal_type"))
-//                        .append("\n Nutritional Value: ").append(resultSet.getString("nutritional_value"))
-//                        .append("\n Spicy: ").append(resultSet.getString("spicy_or_not_spicy"))
-//                        .append("\n Meal Price: ").append(resultSet.getString("meal_price"))
-//                        .append("\n Ingredients: ").append(resultSet.getString("ingredients")).append("\n");
-//
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return mealList.toString();
-//    }
+    public static void main(String[] args) throws SQLException, IOException {
+
+        new HomeFrame();
+    }
 }

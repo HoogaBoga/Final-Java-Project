@@ -3,6 +3,7 @@ package org.example.Buttons;
 import org.example.Frames.AddMealFrame;
 import org.example.Frames.FigmaToCodeApp;
 import org.example.Misc.OvalButton;
+import org.example.Panels.DashBoardPanel;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,10 +16,10 @@ import javax.imageio.ImageIO;
 public class PlusAddButton extends OvalButton implements ActionListener {
 
     private BufferedImage image;
-
-    public PlusAddButton() {
+    public DashBoardPanel panel;
+    public PlusAddButton(DashBoardPanel panel) {
         super(); // Default is oval/circle shape.
-
+        this.panel = panel;
         setBorderThickness(0); // Oval buttons have some border by default.
 
         try {
@@ -39,7 +40,7 @@ public class PlusAddButton extends OvalButton implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        new AddMealFrame();
+        new AddMealFrame(panel);
     }
 }
 
