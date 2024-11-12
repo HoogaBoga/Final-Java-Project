@@ -3,7 +3,7 @@ package org.example.Misc;
 import java.sql.*;
 
 public class CrudInventory {
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:/Users/matty/IdeaProjects/Final-Java-Project/Database.db";
 
     public void addInventory(int quantity, double mealPrice, int mealID) {
         String insertSQL = "INSERT INTO Inventory (quantity, meal_price, meal_id) VALUES (?, ?, ?)";

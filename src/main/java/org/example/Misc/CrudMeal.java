@@ -11,7 +11,7 @@ import java.sql.*;
 
 public class CrudMeal {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:/Users/matty/IdeaProjects/Final-Java-Project/Database.db";
     private DashBoardPanel dashBoardPanel;
 
     public CrudMeal(DashBoardPanel dashBoardPanel) {

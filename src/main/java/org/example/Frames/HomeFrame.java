@@ -15,11 +15,11 @@ import java.sql.*;
 import java.util.Objects;
 
 public class HomeFrame extends JFrame {
-    DashBoardPanel dashBoardPanel = new DashBoardPanel();
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    DashBoardPanel dashBoardPanel;
+    private static final String DB_URL = "jdbc:sqlite:/Users/matty/IdeaProjects/Final-Java-Project/Database.db";
 
 
-    public HomeFrame(DashBoardPanel dashBoardPanel) throws IOException, SQLException {
+    public HomeFrame() throws IOException, SQLException {
         ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(HomeFrame.class.getResource("/Frame 12.png")));
         JLabel greeneryImg = new JLabel();
 
@@ -27,18 +27,19 @@ public class HomeFrame extends JFrame {
 
         CardLayout cardLayout = new CardLayout();
         JPanel cardPanel = new JPanel(cardLayout);
-        PlusAddButton plusAddButton = new PlusAddButton();
+        dashBoardPanel = new DashBoardPanel();
+        PlusAddButton plusAddButton = new PlusAddButton(dashBoardPanel);
         FilterButton filterButton = new FilterButton();
         RefreshButton refreshButton = new RefreshButton();
 
-        refreshButton.addActionListener(e -> dashBoardPanel.refreshMealsDisplay());
+        refreshButton.addActionListener(_ -> dashBoardPanel.refreshMealsDisplay());
 
 
         plusAddButton.setBounds(37, 308, 31, 31);
 
         plusAddButton.setOpaque(false);
 
-        cardPanel.add(new DashBoardPanel(), "Dashboard");
+        cardPanel.add(dashBoardPanel, "Dashboard");
         cardPanel.add(new OrdersPanel(), "Orders");
         cardPanel.add(new InventoryPanel(), "Inventory");
         cardPanel.add(new SalesPanel(), "Sales");
@@ -156,7 +157,7 @@ public class HomeFrame extends JFrame {
 
 
     public static void main(String[] args) throws SQLException, IOException {
-        DashBoardPanel dashBoardPanel = new DashBoardPanel();
-        new HomeFrame(dashBoardPanel);
+
+        new HomeFrame();
     }
 }

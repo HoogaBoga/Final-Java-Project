@@ -9,6 +9,7 @@ import org.example.Misc.CrudMeal;
 import org.example.Panels.DashBoardPanel;
 import org.example.TextFields.RoundedTextField;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -168,12 +169,11 @@ public class AddMealFrame extends JFrame {
                 if (mealID != -1) {
                     // Use the retrieved mealID to add to inventory
                     addInventory.addInventory(quantityInput, mealPriceInput, mealID);
+                    String price = String.valueOf(mealPriceInput);
+                    Image image = ImageIO.read(imageFile);
+                    ImageIcon image2 = new ImageIcon(image);
+                    dashBoardPanel.contentPanel.add(dashBoardPanel.createItemPanel(mealID, mealNameInput, price, image2));
 
-                    SwingUtilities.invokeLater(() -> {
-                        dashBoardPanel.refreshMealsDisplay();
-                        dashBoardPanel.revalidate();
-                        dashBoardPanel.repaint();
-                    });
                 } else {
                     System.out.println("Failed to add meal. Inventory entry was not created.");
                 }

@@ -46,8 +46,8 @@ public class ManagerButton extends JButton implements ActionListener {
                 return;
             }
 
-            DashBoardPanel dashBoardPanel = new DashBoardPanel();
-            new HomeFrame(dashBoardPanel);
+
+            new HomeFrame();
             parentFrame.dispose();
 
         } catch (IOException | SQLException ex) {
