@@ -9,6 +9,7 @@ import org.example.Misc.CrudMeal;
 import org.example.Panels.DashBoardPanel;
 import org.example.TextFields.RoundedTextField;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -16,6 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class AddMealFrame extends JFrame {
+
+    private DashBoardPanel dashBoardPanel = new DashBoardPanel();
 
     private JPanel topPanel = new JPanel();
     private JPanel centerPanel = new JPanel();
@@ -44,11 +47,11 @@ public class AddMealFrame extends JFrame {
     private RoundedTextField priceFoodText = new RoundedTextField();
     private RoundedTextField amountFoodText = new RoundedTextField();
     private RoundedTextField mealIDText = new RoundedTextField();
-    private CrudMeal addMeals = new CrudMeal();
+    private CrudMeal addMeals = new CrudMeal(dashBoardPanel);
     private CrudInventory addInventory = new CrudInventory();
 
     public static final Font INTER_FONT = loadCustomFont();
-    private static DashBoardPanel dashBoardPanel = new DashBoardPanel();
+
 
     public static Font loadCustomFont() {
         try (InputStream is = AddMealFrame.class.getResourceAsStream("/Inter-VariableFont_opsz,wght.ttf")) {
@@ -66,7 +69,7 @@ public class AddMealFrame extends JFrame {
         }
     }
 
-    public AddMealFrame() {
+    public AddMealFrame(DashBoardPanel dashBoardPanel) {
 
         Font inter = loadCustomFont();
         CloseAddButton closeAddButton = new CloseAddButton(this);
@@ -166,6 +169,10 @@ public class AddMealFrame extends JFrame {
                 if (mealID != -1) {
                     // Use the retrieved mealID to add to inventory
                     addInventory.addInventory(quantityInput, mealPriceInput, mealID);
+                    String price = String.valueOf(mealPriceInput);
+                    Image image = ImageIO.read(imageFile);
+                    ImageIcon image2 = new ImageIcon(image);
+                    dashBoardPanel.contentPanel.add(dashBoardPanel.createItemPanel(mealID, mealNameInput, price, image2));
 
                 } else {
                     System.out.println("Failed to add meal. Inventory entry was not created.");
