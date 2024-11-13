@@ -5,26 +5,20 @@ import org.example.Frames.ViewFrame;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-
 
 public class DashBoardPanel extends JScrollPane {
     public static JPanel contentPanel;
-    private static final String DB_URL = "jdbc:sqlite:/Users/matty/IdeaProjects/Final-Java-Project/Database.db";
-    private static Map<Integer, ImageIcon> imageCache;// Cache for images to avoid reloading
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static Map<Integer, ImageIcon> imageCache;
 
     public DashBoardPanel() {
-        contentPanel = new JPanel(new GridLayout(0, 3, 12, 12));
+        contentPanel = new JPanel(new GridLayout(0, 3, 10, 10));
         contentPanel.setBackground(new Color(0xE8E8E8));
         contentPanel.setDoubleBuffered(true);
         this.setViewportView(contentPanel);
@@ -33,11 +27,10 @@ public class DashBoardPanel extends JScrollPane {
         this.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
         imageCache = new HashMap<>();
 
-        // Start background loading
         loadDataInBackground();
     }
 
-    private void loadDataInBackground() {
+    public void loadDataInBackground() {
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
@@ -47,25 +40,28 @@ public class DashBoardPanel extends JScrollPane {
 
             @Override
             protected void done() {
-                // Ensure UI updates happen on the EDT
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Revalidate and repaint the contentPanel to reflect the changes
-                        contentPanel.revalidate();
-                        contentPanel.repaint();
-                    }
+                SwingUtilities.invokeLater(() -> {
+                    // After background task, refresh the UI
+                    contentPanel.revalidate(); // Revalidate layout after loading meals
+                    contentPanel.repaint();
+                    revalidate(); // Revalidate the JScrollPane itself
+                    repaint();    // Repaint the entire pane to ensure it's updated
+                    System.out.println("Dashboard Refreshed");
                 });
             }
         };
-        worker.execute(); // Start the SwingWorker
+        worker.execute();
     }
 
+    public void loadMeals() {
+        // Log the query execution for debugging
+        System.out.println("Executing query to load meals...");
 
-    private void loadMeals() {
+        // Clear all previous meal panels
         contentPanel.removeAll();
-        String query = "SELECT * FROM Meals";
 
+        // Database query to get meals
+        String query = "SELECT * FROM Meals";
         try (Connection connection = DriverManager.getConnection(DB_URL);
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
@@ -76,18 +72,54 @@ public class DashBoardPanel extends JScrollPane {
                 String mealPrice = displayPrice(mealId);
                 byte[] imageBytes = resultSet.getBytes("image");
 
-                ImageIcon mealImage = imageCache.computeIfAbsent(mealId, id -> getImageIcon(imageBytes));
-                contentPanel.add(createItemPanel(mealId, mealName, mealPrice, mealImage));
+                // Only compute the image if it is not cached
+                ImageIcon mealImage = imageCache.containsKey(mealId)
+                        ? imageCache.get(mealId)
+                        : getImageIcon(imageBytes);
+
+                // Cache the image if not already cached
+                if (!imageCache.containsKey(mealId)) {
+                    imageCache.put(mealId, mealImage);
+                }
+
+                System.out.println("Meal ID: " + mealId + ", Name: " + mealName + ", Price: " + mealPrice);
+
+                // Create a new panel for the meal
+                JPanel mealPanel = createItemPanel(mealId, mealName, mealPrice, mealImage);
+                if (mealPanel != null) {
+                    System.out.println("Adding panel for meal: " + mealName);
+                    contentPanel.add(mealPanel);
+                }
             }
 
+            System.out.println("Loaded meals successfully.");
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        // Ensure the content panel is refreshed
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    public void refreshMealsDisplay() {
+        // Debug log to track when the refresh is triggered
+        System.out.println("Refreshing meals display...");
+
+        // Clear the previous panels
+        contentPanel.removeAll();
+
+        // Reload the meals
+        loadMeals();
+
+        // Revalidate and repaint to reflect changes
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
 
     private ImageIcon getImageIcon(byte[] imageBytes) {
-        if (imageBytes == null) return new ImageIcon(); // Default empty icon if no image
+        if (imageBytes == null) return new ImageIcon();
         try {
             BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
             return new ImageIcon(img.getScaledInstance(121, 91, Image.SCALE_SMOOTH));
@@ -123,12 +155,7 @@ public class DashBoardPanel extends JScrollPane {
         viewButton.setForeground(Color.WHITE);
         viewButton.setBounds(10, 161, 130, 15);
 
-        viewButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new ViewFrame(mealID);
-            }
-        });
+        viewButton.addActionListener(e -> new ViewFrame(mealID));
 
         itemPanel.add(viewButton);
 
@@ -148,67 +175,6 @@ public class DashBoardPanel extends JScrollPane {
             e.printStackTrace();
         }
         return "₱0.00";
-    }
-
-    public void refreshMealsDisplay() {
-        // Clear the cache of images to prevent reloading the same image data
-        imageCache.clear();
-        System.out.println("hello");
-        // Clear existing items from the panel before reloading new ones
-        contentPanel.removeAll();
-
-        // Reapply the layout to ensure proper arrangement of components
-        contentPanel.setLayout(new GridLayout(0, 3, 12, 12));
-
-        // Load the data again in the background, ensuring the UI is updated after the task
-//        SwingWorker<Void, Void> worker = new SwingWorker<>() {
-//            @Override
-//            protected Void doInBackground() {
-//                loadMeals(); // Load meals in the background
-//                return null;
-//            }
-//
-//            @Override
-//            protected void done() {
-//
-//                // Ensure UI updates happen on the Event Dispatch Thread (EDT)
-//                SwingUtilities.invokeLater(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        // Revalidate and repaint the contentPanel to reflect the changes
-//                        contentPanel.revalidate();
-//                        contentPanel.repaint();
-//
-//                        // Revalidate and repaint the JScrollPane itself to make sure scroll updates
-//                        DashBoardPanel.this.revalidate();
-//                        DashBoardPanel.this.repaint();
-//                    }
-//                });
-//            }
-//        };
-//
-//        // Start the SwingWorker in the background to refresh the meal data
-//        worker.execute();
-    }
-
-
-    public List<String> getMealNames() {
-        List<String> mealNames = new ArrayList<>();
-        String query = "SELECT meal_name FROM Meals";
-
-        try (Connection connection = DriverManager.getConnection(DB_URL);
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-
-            while (resultSet.next()) {
-                String mealName = resultSet.getString("meal_name");
-                mealNames.add(mealName);  // Add each meal name to the list
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return mealNames;  // Return the list of meal names
     }
 
 }
