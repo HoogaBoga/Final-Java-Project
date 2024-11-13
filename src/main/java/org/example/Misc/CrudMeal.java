@@ -11,7 +11,7 @@ import java.sql.*;
 
 public class CrudMeal {
 
-    private static final String DB_URL = "jdbc:sqlite:/Users/matty/IdeaProjects/Final-Java-Project/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
     private DashBoardPanel dashBoardPanel;
 
     public CrudMeal(DashBoardPanel dashBoardPanel) {
@@ -54,7 +54,8 @@ public class CrudMeal {
                         int mealId = generatedKeys.getInt(1);
                         JOptionPane.showMessageDialog(null, "Meal added successfully! Meal ID: " + mealId, "Success", JOptionPane.INFORMATION_MESSAGE);
                         dashBoardPanel.refreshMealsDisplay();
-                        return mealId;// Return the generated meal_id
+                        dashBoardPanel.loadDataInBackground();
+                        return mealId; // Return the generated meal_id
                     }
                 }
             }
@@ -96,6 +97,8 @@ public class CrudMeal {
             int rowsAffected = preparedStatement.executeUpdate();
             if (rowsAffected > 0) {
                 JOptionPane.showMessageDialog(null, "Meal updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                dashBoardPanel.refreshMealsDisplay();
+                dashBoardPanel.loadDataInBackground();
             } else {
                 JOptionPane.showMessageDialog(null, "No meal found with the provided ID.", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -130,6 +133,8 @@ public class CrudMeal {
                 if (rowsAffected > 0) {
                     System.out.println("Meal with ID " + meal_id + " deleted successfully.");
                     JOptionPane.showMessageDialog(null, "Meal Deleted Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    dashBoardPanel.refreshMealsDisplay();
+                    dashBoardPanel.loadDataInBackground();
                 } else {
                     System.out.println("No meal found with ID " + meal_id);
                     JOptionPane.showMessageDialog(null, "Meal was not Deleted!", "Failed", JOptionPane.ERROR_MESSAGE);
@@ -160,14 +165,19 @@ public class CrudMeal {
                 mealList.append("ID: ").append(resultSet.getInt("meal_id"))
                         .append("\n Meal Name: ").append(resultSet.getString("meal_name"))
                         .append("\n Meal Category: ").append(resultSet.getString("meal_category"))
-                        .append("\n Serving Size: ").append(resultSet.getString("meal_type"))
+                        .append("\n Serving Size: ").append(resultSet.getString("serving_size"))
                         .append("\n Meal Type: ").append(resultSet.getString("meal_type"))
-                        .append("\n Nutritional Value: ").append(resultSet.getString("nutritional_value"))
+                        .append("\n Nutritional Value: ").append(resultSet.getInt("nutritional_value"))
                         .append("\n Spicy: ").append(resultSet.getString("spicy_or_not_spicy"))
                         .append("\n Meal Price: ").append(resultSet.getString("meal_price"))
                         .append("\n Ingredients: ").append(resultSet.getString("ingredients")).append("\n");
-
             }
+
+            // Print the meal list to the console
+            System.out.println(mealList.toString());
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
