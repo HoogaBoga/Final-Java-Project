@@ -13,8 +13,8 @@ import java.sql.*;
 import java.util.Objects;
 
 public class HomeFrame extends JFrame {
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
-    DashBoardPanel dashBoardPanel = new DashBoardPanel();
+    private DashBoardPanel dashBoardPanel;
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/stakezy/Documents/Final-Java-Project/database.db";
 
     public HomeFrame() throws IOException, SQLException {
         ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(HomeFrame.class.getResource("/Frame 12.png")));
@@ -22,26 +22,47 @@ public class HomeFrame extends JFrame {
 
         CardLayout cardLayout = new CardLayout();
         JPanel cardPanel = new JPanel(cardLayout);
-        PlusAddButton plusAddButton = new PlusAddButton();
+
+        // Initialize DashBoardPanel and buttons
+        dashBoardPanel = new DashBoardPanel();
+        PlusAddButton plusAddButton = new PlusAddButton(dashBoardPanel);
         FilterButton filterButton = new FilterButton();
         RefreshButton refreshButton = new RefreshButton();
 
-        refreshButton.addActionListener(e -> dashBoardPanel.refreshMealsDisplay());
+        refreshButton.addActionListener(e -> {
+            // Temporarily switch to another card to clear the dashboard
+            cardLayout.show(cardPanel, "Orders");
+
+            // Clear and reload the dashboard panel data
+            dashBoardPanel.removeAll();  // Remove all components
+            dashBoardPanel.loadDataInBackground();
+            dashBoardPanel.refreshMealsDisplay();// Load data asynchronously
+
+            // Revalidate and repaint the panel after data is loaded
+            dashBoardPanel.revalidate();
+            dashBoardPanel.repaint();
+
+            // Switch back to DashBoardPanel and revalidate/repaint
+            cardLayout.show(cardPanel, "Dashboard");
+            dashBoardPanel.revalidate();
+            dashBoardPanel.repaint();
+        });
 
 
+        // Set button properties
         plusAddButton.setBounds(37, 308, 31, 31);
-
         plusAddButton.setOpaque(false);
 
-        cardPanel.add(new DashBoardPanel(), "Dashboard");
-        cardPanel.add(new OrdersPanel(), "Orders");
+        // Set up card layout and add panels
+        cardPanel.add(dashBoardPanel, "Dashboard");
+        cardPanel.add(new OrdersPanel(dashBoardPanel), "Orders");
         cardPanel.add(new InventoryPanel(), "Inventory");
         cardPanel.add(new SalesPanel(), "Sales");
         cardPanel.add(new PromotionsPanel(), "Promotions");
         cardPanel.add(new SettingsPanel(), "Settings");
         cardPanel.setBounds(25, 40, 484, 318);
 
-        ImageIcon greeneryyImage = new ImageIcon("Resources/Vector.png");
+        // Image and layout setup
         greeneryImg.setBounds(11, 15, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());
         greeneryImg.setIcon(greeneryImage);
 
@@ -54,6 +75,9 @@ public class HomeFrame extends JFrame {
         searchBar.setMargin(new Insets(0, 10, 0, 0));
         searchBar.setPlaceholder("Search");
 
+        searchBar.addActionListener(e -> searchMeals(searchBar.getText()));
+
+        // Panel setup
         JPanel panel1 = new JPanel();
         JPanel panel2 = new JPanel();
         JPanel panel3 = new JPanel();
@@ -78,6 +102,7 @@ public class HomeFrame extends JFrame {
         panel3.add(refreshButton);
         panel1.add(cardPanel);
 
+        // Buttons for navigation
         DashBoardButton dashBoardButton = new DashBoardButton(cardLayout, cardPanel, "Dashboard");
         panel2.add(dashBoardButton);
 
@@ -96,8 +121,9 @@ public class HomeFrame extends JFrame {
         SettingsButton settingsButton = new SettingsButton(cardLayout, cardPanel, "Settings");
         panel2.add(settingsButton);
 
+        // Frame settings
         this.setTitle("Restaurant Management System");
-        this.setIconImage(greeneryyImage.getImage());
+        this.setIconImage(greeneryImage.getImage());
         this.add(panel1, BorderLayout.EAST);
         this.add(panel2, BorderLayout.WEST);
         this.setVisible(true);
@@ -122,34 +148,47 @@ public class HomeFrame extends JFrame {
         panel3.addMouseListener(clickListener);
     }
 
+    // Method to refresh the DashBoardPanel
+    public void refreshDashboardPanel(CardLayout cardLayout, JPanel cardPanel) {
+        // Temporarily switch to another card, then switch back
+        cardLayout.show(cardPanel, "Orders");  // Switch to a different panel temporarily
+
+        // Clear and reload dashBoardPanel data
+        dashBoardPanel.removeAll(); // Removes all components
+        dashBoardPanel.loadMeals();  // Ensure this method properly reloads meals from the database
+
+        // After reloading meals, ensure the new components are added back to the panel
+        dashBoardPanel.revalidate();  // Revalidate the layout to reflect changes
+        dashBoardPanel.repaint();     // Repaint the panel to refresh the view
+
+        // Switch back to DashBoardPanel and revalidate/repaint
+        cardLayout.show(cardPanel, "Dashboard");
+        dashBoardPanel.revalidate();  // Make sure the panel layout is refreshed
+        dashBoardPanel.repaint();     // Repaint the panel
+    }
+
+    public void searchMeals(String searchText) {
+        String searchQuery = "%" + searchText.toLowerCase() + "%";
+
+        String query = "SELECT meal_name FROM Meals WHERE LOWER(meal_name) LIKE ?";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, searchQuery);  // Set the search text in the query
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String mealName = resultSet.getString("meal_name");
+                    System.out.println("Found meal: " + mealName);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) throws SQLException, IOException {
         new HomeFrame();
     }
-
-
-//    public String listMeals() throws SQLException {
-//        String query = "SELECT * FROM Meals";
-//        StringBuilder mealList = new StringBuilder("Meals:\n");
-//        try (Connection connection = DriverManager.getConnection(DB_URL);
-//             Statement statement = connection.createStatement();
-//             ResultSet resultSet = statement.executeQuery(query)) {
-//
-//            while (resultSet.next()) {
-//                mealList.append("ID: ").append(resultSet.getInt("meal_id"))
-//                        .append("\n Meal Name: ").append(resultSet.getString("meal_name"))
-//                        .append("\n Meal Category: ").append(resultSet.getString("meal_category"))
-//                        .append("\n Serving Size: ").append(resultSet.getString("meal_type"))
-//                        .append("\n Meal Type: ").append(resultSet.getString("meal_type"))
-//                        .append("\n Nutritional Value: ").append(resultSet.getString("nutritional_value"))
-//                        .append("\n Spicy: ").append(resultSet.getString("spicy_or_not_spicy"))
-//                        .append("\n Meal Price: ").append(resultSet.getString("meal_price"))
-//                        .append("\n Ingredients: ").append(resultSet.getString("ingredients")).append("\n");
-//
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return mealList.toString();
-//    }
 }

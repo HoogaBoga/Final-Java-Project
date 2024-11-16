@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import java.util.Objects;
 
 public class EmployeeFrame extends JFrame {
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/stakezy/Documents/Final-Java-Project/database.db";
 
     public EmployeeFrame() throws IOException, SQLException {
         ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(EmployeeFrame.class.getResource("/Frame 12.png")));
@@ -21,7 +21,9 @@ public class EmployeeFrame extends JFrame {
 
         CardLayout cardLayout = new CardLayout();
         JPanel cardPanel = new JPanel(cardLayout);
-        PlusAddButton plusAddButton = new PlusAddButton();
+        //temporary to remove
+        DashBoardPanel panel = new DashBoardPanel();
+        PlusAddButton plusAddButton = new PlusAddButton(panel);
 
 
         plusAddButton.setBounds(37, 308, 31, 31);
@@ -29,7 +31,7 @@ public class EmployeeFrame extends JFrame {
         plusAddButton.setOpaque(false);
 
         cardPanel.add(new DashBoardPanel(), "Dashboard");
-        cardPanel.add(new OrdersPanel(), "Orders");
+        cardPanel.add(new OrdersPanel(panel), "Orders");
         cardPanel.add(new InventoryPanel(), "Inventory");
         cardPanel.add(new SettingsPanel(), "Settings");
         cardPanel.setBounds(25, 40, 484, 318);
