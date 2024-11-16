@@ -155,7 +155,7 @@ public class HomeFrame extends JFrame {
 
         // Clear and reload dashBoardPanel data
         dashBoardPanel.removeAll(); // Removes all components
-        dashBoardPanel.loadMeals();  // Ensure this method properly reloads meals from the database
+        dashBoardPanel.loadDataInBackground();  // Ensure this method properly reloads meals from the database
 
         // After reloading meals, ensure the new components are added back to the panel
         dashBoardPanel.revalidate();  // Revalidate the layout to reflect changes
