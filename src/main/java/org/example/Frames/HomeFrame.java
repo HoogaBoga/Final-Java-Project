@@ -14,7 +14,7 @@ import java.util.Objects;
 
 public class HomeFrame extends JFrame {
     private DashBoardPanel dashBoardPanel;
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/stakezy/Documents/Final-Java-Project/database.db";
 
     public HomeFrame() throws IOException, SQLException {
         ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(HomeFrame.class.getResource("/Frame 12.png")));
@@ -55,7 +55,7 @@ public class HomeFrame extends JFrame {
 
         // Set up card layout and add panels
         cardPanel.add(dashBoardPanel, "Dashboard");
-        cardPanel.add(new OrdersPanel(), "Orders");
+        cardPanel.add(new OrdersPanel(dashBoardPanel), "Orders");
         cardPanel.add(new InventoryPanel(), "Inventory");
         cardPanel.add(new SalesPanel(), "Sales");
         cardPanel.add(new PromotionsPanel(), "Promotions");
