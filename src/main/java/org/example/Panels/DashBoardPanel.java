@@ -5,89 +5,83 @@ import org.example.Frames.ViewFrame;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-
-
 public class DashBoardPanel extends JScrollPane {
-    public static JPanel contentPanel;
-    private static final String DB_URL = "jdbc:sqlite:/Users/matty/IdeaProjects/Final-Java-Project/Database.db";
-    private static Map<Integer, ImageIcon> imageCache;// Cache for images to avoid reloading
+    public final JPanel contentPanel;
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final Map<Integer, ImageIcon> imageCache = new HashMap<>();
 
     public DashBoardPanel() {
-        contentPanel = new JPanel(new GridLayout(0, 3, 12, 12));
+        contentPanel = new JPanel(new GridLayout(0, 3, 10, 10));
         contentPanel.setBackground(new Color(0xE8E8E8));
         contentPanel.setDoubleBuffered(true);
+
         this.setViewportView(contentPanel);
         this.setBorder(BorderFactory.createEmptyBorder());
         this.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
-        this.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
-        imageCache = new HashMap<>();
+        this.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED);
 
-        // Start background loading
         loadDataInBackground();
     }
 
-    private void loadDataInBackground() {
-        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+    /**
+     * Loads meal data asynchronously using SwingWorker.
+     */
+    public void loadDataInBackground() {
+        SwingWorker<Void, JPanel> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
-                loadMeals(); // Load meals in the background
+                String query = "SELECT * FROM Meals";
+                try (Connection connection = DriverManager.getConnection(DB_URL);
+                     Statement statement = connection.createStatement();
+                     ResultSet resultSet = statement.executeQuery(query)) {
+
+                    while (resultSet.next()) {
+                        int mealId = resultSet.getInt("meal_id");
+                        String mealName = resultSet.getString("meal_name");
+                        String mealPrice = displayPrice(mealId);
+                        byte[] imageBytes = resultSet.getBytes("image");
+
+                        ImageIcon mealImage = imageCache.getOrDefault(mealId, getImageIcon(imageBytes));
+                        imageCache.put(mealId, mealImage);
+
+                        JPanel mealPanel = createItemPanel(mealId, mealName, mealPrice, mealImage);
+                        publish(mealPanel); // Send panel to the UI thread
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
                 return null;
             }
 
             @Override
+            protected void process(java.util.List<JPanel> panels) {
+                for (JPanel panel : panels) {
+                    contentPanel.add(panel);
+                }
+            }
+
+            @Override
             protected void done() {
-                // Ensure UI updates happen on the EDT
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Revalidate and repaint the contentPanel to reflect the changes
-                        contentPanel.revalidate();
-                        contentPanel.repaint();
-                    }
-                });
+                contentPanel.revalidate();
+                contentPanel.repaint();
+                System.out.println("Dashboard Refreshed");
             }
         };
-        worker.execute(); // Start the SwingWorker
+        worker.execute();
     }
 
-
-    private void loadMeals() {
-        contentPanel.removeAll();
-        String query = "SELECT * FROM Meals";
-
-        try (Connection connection = DriverManager.getConnection(DB_URL);
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-
-            while (resultSet.next()) {
-                int mealId = resultSet.getInt("meal_id");
-                String mealName = resultSet.getString("meal_name");
-                String mealPrice = displayPrice(mealId);
-                byte[] imageBytes = resultSet.getBytes("image");
-
-                ImageIcon mealImage = imageCache.computeIfAbsent(mealId, id -> getImageIcon(imageBytes));
-                contentPanel.add(createItemPanel(mealId, mealName, mealPrice, mealImage));
-            }
-
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
+    /**
+     * Converts byte array to ImageIcon with scaling.
+     */
     private ImageIcon getImageIcon(byte[] imageBytes) {
-        if (imageBytes == null) return new ImageIcon(); // Default empty icon if no image
+        if (imageBytes == null) return new ImageIcon();
         try {
             BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
             return new ImageIcon(img.getScaledInstance(121, 91, Image.SCALE_SMOOTH));
@@ -97,6 +91,27 @@ public class DashBoardPanel extends JScrollPane {
         }
     }
 
+    public Map<Integer, String> getMealData() {
+        Map<Integer, String> meals = new HashMap<>();
+        String query = "SELECT meal_id, meal_name FROM Meals";
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                int mealId = resultSet.getInt("meal_id");
+                String mealName = resultSet.getString("meal_name");
+                meals.put(mealId, mealName);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return meals;
+    }
+
+    /**
+     * Creates a panel for a single meal item.
+     */
     public JPanel createItemPanel(int mealID, String itemName, String itemPrice, ImageIcon imageIcon) {
         JPanel itemPanel = new JPanel(null);
         itemPanel.setBackground(Color.WHITE);
@@ -108,33 +123,31 @@ public class DashBoardPanel extends JScrollPane {
         itemPanel.add(imageLabel);
 
         JLabel nameLabel = new JLabel(itemName);
-        nameLabel.setFont(new Font("Inter", Font.PLAIN, 14));
+        nameLabel.setFont(new Font("Actor", Font.PLAIN, 14));
         nameLabel.setBounds(10, 111, 100, 18);
         itemPanel.add(nameLabel);
 
         JLabel priceLabel = new JLabel(itemPrice);
-        priceLabel.setFont(new Font("Inter", Font.PLAIN, 12));
+        priceLabel.setFont(new Font("Actor", Font.PLAIN, 12));
         priceLabel.setForeground(new Color(0x4CAF50));
         priceLabel.setBounds(10, 136, 70, 15);
         itemPanel.add(priceLabel);
 
         JButton viewButton = new JButton("View");
+        viewButton.setFont(new Font("Actor", Font.PLAIN, 10));
         viewButton.setBackground(new Color(0x4CAF50));
         viewButton.setForeground(Color.WHITE);
         viewButton.setBounds(10, 161, 130, 15);
 
-        viewButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new ViewFrame(mealID);
-            }
-        });
-
+        viewButton.addActionListener(e -> new ViewFrame(mealID));
         itemPanel.add(viewButton);
 
         return itemPanel;
     }
 
+    /**
+     * Retrieves the price for a meal from the Inventory table.
+     */
     public String displayPrice(int meal_id) {
         String query = "SELECT meal_price FROM Inventory WHERE meal_id = ?";
         try (Connection connection = DriverManager.getConnection(DB_URL);
@@ -150,65 +163,13 @@ public class DashBoardPanel extends JScrollPane {
         return "₱0.00";
     }
 
+    /**
+     * Refreshes the displayed meals by clearing and reloading the data.
+     */
     public void refreshMealsDisplay() {
-        // Clear the cache of images to prevent reloading the same image data
-        imageCache.clear();
-        System.out.println("hello");
-        // Clear existing items from the panel before reloading new ones
+        System.out.println("Refreshing meals display...");
+        imageCache.clear(); // Clear image cache to ensure updated images
         contentPanel.removeAll();
-
-        // Reapply the layout to ensure proper arrangement of components
-        contentPanel.setLayout(new GridLayout(0, 3, 12, 12));
-
-        // Load the data again in the background, ensuring the UI is updated after the task
-//        SwingWorker<Void, Void> worker = new SwingWorker<>() {
-//            @Override
-//            protected Void doInBackground() {
-//                loadMeals(); // Load meals in the background
-//                return null;
-//            }
-//
-//            @Override
-//            protected void done() {
-//
-//                // Ensure UI updates happen on the Event Dispatch Thread (EDT)
-//                SwingUtilities.invokeLater(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        // Revalidate and repaint the contentPanel to reflect the changes
-//                        contentPanel.revalidate();
-//                        contentPanel.repaint();
-//
-//                        // Revalidate and repaint the JScrollPane itself to make sure scroll updates
-//                        DashBoardPanel.this.revalidate();
-//                        DashBoardPanel.this.repaint();
-//                    }
-//                });
-//            }
-//        };
-//
-//        // Start the SwingWorker in the background to refresh the meal data
-//        worker.execute();
+        loadDataInBackground();
     }
-
-
-    public List<String> getMealNames() {
-        List<String> mealNames = new ArrayList<>();
-        String query = "SELECT meal_name FROM Meals";
-
-        try (Connection connection = DriverManager.getConnection(DB_URL);
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-
-            while (resultSet.next()) {
-                String mealName = resultSet.getString("meal_name");
-                mealNames.add(mealName);  // Add each meal name to the list
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return mealNames;  // Return the list of meal names
-    }
-
 }

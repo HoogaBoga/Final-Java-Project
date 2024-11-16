@@ -15,12 +15,11 @@
 
     public class Main {
 
-        private static final String DB_URL = "jdbc:sqlite:/Users/matty/IdeaProjects/Final-Java-Project/Database.db";
+        private static final String DB_URL = "jdbc:sqlite:C:/Users/stakezy/Documents/Final-Java-Project/database.db";
 
         public static void main(String[] args) throws IOException, FontFormatException {
 
             new FigmaToCodeApp();
-
 
 
         }
@@ -45,8 +44,8 @@
 
         private static void createOrdersTable() {
             String createTableSQL = "CREATE TABLE IF NOT EXISTS Orders ("
-                    + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    + "user_id INTEGER NOT NULL,"
+                    + "id INTEGER PRIMARY KEY, "
+                    + "user_id INTEGER NOT NULL, "
                     + "meal_id INTEGER NOT NULL, "
                     + "order_quantity INTEGER NOT NULL, "
                     + "order_date TEXT NOT NULL, "
@@ -62,7 +61,6 @@
                 e.printStackTrace();
             }
         }
-
         private static void createPromotionsTable() {
             String createTableSQL = "CREATE TABLE IF NOT EXISTS Promotions ("
                     + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
