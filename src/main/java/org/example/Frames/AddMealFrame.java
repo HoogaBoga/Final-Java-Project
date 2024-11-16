@@ -175,7 +175,6 @@ public class AddMealFrame extends JFrame {
                     dashBoardPanel.contentPanel.add(dashBoardPanel.createItemPanel(mealID, mealNameInput, price, image2));
 
                     dashBoardPanel.refreshMealsDisplay();
-                    dashBoardPanel.loadDataInBackground();
 
                 } else {
                     System.out.println("Failed to add meal. Inventory entry was not created.");
