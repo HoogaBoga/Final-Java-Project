@@ -1,5 +1,6 @@
 package org.example.Panels;
 
+import org.example.Frames.AddMealFrame;
 import org.example.Frames.ViewFrame;
 
 import javax.imageio.ImageIO;
@@ -7,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.HashMap;
@@ -37,6 +39,7 @@ public class DashBoardPanel extends JScrollPane {
         SwingWorker<Void, JPanel> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
+                contentPanel.removeAll();
                 String query = "SELECT * FROM Meals";
                 try (Connection connection = DriverManager.getConnection(DB_URL);
                      Statement statement = connection.createStatement();
@@ -108,7 +111,6 @@ public class DashBoardPanel extends JScrollPane {
         }
         return meals;
     }
-
     /**
      * Creates a panel for a single meal item.
      */
@@ -123,18 +125,18 @@ public class DashBoardPanel extends JScrollPane {
         itemPanel.add(imageLabel);
 
         JLabel nameLabel = new JLabel(itemName);
-        nameLabel.setFont(new Font("Actor", Font.PLAIN, 14));
+        nameLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.PLAIN, 14f));
         nameLabel.setBounds(10, 111, 100, 18);
         itemPanel.add(nameLabel);
 
         JLabel priceLabel = new JLabel(itemPrice);
-        priceLabel.setFont(new Font("Actor", Font.PLAIN, 12));
+        priceLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.PLAIN, 12f));
         priceLabel.setForeground(new Color(0x4CAF50));
-        priceLabel.setBounds(10, 136, 70, 15);
+        priceLabel.setBounds(10, 136, 100, 20);
         itemPanel.add(priceLabel);
 
         JButton viewButton = new JButton("View");
-        viewButton.setFont(new Font("Actor", Font.PLAIN, 10));
+        viewButton.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.PLAIN, 10f));
         viewButton.setBackground(new Color(0x4CAF50));
         viewButton.setForeground(Color.WHITE);
         viewButton.setBounds(10, 161, 130, 15);

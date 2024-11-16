@@ -15,7 +15,7 @@
 
     public class Main {
 
-        private static final String DB_URL = "jdbc:sqlite:C:/Users/stakezy/Documents/Final-Java-Project/database.db";
+        private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
         public static void main(String[] args) throws IOException, FontFormatException {
 
