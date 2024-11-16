@@ -2,6 +2,7 @@ package org.example.Buttons;
 
 import org.example.Frames.FigmaToCodeApp;
 import org.example.Frames.HomeFrame;
+import org.example.Panels.DashBoardPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -44,6 +45,7 @@ public class ManagerButton extends JButton implements ActionListener {
                 JOptionPane.showMessageDialog(parentFrame, "Incorrect Manager Code. Registration failed.", "Authorization Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+
 
             new HomeFrame();
             parentFrame.dispose();

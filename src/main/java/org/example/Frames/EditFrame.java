@@ -1,28 +1,22 @@
 package org.example.Frames;
 
-import org.example.Buttons.AddImageLabel;
-import org.example.Buttons.CloseAddButton;
-import org.example.Buttons.DashBoardButton;
-import org.example.Buttons.FinalAddButton;
+import org.example.Buttons.*;
 import org.example.Misc.CrudInventory;
 import org.example.Misc.CrudMeal;
 import org.example.Panels.DashBoardPanel;
 import org.example.TextFields.RoundedTextField;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class AddMealFrame extends JFrame {
-
+public class EditFrame extends JFrame {
     private DashBoardPanel dashBoardPanel = new DashBoardPanel();
-
     private JPanel topPanel = new JPanel();
     private JPanel centerPanel = new JPanel();
-    private JLabel addMeal = new JLabel("Add Meal");
+    private JLabel addMeal = new JLabel("Edit Meal");
     private JLabel dishName = new JLabel("Dish Name");
     private JLabel mealCategory = new JLabel("Category");
     private JLabel mealType = new JLabel("Meal Type");
@@ -37,6 +31,7 @@ public class AddMealFrame extends JFrame {
     private JLabel spacer = new JLabel();
     private JLabel spacer2 = new JLabel();
     private FinalAddButton finalAddButton = new FinalAddButton();
+    private DeleteButton deleteButton = new DeleteButton();
     private RoundedTextField mealName = new RoundedTextField();
     private RoundedTextField mealCategories = new RoundedTextField();
     private RoundedTextField serveSizeText = new RoundedTextField();
@@ -46,11 +41,9 @@ public class AddMealFrame extends JFrame {
     private RoundedTextField ingredientsNeedText = new RoundedTextField();
     private RoundedTextField priceFoodText = new RoundedTextField();
     private RoundedTextField amountFoodText = new RoundedTextField();
-    private RoundedTextField mealIDText = new RoundedTextField();
-    private CrudMeal addMeals = new CrudMeal(dashBoardPanel);
-    private CrudInventory addInventory = new CrudInventory();
+    private CrudMeal editMeals = new CrudMeal(dashBoardPanel);
+    private CrudInventory editInventory = new CrudInventory();
 
-    public static final Font INTER_FONT = loadCustomFont();
 
 
     public static Font loadCustomFont() {
@@ -69,10 +62,10 @@ public class AddMealFrame extends JFrame {
         }
     }
 
-    public AddMealFrame(DashBoardPanel dashBoardPanel) {
+    public EditFrame(int mealID, DashBoardPanel dashBoardPanel) {
 
         Font inter = loadCustomFont();
-        CloseAddButton closeAddButton = new CloseAddButton(this);
+        CloseAddButton2 closeAddButton = new CloseAddButton2(this);
 
         mealName.setPreferredSize(new Dimension(147, 20)); // Set preferred size for visibility
         mealName.setBackground(new Color(251, 250, 242));
@@ -145,8 +138,10 @@ public class AddMealFrame extends JFrame {
         amountFoodText.setOpaque(false);
         amountFoodText.setMargin(new Insets(0, 10, 0, 0));
         amountFoodText.setPlaceholder("Enter amount");
-        
+
         this.setLayout(new BorderLayout());
+
+        finalAddButton.setPreferredSize(new Dimension(91, 25));
 
         finalAddButton.addActionListener(e -> {
             try {
@@ -162,24 +157,11 @@ public class AddMealFrame extends JFrame {
                 double mealPriceInput = Double.parseDouble(priceFoodText.getText());
                 int quantityInput = Integer.parseInt(amountFoodText.getText());
 
-                // Add meal and retrieve generated mealID
-                int mealID = addMeals.addMeal(mealNameInput, mealCategoryInput, servingSizeInput, mealTypeInput,
-                        mealNutritionalInput, spiceLevelInput, ingredientsInput, imageFile);
+                editMeals.editMeal(mealID, mealNameInput, mealCategoryInput, servingSizeInput,
+                        mealTypeInput, mealNutritionalInput, spiceLevelInput, ingredientsInput, imageFile);
 
-                if (mealID != -1) {
-                    // Use the retrieved mealID to add to inventory
-                    addInventory.addInventory(quantityInput, mealPriceInput, mealID);
-                    String price = String.valueOf(mealPriceInput);
-                    Image image = ImageIO.read(imageFile);
-                    ImageIcon image2 = new ImageIcon(image);
-                    dashBoardPanel.contentPanel.add(dashBoardPanel.createItemPanel(mealID, mealNameInput, price, image2));
+                editInventory.editInventory(quantityInput, mealPriceInput, mealID);
 
-                    dashBoardPanel.refreshMealsDisplay();
-                    dashBoardPanel.loadDataInBackground();
-
-                } else {
-                    System.out.println("Failed to add meal. Inventory entry was not created.");
-                }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(null, "Please enter valid numeric values for serving size, nutritional value, price, and quantity.", "Input Error", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
@@ -188,7 +170,16 @@ public class AddMealFrame extends JFrame {
             }
         });
 
+        deleteButton.addActionListener(e -> {
+            try {
+                editMeals.deleteMeal(mealID);
 
+                editInventory.deleteInventory(mealID);
+
+        } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         addMeal.setFont(inter.deriveFont(Font.BOLD,12f));
         addMeal.setForeground(Color.WHITE);
@@ -199,7 +190,7 @@ public class AddMealFrame extends JFrame {
 
         dishName.setFont(inter.deriveFont(12f));
         dishName.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
-        
+
         mealCategory.setFont(inter.deriveFont(12f));
         mealCategory.setBorder(BorderFactory.createEmptyBorder(0,0,0,20));
 
@@ -266,6 +257,7 @@ public class AddMealFrame extends JFrame {
         centerPanel.add(addImageLabel);
         centerPanel.add(spacer2);
         centerPanel.add(finalAddButton);
+        centerPanel.add(deleteButton);
 
         this.add(topPanel, BorderLayout.NORTH);
         this.add(centerPanel, BorderLayout.CENTER);
@@ -277,5 +269,7 @@ public class AddMealFrame extends JFrame {
         this.setVisible(true);
     }
 
+    public void editMeals(int mealID){
 
+    }
 }

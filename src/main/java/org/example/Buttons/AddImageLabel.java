@@ -64,4 +64,6 @@ public class AddImageLabel extends JLabel {
     }
 
 
+    public void setImage(File file) {
+    }
 }
