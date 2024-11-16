@@ -14,19 +14,20 @@ import java.util.Map;
 
 public class DashBoardPanel extends JScrollPane {
     public static JPanel contentPanel;
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/stakezy/Documents/Final-Java-Project/database.db";
     private static Map<Integer, ImageIcon> imageCache;
 
     public DashBoardPanel() {
         contentPanel = new JPanel(new GridLayout(0, 3, 10, 10));
         contentPanel.setBackground(new Color(0xE8E8E8));
         contentPanel.setDoubleBuffered(true);
+
         this.setViewportView(contentPanel);
         this.setBorder(BorderFactory.createEmptyBorder());
         this.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
-        this.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
-        imageCache = new HashMap<>();
+        this.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED);
 
+        imageCache = new HashMap<>();
         loadDataInBackground();
     }
 
@@ -34,18 +35,17 @@ public class DashBoardPanel extends JScrollPane {
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
-                loadMeals(); // Load meals in the background
+                loadMeals();
                 return null;
             }
 
             @Override
             protected void done() {
                 SwingUtilities.invokeLater(() -> {
-                    // After background task, refresh the UI
-                    contentPanel.revalidate(); // Revalidate layout after loading meals
+                    contentPanel.revalidate();
                     contentPanel.repaint();
-                    revalidate(); // Revalidate the JScrollPane itself
-                    repaint();    // Repaint the entire pane to ensure it's updated
+                    revalidate();
+                    repaint();
                     System.out.println("Dashboard Refreshed");
                 });
             }
@@ -54,13 +54,10 @@ public class DashBoardPanel extends JScrollPane {
     }
 
     public void loadMeals() {
-        // Log the query execution for debugging
         System.out.println("Executing query to load meals...");
 
-        // Clear all previous meal panels
         contentPanel.removeAll();
 
-        // Database query to get meals
         String query = "SELECT * FROM Meals";
         try (Connection connection = DriverManager.getConnection(DB_URL);
              Statement statement = connection.createStatement();
@@ -72,19 +69,16 @@ public class DashBoardPanel extends JScrollPane {
                 String mealPrice = displayPrice(mealId);
                 byte[] imageBytes = resultSet.getBytes("image");
 
-                // Only compute the image if it is not cached
                 ImageIcon mealImage = imageCache.containsKey(mealId)
                         ? imageCache.get(mealId)
                         : getImageIcon(imageBytes);
 
-                // Cache the image if not already cached
                 if (!imageCache.containsKey(mealId)) {
                     imageCache.put(mealId, mealImage);
                 }
 
                 System.out.println("Meal ID: " + mealId + ", Name: " + mealName + ", Price: " + mealPrice);
 
-                // Create a new panel for the meal
                 JPanel mealPanel = createItemPanel(mealId, mealName, mealPrice, mealImage);
                 if (mealPanel != null) {
                     System.out.println("Adding panel for meal: " + mealName);
@@ -98,22 +92,15 @@ public class DashBoardPanel extends JScrollPane {
             e.printStackTrace();
         }
 
-        // Ensure the content panel is refreshed
         contentPanel.revalidate();
         contentPanel.repaint();
     }
 
     public void refreshMealsDisplay() {
-        // Debug log to track when the refresh is triggered
         System.out.println("Refreshing meals display...");
 
-        // Clear the previous panels
         contentPanel.removeAll();
-
-        // Reload the meals
         loadMeals();
-
-        // Revalidate and repaint to reflect changes
         contentPanel.revalidate();
         contentPanel.repaint();
     }
@@ -140,23 +127,23 @@ public class DashBoardPanel extends JScrollPane {
         itemPanel.add(imageLabel);
 
         JLabel nameLabel = new JLabel(itemName);
-        nameLabel.setFont(new Font("Inter", Font.PLAIN, 14));
+        nameLabel.setFont(new Font("Actor", Font.PLAIN, 14));
         nameLabel.setBounds(10, 111, 100, 18);
         itemPanel.add(nameLabel);
 
         JLabel priceLabel = new JLabel(itemPrice);
-        priceLabel.setFont(new Font("Inter", Font.PLAIN, 12));
+        priceLabel.setFont(new Font("Actor", Font.PLAIN, 12));
         priceLabel.setForeground(new Color(0x4CAF50));
         priceLabel.setBounds(10, 136, 70, 15);
         itemPanel.add(priceLabel);
 
         JButton viewButton = new JButton("View");
+        viewButton.setFont(new Font("Actor", Font.PLAIN, 10));
         viewButton.setBackground(new Color(0x4CAF50));
         viewButton.setForeground(Color.WHITE);
         viewButton.setBounds(10, 161, 130, 15);
 
         viewButton.addActionListener(e -> new ViewFrame(mealID));
-
         itemPanel.add(viewButton);
 
         return itemPanel;
@@ -177,4 +164,36 @@ public class DashBoardPanel extends JScrollPane {
         return "₱0.00";
     }
 
+    public Map<Integer, String> getMealData() {
+        Map<Integer, String> meals = new HashMap<>();
+        String query = "SELECT meal_id, meal_name FROM Meals";
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                int mealId = resultSet.getInt("meal_id");
+                String mealName = resultSet.getString("meal_name");
+                meals.put(mealId, mealName);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return meals;
+    }
+
+    public double getMealPrice(int mealId) {
+        String query = "SELECT meal_price FROM Inventory WHERE meal_id = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, mealId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getDouble("meal_price");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
 }
