@@ -20,7 +20,7 @@ public class OrdersPanel extends JPanel {
     private JLabel noActivityLabel;
     private Queue<JPanel> activityQueue;
     private Set<String> generatedOrderIDs;
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/stakezy/Documents/Final-Java-Project/database.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
     public OrdersPanel(DashBoardPanel dashBoardPanel) {
         this.dashBoardPanel = dashBoardPanel;
@@ -134,6 +134,31 @@ public class OrdersPanel extends JPanel {
 
         add(headerPanel, BorderLayout.NORTH);
         add(contentPanel, BorderLayout.CENTER);
+
+        // Load existing orders from the database
+        loadOrders();
+    }
+
+    private void loadOrders() {
+        String query = "SELECT * FROM Orders";
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                int orderID = resultSet.getInt("id");
+                int userID = resultSet.getInt("user_id");
+                int mealID = resultSet.getInt("meal_id");
+                int quantity = resultSet.getInt("order_quantity");
+                String orderDate = resultSet.getString("order_date");
+                String status = resultSet.getString("status");
+
+                model.addRow(new Object[]{orderID, userID, mealID, quantity, orderDate, status});
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void makeOrder() {
