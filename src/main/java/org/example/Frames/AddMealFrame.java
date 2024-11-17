@@ -145,7 +145,7 @@ public class AddMealFrame extends JFrame {
         amountFoodText.setOpaque(false);
         amountFoodText.setMargin(new Insets(0, 10, 0, 0));
         amountFoodText.setPlaceholder("Enter amount");
-        
+
         this.setLayout(new BorderLayout());
 
         finalAddButton.addActionListener(e -> {
@@ -200,7 +200,7 @@ public class AddMealFrame extends JFrame {
 
         dishName.setFont(inter.deriveFont(12f));
         dishName.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
-        
+
         mealCategory.setFont(inter.deriveFont(12f));
         mealCategory.setBorder(BorderFactory.createEmptyBorder(0,0,0,20));
 
