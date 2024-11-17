@@ -3,12 +3,10 @@ package org.example.Panels;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.sql.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class InventoryPanel extends JPanel {
-
     private JTable inventoryTable; // Declare the variables here
     private JTable orderHistoryTable;
     private JTable supplierListTable;
@@ -53,11 +51,10 @@ public class InventoryPanel extends JPanel {
         JFrame frame = new JFrame("Greenery Restaurant Inventory");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
-
         InventoryPanel panel = new InventoryPanel();
         frame.add(panel);
-
         frame.setVisible(true);
     }
 }
+
 
