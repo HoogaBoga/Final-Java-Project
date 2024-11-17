@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class EditFrame extends JFrame {
-    private DashBoardPanel dashBoardPanel = new DashBoardPanel();
+    private DashBoardPanel dashBoardPanel;
     private JPanel topPanel = new JPanel();
     private JPanel centerPanel = new JPanel();
     private JLabel addMeal = new JLabel("Edit Meal");
@@ -41,10 +41,9 @@ public class EditFrame extends JFrame {
     private RoundedTextField ingredientsNeedText = new RoundedTextField();
     private RoundedTextField priceFoodText = new RoundedTextField();
     private RoundedTextField amountFoodText = new RoundedTextField();
-    private CrudMeal editMeals = new CrudMeal(dashBoardPanel);
+    private CrudMeal editMeals;
     private CrudInventory editInventory = new CrudInventory();
-
-
+    private ViewFrame parentViewFrame;
 
     public static Font loadCustomFont() {
         try (InputStream is = AddMealFrame.class.getResourceAsStream("/Inter-VariableFont_opsz,wght.ttf")) {
@@ -62,7 +61,10 @@ public class EditFrame extends JFrame {
         }
     }
 
-    public EditFrame(int mealID, DashBoardPanel dashBoardPanel) {
+    public EditFrame(int mealID, DashBoardPanel dashBoardPanel, ViewFrame viewFrame) {
+        this.dashBoardPanel = dashBoardPanel;
+        this.parentViewFrame = viewFrame;
+        this.editMeals = new CrudMeal(dashBoardPanel);
 
         Font inter = loadCustomFont();
         CloseAddButton2 closeAddButton = new CloseAddButton2(this);
@@ -143,45 +145,77 @@ public class EditFrame extends JFrame {
 
         finalAddButton.setPreferredSize(new Dimension(91, 25));
 
+        deleteButton.addActionListener(e -> {
+            try {
+                // Delete the meal from the database
+                editMeals.deleteMeal(mealID);
+                editInventory.deleteInventory(mealID);
+
+                // Refresh the dashboard panel
+                dashBoardPanel.refreshMealsDisplay();
+
+                // Close the view frame if it exists
+                if (parentViewFrame != null) {
+                    parentViewFrame.dispose(); // Close the ViewFrame
+                }
+
+                // Close this edit frame
+                this.dispose();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "An error occurred while deleting the meal.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
         finalAddButton.addActionListener(e -> {
             try {
-                String mealNameInput = mealName.getText();
-                String mealCategoryInput = mealCategories.getText();
-                int servingSizeInput = Integer.parseInt(serveSizeText.getText());
-                String mealTypeInput = mealTypeText.getText();
-                int mealNutritionalInput = Integer.parseInt(nutritionalValue.getText());
-                String spiceLevelInput = spiceLevelText.getText();
-                String ingredientsInput = ingredientsNeedText.getText();
+                // Collect and validate inputs
+                String mealNameInput = getValidText(mealName, "Enter dish name");
+                String mealCategoryInput = getValidText(mealCategories, "Enter meal category");
+                String mealTypeInput = getValidText(mealTypeText, "Enter meal type");
+                String spiceLevelInput = getValidText(spiceLevelText, "Enter spiciness");
+                String ingredientsInput = getValidText(ingredientsNeedText, "Enter ingredients");
                 File imageFile = addImageLabel.getSelectedImageFile();
 
-                double mealPriceInput = Double.parseDouble(priceFoodText.getText());
-                int quantityInput = Integer.parseInt(amountFoodText.getText());
+                // Initialize error message collector
+                StringBuilder errorMessages = new StringBuilder();
 
-                editMeals.editMeal(mealID, mealNameInput, mealCategoryInput, servingSizeInput,
-                        mealTypeInput, mealNutritionalInput, spiceLevelInput, ingredientsInput, imageFile);
+                // Parse numeric inputs
+                Integer servingSizeInput = parseInteger(serveSizeText, "Enter serving size", errorMessages);
+                Integer nutritionalValueInput = parseInteger(nutritionalValue, "Enter nutritional value", errorMessages);
+                Double priceInput = parseDouble(priceFoodText, "Enter price", errorMessages);
+                Integer quantityInput = parseInteger(amountFoodText, "Enter amount", errorMessages);
 
-                editInventory.editInventory(quantityInput, mealPriceInput, mealID);
+                // Show error dialog if validation issues exist
+                if (errorMessages.length() > 0) {
+                    JOptionPane.showMessageDialog(null, errorMessages.toString(), "Input Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
 
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(null, "Please enter valid numeric values for serving size, nutritional value, price, and quantity.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                // Perform the edit operation
+                editMeals.editMeal(mealID, mealNameInput, mealCategoryInput, servingSizeInput, mealTypeInput,
+                        nutritionalValueInput, spiceLevelInput, ingredientsInput, imageFile);
+
+                editInventory.editInventory(quantityInput, priceInput, mealID);
+
+                // Refresh the dashboard panel
+                dashBoardPanel.refreshMealsDisplay();
+
+                // Refresh the view frame
+                if (parentViewFrame != null) {
+                    parentViewFrame.loadMeals(mealID);
+                }
+
+                // Close the edit frame
+                this.dispose();
             } catch (Exception ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(null, "An unexpected error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        deleteButton.addActionListener(e -> {
-            try {
-                editMeals.deleteMeal(mealID);
 
-                editInventory.deleteInventory(mealID);
-
-        } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-
-        addMeal.setFont(inter.deriveFont(Font.BOLD,12f));
+        addMeal.setFont(inter.deriveFont(Font.BOLD, 12f));
         addMeal.setForeground(Color.WHITE);
         addMeal.setHorizontalAlignment(SwingConstants.CENTER);
 
@@ -192,7 +226,7 @@ public class EditFrame extends JFrame {
         dishName.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
 
         mealCategory.setFont(inter.deriveFont(12f));
-        mealCategory.setBorder(BorderFactory.createEmptyBorder(0,0,0,20));
+        mealCategory.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 20));
 
         mealType.setFont(inter.deriveFont(12f));
         mealType.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 14));
@@ -201,7 +235,7 @@ public class EditFrame extends JFrame {
         serveSize.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 3));
 
         nutritional.setFont(inter.deriveFont(12f));
-        nutritional.setBorder(BorderFactory.createEmptyBorder(0,0,0,25));
+        nutritional.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 25));
 
         spicyLevel.setFont(inter.deriveFont(12f));
         spicyLevel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 19));
@@ -210,10 +244,10 @@ public class EditFrame extends JFrame {
         ingredientsNeed.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 
         priceFood.setFont(inter.deriveFont(12f));
-        priceFood.setBorder(BorderFactory.createEmptyBorder(0,0,0,45));
+        priceFood.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 45));
 
         amountFood.setFont(inter.deriveFont(12f));
-        amountFood.setBorder(BorderFactory.createEmptyBorder(0,0,0,30 ));
+        amountFood.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 30));
 
         spacer.setPreferredSize(new Dimension(241, 5));
         spacer2.setPreferredSize(new Dimension(241, 5));
@@ -269,7 +303,34 @@ public class EditFrame extends JFrame {
         this.setVisible(true);
     }
 
-    public void editMeals(int mealID){
+    private String getValidText(RoundedTextField textField, String placeholder) {
+        String text = textField.getText();
+        return (text == null || text.trim().equals(placeholder) || text.trim().isEmpty()) ? null : text.trim();
+    }
 
+    private Integer parseInteger(RoundedTextField textField, String placeholder, StringBuilder errorMessages) {
+        String value = getValidText(textField, placeholder);
+        if (value == null) {
+            return null; // Allow blank fields
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            errorMessages.append("Please enter a valid number for ").append(placeholder).append(".\n");
+            return null;
+        }
+    }
+
+    private Double parseDouble(RoundedTextField textField, String placeholder, StringBuilder errorMessages) {
+        String value = getValidText(textField, placeholder);
+        if (value == null) {
+            return null; // Allow blank fields
+        }
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            errorMessages.append("Please enter a valid decimal number for ").append(placeholder).append(".\n");
+            return null;
+        }
     }
 }

@@ -8,6 +8,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CrudMeal {
 
@@ -53,8 +55,11 @@ public class CrudMeal {
                     if (generatedKeys.next()) {
                         int mealId = generatedKeys.getInt(1);
                         JOptionPane.showMessageDialog(null, "Meal added successfully! Meal ID: " + mealId, "Success", JOptionPane.INFORMATION_MESSAGE);
+
+                        List<String> categories = new ArrayList<>();
+                        categories.add(category); // Add the single category to the list
                         dashBoardPanel.refreshMealsDisplay();
-                        dashBoardPanel.loadDataInBackground();
+                        dashBoardPanel.loadDataInBackground(categories, spice, type);
                         return mealId; // Return the generated meal_id
                     }
                 }
@@ -66,48 +71,87 @@ public class CrudMeal {
         return -1;
     }
 
-    public void editMeal(int mealId, String mealName, String mealCategory, int servingSize, String mealType, int nutritionalValue,
-                         String spicyOrNotSpicy, String ingredients, File imageFile) {
-        String updateSQL = "UPDATE Meals SET meal_name = ?, meal_category = ?, serving_size = ?, " +
-                "meal_type = ?, nutritional_value = ?, spicy_or_not_spicy = ?, ingredients = ?, image = ? " +
-                "WHERE meal_id = ?";
+    public void editMeal(int mealId, String mealName, String mealCategory, Integer servingSize, String mealType,
+                         Integer nutritionalValue, String spicyOrNotSpicy, String ingredients, File imageFile) {
+        // Query to fetch current meal details
+        String fetchSQL = "SELECT * FROM Meals WHERE meal_id = ?";
+        // Query to update the meal
+        String updateSQL = "UPDATE Meals SET meal_name = ?, meal_category = ?, serving_size = ?, meal_type = ?, " +
+                "nutritional_value = ?, spicy_or_not_spicy = ?, ingredients = ?, image = ? WHERE meal_id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
-             PreparedStatement preparedStatement = connection.prepareStatement(updateSQL)) {
-
+        try (Connection connection = DriverManager.getConnection(DB_URL)) {
             // Set PRAGMA settings
             setPragmas(connection);
 
-            preparedStatement.setString(1, mealName);
-            preparedStatement.setString(2, mealCategory);
-            preparedStatement.setInt(3, servingSize);
-            preparedStatement.setString(4, mealType);
-            preparedStatement.setInt(5, nutritionalValue);
-            preparedStatement.setString(6, spicyOrNotSpicy);
-            preparedStatement.setString(7, ingredients);
+            // Fetch the current values of the meal
+            String currentMealName = null;
+            String currentMealCategory = null;
+            int currentServingSize = 0;
+            String currentMealType = null;
+            int currentNutritionalValue = 0;
+            String currentSpicyOrNotSpicy = null;
+            String currentIngredients = null;
+            byte[] currentImage = null;
 
-            if (imageFile != null && imageFile.exists()) {
-                preparedStatement.setBytes(8, Files.readAllBytes(imageFile.toPath()));
-            } else {
-                preparedStatement.setNull(8, java.sql.Types.BLOB);
+            try (PreparedStatement fetchStatement = connection.prepareStatement(fetchSQL)) {
+                fetchStatement.setInt(1, mealId);
+                try (ResultSet resultSet = fetchStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        currentMealName = resultSet.getString("meal_name");
+                        currentMealCategory = resultSet.getString("meal_category");
+                        currentServingSize = resultSet.getInt("serving_size");
+                        currentMealType = resultSet.getString("meal_type");
+                        currentNutritionalValue = resultSet.getInt("nutritional_value");
+                        currentSpicyOrNotSpicy = resultSet.getString("spicy_or_not_spicy");
+                        currentIngredients = resultSet.getString("ingredients");
+                        currentImage = resultSet.getBytes("image");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "No meal found with the provided ID.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                }
             }
 
-            preparedStatement.setInt(9, mealId); // Set the meal ID
+            // Use provided values or fallback to current values
+            mealName = (mealName != null && !mealName.isEmpty()) ? mealName : currentMealName;
+            mealCategory = (mealCategory != null && !mealCategory.isEmpty()) ? mealCategory : currentMealCategory;
+            servingSize = (servingSize != null) ? servingSize : currentServingSize;
+            mealType = (mealType != null && !mealType.isEmpty()) ? mealType : currentMealType;
+            nutritionalValue = (nutritionalValue != null) ? nutritionalValue : currentNutritionalValue;
+            spicyOrNotSpicy = (spicyOrNotSpicy != null && !spicyOrNotSpicy.isEmpty()) ? spicyOrNotSpicy : currentSpicyOrNotSpicy;
+            ingredients = (ingredients != null && !ingredients.isEmpty()) ? ingredients : currentIngredients;
+            byte[] imageBytes = (imageFile != null && imageFile.exists()) ? Files.readAllBytes(imageFile.toPath()) : currentImage;
 
-            int rowsAffected = preparedStatement.executeUpdate();
-            if (rowsAffected > 0) {
-                JOptionPane.showMessageDialog(null, "Meal updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                dashBoardPanel.refreshMealsDisplay();
-                dashBoardPanel.loadDataInBackground();
-            } else {
-                JOptionPane.showMessageDialog(null, "No meal found with the provided ID.", "Error", JOptionPane.ERROR_MESSAGE);
+            // Update the meal with the resolved values
+            try (PreparedStatement updateStatement = connection.prepareStatement(updateSQL)) {
+                updateStatement.setString(1, mealName);
+                updateStatement.setString(2, mealCategory);
+                updateStatement.setInt(3, servingSize);
+                updateStatement.setString(4, mealType);
+                updateStatement.setInt(5, nutritionalValue);
+                updateStatement.setString(6, spicyOrNotSpicy);
+                updateStatement.setString(7, ingredients);
+                if (imageBytes != null) {
+                    updateStatement.setBytes(8, imageBytes);
+                } else {
+                    updateStatement.setNull(8, Types.BLOB);
+                }
+                updateStatement.setInt(9, mealId);
+
+                int rowsAffected = updateStatement.executeUpdate();
+                if (rowsAffected > 0) {
+                    JOptionPane.showMessageDialog(null, "Meal updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    dashBoardPanel.refreshMealsDisplay();
+                } else {
+                    JOptionPane.showMessageDialog(null, "No meal found with the provided ID.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
-
         } catch (SQLException | IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Failed to update meal. Please check your input.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     public void deleteMeal(int meal_id) {
         // Show confirmation dialog
@@ -134,7 +178,6 @@ public class CrudMeal {
                     System.out.println("Meal with ID " + meal_id + " deleted successfully.");
                     JOptionPane.showMessageDialog(null, "Meal Deleted Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                     dashBoardPanel.refreshMealsDisplay();
-                    dashBoardPanel.loadDataInBackground();
                 } else {
                     System.out.println("No meal found with ID " + meal_id);
                     JOptionPane.showMessageDialog(null, "Meal was not Deleted!", "Failed", JOptionPane.ERROR_MESSAGE);
