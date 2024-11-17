@@ -14,7 +14,7 @@ import java.util.Objects;
 
 public class HomeFrame extends JFrame {
     private DashBoardPanel dashBoardPanel;
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/stakezy/Documents/Final-Java-Project/database.db";
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
     public HomeFrame() throws IOException, SQLException {
         ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(HomeFrame.class.getResource("/Frame 12.png")));
@@ -27,27 +27,28 @@ public class HomeFrame extends JFrame {
         dashBoardPanel = new DashBoardPanel();
         PlusAddButton plusAddButton = new PlusAddButton(dashBoardPanel);
         FilterButton filterButton = new FilterButton();
+        JLabel removeFilter = new JLabel("Remove Filter");
+
+        removeFilter.setBounds(375, 13, 100, 20);
+        removeFilter.setFont(DashBoardButton.ACTOR_REGULAR_FONT.deriveFont(Font.PLAIN, 12f));
+        removeFilter.setForeground(new Color(0x58A558));
+
+        removeFilter.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                dashBoardPanel.refreshMealsDisplay();
+            }
+        });
+
+        filterButton.addActionListener(e -> {
+            new SortingFrame(dashBoardPanel);
+        });
+
         RefreshButton refreshButton = new RefreshButton();
 
         refreshButton.addActionListener(e -> {
-            // Temporarily switch to another card to clear the dashboard
-            cardLayout.show(cardPanel, "Orders");
-
-            // Clear and reload the dashboard panel data
-            dashBoardPanel.removeAll();  // Remove all components
-            dashBoardPanel.loadDataInBackground();
-            dashBoardPanel.refreshMealsDisplay();// Load data asynchronously
-
-            // Revalidate and repaint the panel after data is loaded
-            dashBoardPanel.revalidate();
-            dashBoardPanel.repaint();
-
-            // Switch back to DashBoardPanel and revalidate/repaint
-            cardLayout.show(cardPanel, "Dashboard");
-            dashBoardPanel.revalidate();
-            dashBoardPanel.repaint();
+            dashBoardPanel.refreshMealsDisplay();
         });
-
 
         // Set button properties
         plusAddButton.setBounds(37, 308, 31, 31);
@@ -100,6 +101,7 @@ public class HomeFrame extends JFrame {
         panel3.add(searchBar);
         panel3.add(filterButton);
         panel3.add(refreshButton);
+        panel3.add(removeFilter);
         panel1.add(cardPanel);
 
         // Buttons for navigation
@@ -148,40 +150,40 @@ public class HomeFrame extends JFrame {
         panel3.addMouseListener(clickListener);
     }
 
-    // Method to refresh the DashBoardPanel
-    public void refreshDashboardPanel(CardLayout cardLayout, JPanel cardPanel) {
-        // Temporarily switch to another card, then switch back
-        cardLayout.show(cardPanel, "Orders");  // Switch to a different panel temporarily
-
-        // Clear and reload dashBoardPanel data
-        dashBoardPanel.removeAll(); // Removes all components
-        dashBoardPanel.loadDataInBackground();  // Ensure this method properly reloads meals from the database
-
-        // After reloading meals, ensure the new components are added back to the panel
-        dashBoardPanel.revalidate();  // Revalidate the layout to reflect changes
-        dashBoardPanel.repaint();     // Repaint the panel to refresh the view
-
-        // Switch back to DashBoardPanel and revalidate/repaint
-        cardLayout.show(cardPanel, "Dashboard");
-        dashBoardPanel.revalidate();  // Make sure the panel layout is refreshed
-        dashBoardPanel.repaint();     // Repaint the panel
-    }
-
     public void searchMeals(String searchText) {
         String searchQuery = "%" + searchText.toLowerCase() + "%";
 
-        String query = "SELECT meal_name FROM Meals WHERE LOWER(meal_name) LIKE ?";
+        String query = "SELECT Meals.meal_id, Meals.meal_name, Inventory.meal_price, Meals.image " +
+                "FROM Meals INNER JOIN Inventory ON Meals.meal_id = Inventory.meal_id " +
+                "WHERE LOWER(Meals.meal_name) LIKE ?";
 
         try (Connection connection = DriverManager.getConnection(DB_URL);
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
-            preparedStatement.setString(1, searchQuery);  // Set the search text in the query
+            preparedStatement.setString(1, searchQuery); // Set the search text in the query
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                dashBoardPanel.contentPanel.removeAll(); // Clear current content
                 while (resultSet.next()) {
+                    int mealID = resultSet.getInt("meal_id");
                     String mealName = resultSet.getString("meal_name");
-                    System.out.println("Found meal: " + mealName);
+                    double mealPrice = resultSet.getDouble("meal_price");
+                    byte[] imageBytes = resultSet.getBytes("image");
+
+                    // Convert image bytes to an ImageIcon
+                    ImageIcon mealImage = null;
+                    if (imageBytes != null) {
+                        mealImage = new ImageIcon(Toolkit.getDefaultToolkit().createImage(imageBytes)
+                                .getScaledInstance(121, 91, Image.SCALE_SMOOTH));
+                    }
+
+                    // Add filtered meal to the dashboard
+                    JPanel mealPanel = dashBoardPanel.createItemPanel(mealID, mealName, "₱" + mealPrice, mealImage);
+                    dashBoardPanel.contentPanel.add(mealPanel);
                 }
+
+                dashBoardPanel.contentPanel.revalidate();
+                dashBoardPanel.contentPanel.repaint();
             }
         } catch (SQLException e) {
             e.printStackTrace();
