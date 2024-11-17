@@ -27,6 +27,23 @@ public class HomeFrame extends JFrame {
         dashBoardPanel = new DashBoardPanel();
         PlusAddButton plusAddButton = new PlusAddButton(dashBoardPanel);
         FilterButton filterButton = new FilterButton();
+        JLabel removeFilter = new JLabel("Remove Filter");
+
+        removeFilter.setBounds(375, 13, 100, 20);
+        removeFilter.setFont(DashBoardButton.ACTOR_REGULAR_FONT.deriveFont(Font.PLAIN, 12f));
+        removeFilter.setForeground(new Color(0x58A558));
+
+        removeFilter.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                dashBoardPanel.refreshMealsDisplay();
+            }
+        });
+
+        filterButton.addActionListener(e -> {
+            new SortingFrame(dashBoardPanel);
+        });
+
         RefreshButton refreshButton = new RefreshButton();
 
         refreshButton.addActionListener(e -> {
@@ -84,6 +101,7 @@ public class HomeFrame extends JFrame {
         panel3.add(searchBar);
         panel3.add(filterButton);
         panel3.add(refreshButton);
+        panel3.add(removeFilter);
         panel1.add(cardPanel);
 
         // Buttons for navigation
