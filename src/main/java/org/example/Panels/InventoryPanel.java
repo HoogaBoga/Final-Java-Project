@@ -56,3 +56,5 @@ public class InventoryPanel extends JPanel {
         frame.setVisible(true);
     }
 }
+
+
