@@ -28,7 +28,8 @@ public class CrudInventory {
         }
     }
 
-    public void editInventory(int quantity, double meal_price, int meal_id) {
+    public void editInventory(Integer quantity, Double meal_price, int meal_id) {
+        String fetchSQL = "SELECT quantity, meal_price FROM Inventory WHERE meal_id = ?";
         String updateSQL = "UPDATE Inventory SET quantity = ?, meal_price = ? WHERE meal_id = ?";
 
         try (Connection connection = DriverManager.getConnection(DB_URL)) {
@@ -39,12 +40,33 @@ public class CrudInventory {
                 stmt.execute("PRAGMA locking_mode=NORMAL;");  // Set locking mode to NORMAL (default)
             }
 
-            try (PreparedStatement preparedStatement = connection.prepareStatement(updateSQL)) {
-                preparedStatement.setInt(1, quantity);
-                preparedStatement.setDouble(2, meal_price);
-                preparedStatement.setInt(3, meal_id);
+            Integer currentQuantity = null;
+            Double currentMealPrice = null;
 
-                int rowsAffected = preparedStatement.executeUpdate();
+            try (PreparedStatement fetchStatement = connection.prepareStatement(fetchSQL)) {
+                fetchStatement.setInt(1, meal_id);
+                try (ResultSet resultSet = fetchStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        currentQuantity = resultSet.getInt("quantity");
+                        currentMealPrice = resultSet.getDouble("meal_price");
+                    } else {
+                        System.out.println("No inventory found with the provided ID.");
+                        return; // Exit if no inventory is found
+                    }
+                }
+            }
+
+            // Use provided values or fallback to current values
+            quantity = (quantity != null) ? quantity : currentQuantity;
+            meal_price = (meal_price != null) ? meal_price : currentMealPrice;
+
+            // Update the inventory with the resolved values
+            try (PreparedStatement updateStatement = connection.prepareStatement(updateSQL)) {
+                updateStatement.setInt(1, quantity);
+                updateStatement.setDouble(2, meal_price);
+                updateStatement.setInt(3, meal_id);
+
+                int rowsAffected = updateStatement.executeUpdate();
                 if (rowsAffected > 0) {
                     System.out.println("Inventory updated successfully!");
                 } else {

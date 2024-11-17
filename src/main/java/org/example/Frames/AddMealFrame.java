@@ -176,6 +176,8 @@ public class AddMealFrame extends JFrame {
 
                     dashBoardPanel.refreshMealsDisplay();
 
+                    this.dispose();
+
                 } else {
                     System.out.println("Failed to add meal. Inventory entry was not created.");
                 }

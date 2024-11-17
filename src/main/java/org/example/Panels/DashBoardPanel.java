@@ -1,6 +1,5 @@
 package org.example.Panels;
 
-import org.example.Frames.AddMealFrame;
 import org.example.Frames.ViewFrame;
 
 import javax.imageio.ImageIO;
@@ -8,16 +7,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DashBoardPanel extends JScrollPane {
     public final JPanel contentPanel;
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
-    private static final Map<Integer, ImageIcon> imageCache = new HashMap<>();
+    private static final Map<Integer, ImageIcon> imageCache = new ConcurrentHashMap<>(); // Thread-safe cache
+    private final Map<Integer, JPanel> mealPanelCache = new ConcurrentHashMap<>(); // Cache for meal panels
 
     public DashBoardPanel() {
         contentPanel = new JPanel(new GridLayout(0, 3, 10, 10));
@@ -29,33 +29,62 @@ public class DashBoardPanel extends JScrollPane {
         this.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
         this.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED);
 
-        loadDataInBackground();
+        loadDataInBackground(null, null, null);
     }
 
     /**
      * Loads meal data asynchronously using SwingWorker.
      */
-    public void loadDataInBackground() {
+    public void loadDataInBackground(List<String> categories, String spiciness, String diet) {
         SwingWorker<Void, JPanel> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
-                contentPanel.removeAll();
-                String query = "SELECT * FROM Meals";
+                contentPanel.removeAll(); // Clear UI before loading
+                StringBuilder query = new StringBuilder("SELECT Meals.meal_id, Meals.meal_name, Meals.image, Inventory.meal_price FROM Meals ");
+                query.append("LEFT JOIN Inventory ON Meals.meal_id = Inventory.meal_id WHERE 1=1");
+
+                // Dynamically add filters
+                if (categories != null && !categories.isEmpty()) {
+                    query.append(" AND meal_category IN (")
+                            .append("?,".repeat(categories.size()))
+                            .deleteCharAt(query.length() - 1) // Remove trailing comma
+                            .append(")");
+                }
+                if (spiciness != null) {
+                    query.append(" AND spicy_or_not_spicy = ?");
+                }
+                if (diet != null) {
+                    query.append(" AND meal_type = ?");
+                }
+
                 try (Connection connection = DriverManager.getConnection(DB_URL);
-                     Statement statement = connection.createStatement();
-                     ResultSet resultSet = statement.executeQuery(query)) {
+                     PreparedStatement preparedStatement = connection.prepareStatement(query.toString())) {
+                    int paramIndex = 1;
+
+                    if (categories != null && !categories.isEmpty()) {
+                        for (String category : categories) {
+                            preparedStatement.setString(paramIndex++, category);
+                        }
+                    }
+                    if (spiciness != null) {
+                        preparedStatement.setString(paramIndex++, spiciness);
+                    }
+                    if (diet != null) {
+                        preparedStatement.setString(paramIndex++, diet);
+                    }
+
+                    ResultSet resultSet = preparedStatement.executeQuery();
 
                     while (resultSet.next()) {
                         int mealId = resultSet.getInt("meal_id");
                         String mealName = resultSet.getString("meal_name");
-                        String mealPrice = displayPrice(mealId);
+                        String mealPrice = "₱" + resultSet.getDouble("meal_price");
                         byte[] imageBytes = resultSet.getBytes("image");
 
-                        ImageIcon mealImage = imageCache.getOrDefault(mealId, getImageIcon(imageBytes));
-                        imageCache.put(mealId, mealImage);
+                        ImageIcon mealImage = imageCache.computeIfAbsent(mealId, id -> getImageIcon(imageBytes));
 
-                        JPanel mealPanel = createItemPanel(mealId, mealName, mealPrice, mealImage);
-                        publish(mealPanel); // Send panel to the UI thread
+                        JPanel mealPanel = mealPanelCache.computeIfAbsent(mealId, id -> createItemPanel(mealId, mealName, mealPrice, mealImage));
+                        publish(mealPanel);
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -64,20 +93,44 @@ public class DashBoardPanel extends JScrollPane {
             }
 
             @Override
-            protected void process(java.util.List<JPanel> panels) {
+            protected void process(List<JPanel> panels) {
                 for (JPanel panel : panels) {
                     contentPanel.add(panel);
                 }
+
             }
 
             @Override
             protected void done() {
                 contentPanel.revalidate();
                 contentPanel.repaint();
-                System.out.println("Dashboard Refreshed");
+                System.out.println("Dashboard refreshed with filters.");
             }
         };
         worker.execute();
+    }
+
+    /**
+     * Retrieves meal data (meal ID and meal name) from the database.
+     */
+    public Map<Integer, String> getMealData() {
+        Map<Integer, String> meals = new HashMap<>();
+        String query = "SELECT meal_id, meal_name FROM Meals";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                int mealId = resultSet.getInt("meal_id");
+                String mealName = resultSet.getString("meal_name");
+                meals.put(mealId, mealName);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return meals;
     }
 
     /**
@@ -94,23 +147,6 @@ public class DashBoardPanel extends JScrollPane {
         }
     }
 
-    public Map<Integer, String> getMealData() {
-        Map<Integer, String> meals = new HashMap<>();
-        String query = "SELECT meal_id, meal_name FROM Meals";
-        try (Connection connection = DriverManager.getConnection(DB_URL);
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-
-            while (resultSet.next()) {
-                int mealId = resultSet.getInt("meal_id");
-                String mealName = resultSet.getString("meal_name");
-                meals.put(mealId, mealName);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return meals;
-    }
     /**
      * Creates a panel for a single meal item.
      */
@@ -125,53 +161,42 @@ public class DashBoardPanel extends JScrollPane {
         itemPanel.add(imageLabel);
 
         JLabel nameLabel = new JLabel(itemName);
-        nameLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.PLAIN, 14f));
+        nameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         nameLabel.setBounds(10, 111, 100, 18);
         itemPanel.add(nameLabel);
 
         JLabel priceLabel = new JLabel(itemPrice);
-        priceLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.PLAIN, 12f));
+        priceLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         priceLabel.setForeground(new Color(0x4CAF50));
         priceLabel.setBounds(10, 136, 100, 20);
         itemPanel.add(priceLabel);
 
         JButton viewButton = new JButton("View");
-        viewButton.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.PLAIN, 10f));
+        viewButton.setFont(new Font("Arial", Font.PLAIN, 10));
         viewButton.setBackground(new Color(0x4CAF50));
         viewButton.setForeground(Color.WHITE);
         viewButton.setBounds(10, 161, 130, 15);
 
-        viewButton.addActionListener(e -> new ViewFrame(mealID));
+        viewButton.addActionListener(e -> new ViewFrame(mealID, this));
         itemPanel.add(viewButton);
 
         return itemPanel;
     }
 
     /**
-     * Retrieves the price for a meal from the Inventory table.
-     */
-    public String displayPrice(int meal_id) {
-        String query = "SELECT meal_price FROM Inventory WHERE meal_id = ?";
-        try (Connection connection = DriverManager.getConnection(DB_URL);
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setInt(1, meal_id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                return "₱" + resultSet.getString("meal_price");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return "₱0.00";
-    }
-
-    /**
-     * Refreshes the displayed meals by clearing and reloading the data.
+     * Refreshes the displayed meals by clearing and reloading the data without filters.
      */
     public void refreshMealsDisplay() {
-        System.out.println("Refreshing meals display...");
-        imageCache.clear(); // Clear image cache to ensure updated images
-        contentPanel.removeAll();
-        loadDataInBackground();
+        SwingUtilities.invokeLater(() -> {
+            // Clear caches and UI before loading new data
+            imageCache.clear();
+            mealPanelCache.clear();
+            contentPanel.removeAll();
+            contentPanel.revalidate();
+            contentPanel.repaint();
+
+            // Reload meals in the background
+            loadDataInBackground(null, null, null);
+        });
     }
 }
