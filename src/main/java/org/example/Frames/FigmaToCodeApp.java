@@ -117,12 +117,33 @@ public class FigmaToCodeApp extends JFrame {
         forgotPasswordLabel.setForeground(new Color(192, 191, 191));
         forgotPasswordLabel.setFont(readexPro.deriveFont(12f));
         forgotPasswordLabel.setBounds(505, 315, 100, 20);
+
+        forgotPasswordLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new AskEmailFrame();
+            }
+        });
         backgroundPanel.add(forgotPasswordLabel);
 
+        JLabel forgotUsername = new JLabel("Forgot Username");
+        forgotUsername.setForeground(new Color(192, 191, 191));
+        forgotUsername.setFont(readexPro.deriveFont(12f));
+        forgotUsername.setBounds(490, 187, 150, 20);
+
+        forgotUsername.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new ForgotUserFrame();
+            }
+        });
+
+        backgroundPanel.add(forgotUsername);
+
         JLabel registerNewUser = new JLabel("Not a User? Register Here");
-        registerNewUser.setForeground(new Color(192, 191, 191));
+        registerNewUser.setForeground(Color.WHITE);
         registerNewUser.setFont(readexPro.deriveFont(12f));
-        registerNewUser.setBounds(335, 315, 200, 20);
+        registerNewUser.setBounds(335, 315, 155, 20);
         backgroundPanel.add(registerNewUser);
 
         registerNewUser.addMouseListener(new MouseAdapter() {

@@ -138,6 +138,7 @@ public class SortingFrame extends JFrame {
             dashBoardPanel.loadDataInBackground(selectedCategories, selectedSpiciness, selectedDiet);
 
             // Close the SortingFrame
+
             this.dispose();
         });
 

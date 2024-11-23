@@ -4,28 +4,20 @@ import org.example.Buttons.EmployeeButton;
 import org.example.Buttons.ManagerButton;
 import org.example.Misc.ShadowLabel;
 
-import javax.management.relation.Role;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Objects;
 
 public class RolePage extends JFrame {
 
     private JLabel backButton = new JLabel("Back");
 
-    public RolePage() throws IOException {
+    public RolePage(int userId) throws IOException {
         // Set layout
-
-
         setLayout(new BorderLayout());
 
         ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(RolePage.class.getResource("/Vector.png")));
-
         JLabel greeneryyImage = new JLabel();
 
         greeneryyImage.setBounds(438, 50, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());
@@ -34,7 +26,7 @@ public class RolePage extends JFrame {
         // Create panel for frame
         JPanel backgroundPanel = new JPanel() {
             @Override
-            protected void paintComponent(Graphics g){
+            protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
 
                 ImageIcon imageIcon = new ImageIcon(Objects.requireNonNull(RolePage.class.getResource("/Role Page.png")));
@@ -47,18 +39,16 @@ public class RolePage extends JFrame {
             }
         };
 
-        backButton.setFont(FigmaToCodeApp.READEX_PRO_FONT.deriveFont(14f));
+        backButton.setFont(new Font("Readex Pro", Font.PLAIN, 14));
         backButton.setForeground(Color.WHITE);
         backButton.setBounds(20, 328, 33, 18);
-        backButton.addMouseListener(new MouseAdapter() {
+        backButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseClicked(java.awt.event.MouseEvent e) {
                 RolePage.this.dispose();
                 try {
                     new FigmaToCodeApp();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                } catch (FontFormatException ex) {
+                } catch (IOException | FontFormatException ex) {
                     throw new RuntimeException(ex);
                 }
             }
@@ -73,20 +63,20 @@ public class RolePage extends JFrame {
 
         ShadowLabel Hello = new ShadowLabel("Hello!");
         Hello.setForeground(Color.WHITE);
-        Hello.setFont(FigmaToCodeApp.READEX_PRO_FONT.deriveFont(35f));
+        Hello.setFont(new Font("Readex Pro", Font.BOLD, 35));
         Hello.setBounds(20, 70, 108, 50);
         backgroundPanel.add(Hello);
 
         ShadowLabel wru = new ShadowLabel("What are you?");
         wru.setForeground(Color.WHITE);
-        wru.setFont(FigmaToCodeApp.READEX_PRO_FONT.deriveFont(35f));
+        wru.setFont(new Font("Readex Pro", Font.BOLD, 35));
         wru.setBounds(20, 120, 275, 50);
         backgroundPanel.add(wru);
 
-        ManagerButton managerButton = new ManagerButton(this);
+        ManagerButton managerButton = new ManagerButton(this, userId); // Pass userId to ManagerButton
         backgroundPanel.add(managerButton);
 
-        EmployeeButton employeeButton = new EmployeeButton(this);
+        EmployeeButton employeeButton = new EmployeeButton(this, userId); // Pass userId to EmployeeButton
         backgroundPanel.add(employeeButton);
 
         backgroundPanel.add(backButton);

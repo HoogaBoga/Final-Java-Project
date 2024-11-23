@@ -1,6 +1,7 @@
 package org.example.Frames;
 
 import org.example.Panels.DashBoardPanel;
+import org.example.Panels.InventoryPanel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -168,7 +169,7 @@ public class ViewFrame extends JFrame {
         mealPanel.add(nutritionLabel);
 
         JLabel edit = new JLabel("Edit");
-        edit.setFont(new Font("Arial", Font.PLAIN, 12));
+        edit.setFont(AddMealFrame.INTER_FONT.deriveFont(12f));
         edit.setForeground(new Color(0x65B265));
         edit.setBounds(250, 125, 100, 50);
         edit.addMouseListener(new MouseAdapter() {
@@ -184,11 +185,11 @@ public class ViewFrame extends JFrame {
         String[] columnNames = {"Ingredients", "Volume", "Unit"};
         DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
         JTable ingredientTable = new JTable(tableModel);
-        ingredientTable.setPreferredScrollableViewportSize(new Dimension(250, 100));
-        ingredientTable.setFillsViewportHeight(true);
+        ingredientTable.setPreferredScrollableViewportSize(new Dimension(250, 50));
+        ingredientTable.setFillsViewportHeight(false);
 
         JScrollPane tableScroll = new JScrollPane(ingredientTable);
-        tableScroll.setBounds(7, 250, 274, 200);
+        tableScroll.setBounds(7, 250, 274, 180);
         mealPanel.add(tableScroll);
 
         // Load and split ingredients from database string

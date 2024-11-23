@@ -10,13 +10,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
-public class FilterButton extends JButton implements ActionListener {
+public class FilterButton extends JButton{
 
     private BufferedImage image;
 
     public FilterButton(){
 
-        this.setBounds(337, 15, 15, 15 );
+        this.setBounds(250, 15, 15, 15 );
 
         try{
             image = ImageIO.read(Objects.requireNonNull(FilterButton.class.getResource("/filter.png")));
@@ -26,7 +26,6 @@ public class FilterButton extends JButton implements ActionListener {
         }
 
         this.setContentAreaFilled(false);
-        this.addActionListener(this);
     }
 
     @Override
@@ -36,10 +35,5 @@ public class FilterButton extends JButton implements ActionListener {
         }
 
         super.paintComponent(g);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
     }
 }
