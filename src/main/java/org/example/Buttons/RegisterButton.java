@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.sql.*;
 
 public class RegisterButton extends JButton implements ActionListener {
+    private RoundedTextField emailField;
     private RoundedTextField usernameField;
     private RoundedPassWordField passwordField;
     private JComboBox<String> rolesBox; // Role selection combo box
@@ -29,8 +30,9 @@ public class RegisterButton extends JButton implements ActionListener {
 
     final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
-    public RegisterButton(RoundedTextField usernameField, RoundedPassWordField passwordField, JComboBox<String> rolesBox, JFrame parentFrame) {
+    public RegisterButton(RoundedTextField usernameField, RoundedPassWordField passwordField, JComboBox<String> rolesBox, JFrame parentFrame, RoundedTextField emailField) {
         super("Register");
+        this.emailField = emailField;
         this.usernameField = usernameField;
         this.passwordField = passwordField;
         this.rolesBox = rolesBox; // Initialize role box
@@ -38,7 +40,7 @@ public class RegisterButton extends JButton implements ActionListener {
 
 
         // Button settings
-        this.setBounds(131, 315, 162, 29);
+        this.setBounds(131, 330, 162, 29);
         this.setBackground(new Color(152, 130, 132));
         this.setForeground(Color.WHITE);
         this.setFont(new Font("Readex Pro", Font.PLAIN, 14));
@@ -72,6 +74,7 @@ public class RegisterButton extends JButton implements ActionListener {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
         String role = (String) rolesBox.getSelectedItem();
+        String email = emailField.getText().trim();
 
 
         if (username.isEmpty() || password.isEmpty() || role.equals("  Select Role")) {
@@ -94,7 +97,7 @@ public class RegisterButton extends JButton implements ActionListener {
             }
         }
 
-        boolean registrationSuccessful = registerUser(username, password, role);
+        boolean registrationSuccessful = registerUser(email, username, password, role);
 
         if (registrationSuccessful) {
             JOptionPane.showMessageDialog(parentFrame, "Registration Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -104,20 +107,20 @@ public class RegisterButton extends JButton implements ActionListener {
         }
     }
 
-    private boolean registerUser(String username, String password, String role) {
-        return addUser(username, password, role);
+    private boolean registerUser(String username, String password, String role, String email) {
+        return addUser(username, password, role, email);
     }
 
-    private boolean addUser(String username, String password, String role) {
-        String insertSQL = "INSERT INTO Users (username, password, role) VALUES (?, ?, ?)";
-
+    private boolean addUser(String email, String username, String password, String role) {
+        String insertSQL = "INSERT INTO Users (email, username, password, role) VALUES (?, ?, ?, ?)";
 
         try (Connection connection = DriverManager.getConnection(DB_URL);
              PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
 
-            preparedStatement.setString(1, username);
-            preparedStatement.setString(2, password);
-            preparedStatement.setString(3, role);
+            preparedStatement.setString(1, email); // Set email first
+            preparedStatement.setString(2, username); // Set username second
+            preparedStatement.setString(3, password); // Set password third
+            preparedStatement.setString(4, role); // Set role last
 
             int rowsAffected = preparedStatement.executeUpdate();
             if (rowsAffected > 0) {
@@ -132,6 +135,7 @@ public class RegisterButton extends JButton implements ActionListener {
         return false;
     }
 
+
     private void refreshUserList() {
         // Re-fetch users from the database
         String query = "SELECT * FROM Users";
@@ -140,6 +144,7 @@ public class RegisterButton extends JButton implements ActionListener {
              ResultSet resultSet = statement.executeQuery(query)) {
 
             while (resultSet.next()) {
+                String email = resultSet.getString("email");
                 String username = resultSet.getString("username");
                 String password = resultSet.getString("password");
                 String role = resultSet.getString("role");

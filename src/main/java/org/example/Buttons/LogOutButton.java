@@ -1,7 +1,5 @@
 package org.example.Buttons;
 
-import org.example.Panels.DashBoardPanel;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -12,17 +10,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
-public class RefreshButton extends JButton {
+public class LogOutButton extends JButton{
 
     private BufferedImage image;
 
+    public LogOutButton(){
 
-    public RefreshButton(){
-
-        this.setBounds(267, 15, 15, 15 );
+        this.setBounds(475, 15, 15, 15 );
 
         try{
-            image = ImageIO.read(Objects.requireNonNull(RefreshButton.class.getResource("/refresh-cw.png")));
+            image = ImageIO.read(Objects.requireNonNull(FilterButton.class.getResource("/LogOut.png")));
         } catch (IOException e) {
             e.printStackTrace();
             image = null;

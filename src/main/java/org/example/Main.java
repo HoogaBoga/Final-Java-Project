@@ -238,5 +238,64 @@
                 }
             }
         }
+        private static void addIsLoggedInColumn() {
+            String alterTableSQL = "ALTER TABLE Users ADD COLUMN is_logged_in BOOLEAN DEFAULT 0";
+
+            try (Connection connection = DriverManager.getConnection(DB_URL);
+                 Statement statement = connection.createStatement()) {
+
+                statement.executeUpdate(alterTableSQL);
+                System.out.println("Column 'is_logged_in' added successfully to the 'Users' table.");
+
+            } catch (SQLException e) {
+                if (e.getMessage().contains("duplicate column name")) {
+                    System.out.println("Column 'is_logged_in' already exists.");
+                } else {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        private static void addForgotPasswordStuff() {
+            String createNewTableSQL = "CREATE TABLE IF NOT EXISTS Users_new (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "username TEXT NOT NULL UNIQUE, " +
+                    "password TEXT NOT NULL, " +
+                    "role TEXT NOT NULL, " +
+                    "email TEXT UNIQUE, " + // Added UNIQUE constraint here
+                    "reset_token TEXT, " +
+                    "reset_token_time DATETIME" +
+                    ")";
+
+            String copyDataSQL = "INSERT INTO Users_new (id, username, password, role) " +
+                    "SELECT id, username, password, role FROM Users";
+
+            String dropOldTableSQL = "DROP TABLE Users";
+
+            String renameTableSQL = "ALTER TABLE Users_new RENAME TO Users";
+
+            try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db");
+                 Statement statement = connection.createStatement()) {
+
+                // Step 1: Create the new table with the additional columns and constraints
+                statement.executeUpdate(createNewTableSQL);
+                System.out.println("New table 'Users_new' created successfully.");
+
+                // Step 2: Copy the data from the old table to the new one
+                statement.executeUpdate(copyDataSQL);
+                System.out.println("Data copied to 'Users_new' successfully.");
+
+                // Step 3: Drop the old table
+                statement.executeUpdate(dropOldTableSQL);
+                System.out.println("Old table 'Users' dropped successfully.");
+
+                // Step 4: Rename the new table to 'Users'
+                statement.executeUpdate(renameTableSQL);
+                System.out.println("Table 'Users_new' renamed to 'Users' successfully.");
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
 
     }

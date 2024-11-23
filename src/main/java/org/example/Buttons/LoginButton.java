@@ -3,6 +3,7 @@ package org.example.Buttons;
 import org.example.*;
 import org.example.Frames.RolePage;
 import org.example.Misc.RoundedBorder;
+import org.example.Misc.UserSessionManager;
 import org.example.TextFields.PasswordField;
 import org.example.TextFields.TextField;
 
@@ -65,9 +66,14 @@ public class LoginButton extends JButton implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (Main.authenticateUser(usernameField.getText(), new String(passwordField.getPassword()))) {
+        String username = usernameField.getText();
+        String password = new String(passwordField.getPassword());
+
+        int userId = UserSessionManager.getUserIdByCredentials(username, password); // Get userId by credentials
+        if (userId != -1) {
+            UserSessionManager.markAsLoggedIn(userId); // Mark the user as logged in
             try {
-                new RolePage();
+                new RolePage(userId); // Pass userId to RolePage
                 parentFrame.dispose();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);

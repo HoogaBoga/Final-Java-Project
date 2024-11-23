@@ -1,11 +1,14 @@
 package org.example.Frames;
 
 import org.example.Buttons.*;
+import org.example.Misc.UserSessionManager;
 import org.example.Panels.*;
 import org.example.TextFields.RoundedTextField;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -14,22 +17,29 @@ import java.util.Objects;
 
 public class HomeFrame extends JFrame {
     private DashBoardPanel dashBoardPanel;
+    private InventoryPanel inventoryPanel;
+    public JPanel cardPanel;
+    private int userId;
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
-    public HomeFrame() throws IOException, SQLException {
+    public HomeFrame(int userId) throws IOException, SQLException {
+        this.userId = userId;
         ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(HomeFrame.class.getResource("/Frame 12.png")));
         JLabel greeneryImg = new JLabel();
 
+        UserNameBox userNameBox = new UserNameBox(userId);
+
         CardLayout cardLayout = new CardLayout();
-        JPanel cardPanel = new JPanel(cardLayout);
+        cardPanel = new JPanel(cardLayout);
 
         // Initialize DashBoardPanel and buttons
         dashBoardPanel = new DashBoardPanel();
+        inventoryPanel = new InventoryPanel();
         PlusAddButton plusAddButton = new PlusAddButton(dashBoardPanel);
         FilterButton filterButton = new FilterButton();
         JLabel removeFilter = new JLabel("Remove Filter");
 
-        removeFilter.setBounds(375, 13, 100, 20);
+        removeFilter.setBounds(285, 13, 100, 20);
         removeFilter.setFont(DashBoardButton.ACTOR_REGULAR_FONT.deriveFont(Font.PLAIN, 12f));
         removeFilter.setForeground(new Color(0x58A558));
 
@@ -48,6 +58,24 @@ public class HomeFrame extends JFrame {
 
         refreshButton.addActionListener(e -> {
             dashBoardPanel.refreshMealsDisplay();
+            inventoryPanel.refresh();
+        });
+
+        LogOutButton logOutButton = new LogOutButton();
+        logOutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    UserSessionManager.markAsLoggedOut();
+                    new FigmaToCodeApp();
+                    dispose();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (FontFormatException ex) {
+                    throw new RuntimeException(ex);
+                }
+
+            }
         });
 
         // Set button properties
@@ -56,7 +84,7 @@ public class HomeFrame extends JFrame {
 
         // Set up card layout and add panels
         cardPanel.add(dashBoardPanel, "Dashboard");
-        cardPanel.add(new OrdersPanel(dashBoardPanel), "Orders");
+        cardPanel.add(new OrdersPanel(dashBoardPanel, inventoryPanel), "Orders");
         cardPanel.add(new InventoryPanel(), "Inventory");
         cardPanel.add(new SalesPanel(), "Sales");
         cardPanel.add(new PromotionsPanel(), "Promotions");
@@ -68,7 +96,7 @@ public class HomeFrame extends JFrame {
         greeneryImg.setIcon(greeneryImage);
 
         RoundedTextField searchBar = new RoundedTextField();
-        searchBar.setBounds(24, 10, 304, 21);
+        searchBar.setBounds(24, 10, 220, 21);
         searchBar.setBackground(Color.WHITE);
         searchBar.setForeground(Color.BLACK);
         searchBar.setFont(DashBoardButton.ACTOR_REGULAR_FONT.deriveFont(10f));
@@ -83,26 +111,34 @@ public class HomeFrame extends JFrame {
         JPanel panel2 = new JPanel();
         JPanel panel3 = new JPanel();
 
+        //Panel Layouts
         panel1.setLayout(null);
         panel2.setLayout(null);
         panel3.setLayout(null);
 
+        //Panel Backgrounds
         panel1.setBackground(new Color(0xE8E8E8));
         panel2.setBackground(Color.WHITE);
         panel3.setBackground(new Color(0xE8E8E8));
 
+        //Panel Sizes
         panel1.setPreferredSize(new Dimension(516, 358));
         panel2.setPreferredSize(new Dimension(105, 358));
         panel3.setBounds(0, 0, 516, 36);
 
+        //Panel Components
+        panel1.add(panel3, BorderLayout.NORTH);
+        panel1.add(cardPanel);
+
         panel2.add(greeneryImg);
         panel2.add(plusAddButton);
-        panel1.add(panel3, BorderLayout.NORTH);
+
         panel3.add(searchBar);
         panel3.add(filterButton);
         panel3.add(refreshButton);
         panel3.add(removeFilter);
-        panel1.add(cardPanel);
+        panel3.add(userNameBox);
+        panel3.add(logOutButton);
 
         // Buttons for navigation
         DashBoardButton dashBoardButton = new DashBoardButton(cardLayout, cardPanel, "Dashboard");
@@ -190,7 +226,7 @@ public class HomeFrame extends JFrame {
         }
     }
 
-    public static void main(String[] args) throws SQLException, IOException {
-        new HomeFrame();
+    public int getUserId() {
+        return userId;
     }
 }

@@ -1,5 +1,7 @@
 package org.example.Panels;
 
+import org.example.Frames.AddMealFrame;
+import org.example.Frames.HomeFrame;
 import org.example.Frames.ViewFrame;
 
 import javax.imageio.ImageIO;
@@ -161,18 +163,41 @@ public class DashBoardPanel extends JScrollPane {
         itemPanel.add(imageLabel);
 
         JLabel nameLabel = new JLabel(itemName);
-        nameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        nameLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.PLAIN, 14f));
         nameLabel.setBounds(10, 111, 100, 18);
         itemPanel.add(nameLabel);
 
         JLabel priceLabel = new JLabel(itemPrice);
-        priceLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        priceLabel.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.PLAIN, 12f));
         priceLabel.setForeground(new Color(0x4CAF50));
-        priceLabel.setBounds(10, 136, 100, 20);
+        priceLabel.setBounds(10, 130, 100, 20);
         itemPanel.add(priceLabel);
 
+        JLabel lowInventory = new JLabel("Low inventory");
+        lowInventory.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.ITALIC, 8f));
+        lowInventory.setForeground(Color.RED);
+        lowInventory.setBounds(10, 143, 100, 20);
+        lowInventory.setVisible(false);
+        itemPanel.add(lowInventory);
+
+        JLabel noStock = new JLabel("No Stock");
+        noStock.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.ITALIC, 8f));
+        noStock.setForeground(Color.RED);
+        noStock.setBounds(10, 143, 100, 20);
+        noStock.setVisible(false);
+        itemPanel.add(noStock);
+
+        if(getAmount(mealID) <= 5 && getAmount(mealID) > 0){
+            lowInventory.setVisible(true);
+        }
+
+        if(getAmount(mealID) <= 0){
+            lowInventory.setVisible(false);
+            noStock.setVisible(true);
+        }
+
         JButton viewButton = new JButton("View");
-        viewButton.setFont(new Font("Arial", Font.PLAIN, 10));
+        viewButton.setFont(AddMealFrame.INTER_FONT.deriveFont(Font.PLAIN, 10f));
         viewButton.setBackground(new Color(0x4CAF50));
         viewButton.setForeground(Color.WHITE);
         viewButton.setBounds(10, 161, 130, 15);
@@ -198,5 +223,45 @@ public class DashBoardPanel extends JScrollPane {
             // Reload meals in the background
             loadDataInBackground(null, null, null);
         });
+    }
+
+    public int getAmount(int meal_ID){
+        String query = "SELECT quantity FROM Inventory WHERE meal_id = ?";
+
+        int amount = 0;
+
+        try(Connection connection = DriverManager.getConnection(DB_URL);
+            PreparedStatement preparedStatement = connection.prepareStatement(query)){
+
+            preparedStatement.setInt(1, meal_ID);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while(resultSet.next()){
+                amount = resultSet.getInt("quantity");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return amount;
+    }
+
+    public int getLoggedInUserId() {
+        String query = "SELECT id FROM Users WHERE is_logged_in = 1";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(query);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+
+            if (resultSet.next()) {
+                return resultSet.getInt("id");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return -1; // Return -1 if no user is logged in
     }
 }

@@ -1,3 +1,4 @@
+// OrdersPanel.java (Updated with Missing Methods Restored)
 package org.example.Panels;
 
 import javax.swing.*;
@@ -11,19 +12,27 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
+
+import org.example.Frames.HomeFrame;
+import org.example.Frames.ViewFrame;
 
 public class OrdersPanel extends JPanel {
     private DashBoardPanel dashBoardPanel;
+    private InventoryPanel inventoryPanel;
     private JTable ordersTable;
     private DefaultTableModel model;
     private JPanel activityPanel;
     private JLabel noActivityLabel;
     private Queue<JPanel> activityQueue;
+    private HomeFrame parentFrame;
     private Set<String> generatedOrderIDs;
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
-    public OrdersPanel(DashBoardPanel dashBoardPanel) {
+    public OrdersPanel(DashBoardPanel dashBoardPanel, InventoryPanel inventoryPanel) {
         this.dashBoardPanel = dashBoardPanel;
+        this.parentFrame = parentFrame;
+        this.inventoryPanel = inventoryPanel;
         this.activityQueue = new LinkedList<>();
         this.generatedOrderIDs = new HashSet<>();
 
@@ -60,12 +69,7 @@ public class OrdersPanel extends JPanel {
         addOrderButton.setForeground(Color.WHITE);
         addOrderButton.setFocusPainted(false);
 
-        addOrderButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                makeOrder();
-            }
-        });
+        addOrderButton.addActionListener(e -> makeOrder());
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBackground(Color.WHITE);
@@ -95,34 +99,15 @@ public class OrdersPanel extends JPanel {
 
         ordersTable.setDefaultRenderer(Object.class, new MultiLineTableCellRenderer());
 
-        // Adjust the column widths to fit the content
-        TableColumnModel columnModel = ordersTable.getColumnModel();
-        for (int i = 0; i < columnModel.getColumnCount(); i++) {
-            TableColumn column = columnModel.getColumn(i);
-            int width = 0;
-            for (int row = 0; row < ordersTable.getRowCount(); row++) {
-                TableCellRenderer cellRenderer = column.getCellRenderer();
-                Component comp = ordersTable.prepareRenderer(cellRenderer, row, i);
-                width = Math.max(comp.getPreferredSize().width, width);
-            }
-            column.setPreferredWidth(width + 10); // Add some padding
-        }
-
         JScrollPane tableScrollPane = new JScrollPane(ordersTable);
 
-        // Update Status Button
         JButton updateStatusButton = new JButton("Update Status");
         updateStatusButton.setFont(new Font("Actor", Font.PLAIN, 14));
         updateStatusButton.setBackground(Color.decode("#4CAF50"));
         updateStatusButton.setForeground(Color.WHITE);
         updateStatusButton.setFocusPainted(false);
 
-        updateStatusButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateOrderStatus();
-            }
-        });
+        updateStatusButton.addActionListener(e -> updateOrderStatus());
 
         JPanel statusButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         statusButtonPanel.setBackground(Color.WHITE);
@@ -135,78 +120,50 @@ public class OrdersPanel extends JPanel {
         add(headerPanel, BorderLayout.NORTH);
         add(contentPanel, BorderLayout.CENTER);
 
-        // Load existing orders from the database
-        loadOrders();
-    }
-
-    private void loadOrders() {
-        String query = "SELECT * FROM Orders";
-        try (Connection connection = DriverManager.getConnection(DB_URL);
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
-
-            while (resultSet.next()) {
-                int orderID = resultSet.getInt("id");
-                int userID = resultSet.getInt("user_id");
-                int mealID = resultSet.getInt("meal_id");
-                int quantity = resultSet.getInt("order_quantity");
-                String orderDate = resultSet.getString("order_date");
-                String status = resultSet.getString("status");
-
-                model.addRow(new Object[]{orderID, userID, mealID, quantity, orderDate, status});
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        loadOrdersFromDatabase();
     }
 
     private void makeOrder() {
         String customerName = JOptionPane.showInputDialog(this, "Enter customer name:", "Customer Name", JOptionPane.PLAIN_MESSAGE);
         if (customerName == null || customerName.trim().isEmpty()) return;
 
-        Map<Integer, String> meals = dashBoardPanel.getMealData(); // Assumes getMealData method is implemented
+        Map<Integer, String> meals = dashBoardPanel.getMealData();
         String[] mealOptions = meals.values().toArray(new String[0]);
 
         String selectedMeal = (String) JOptionPane.showInputDialog(this, "Select a food item:", "Food Item", JOptionPane.PLAIN_MESSAGE, null, mealOptions, mealOptions[0]);
-
         if (selectedMeal == null) return;
 
         String quantityStr = JOptionPane.showInputDialog(this, "Enter quantity:", "Quantity", JOptionPane.PLAIN_MESSAGE);
-        int quantity = Integer.parseInt(quantityStr);
+        if (quantityStr == null || quantityStr.trim().isEmpty()) return;
 
-        JPanel datePanel = new JPanel(new FlowLayout());
-        JComboBox<String> monthComboBox = new JComboBox<>(getMonths());
-        JComboBox<String> dayComboBox = new JComboBox<>(getDays(31));
-        JComboBox<String> yearComboBox = new JComboBox<>(getYears());
-
-        monthComboBox.addActionListener(e -> {
-            int selectedYear = Integer.parseInt((String) yearComboBox.getSelectedItem());
-            String selectedMonth = (String) monthComboBox.getSelectedItem();
-            int daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
-            dayComboBox.setModel(new DefaultComboBoxModel<>(getDays(daysInMonth)));
-        });
-
-        datePanel.add(new JLabel("Month:"));
-        datePanel.add(monthComboBox);
-        datePanel.add(new JLabel("Day:"));
-        datePanel.add(dayComboBox);
-        datePanel.add(new JLabel("Year:"));
-        datePanel.add(yearComboBox);
-
-        int result = JOptionPane.showConfirmDialog(this, datePanel, "Select Date", JOptionPane.OK_CANCEL_OPTION);
-        if (result != JOptionPane.OK_OPTION) return;
-
-        String selectedDate = monthComboBox.getSelectedItem() + " " + dayComboBox.getSelectedItem() + ", " + yearComboBox.getSelectedItem();
+        int quantity;
+        try {
+            quantity = Integer.parseInt(quantityStr);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Invalid quantity entered. Please enter a numeric value.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         String mealID = getMealID(selectedMeal);
-        String userID = "1"; // For simplicity, assuming the user ID is "1". Modify as needed.
+        int currentStock = getMealStock(mealID);
+        if (currentStock < quantity) {
+            JOptionPane.showMessageDialog(this, "Not enough stock for the selected item.", "Insufficient Stock", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String selectedDate = new Date().toString(); // Simplified date selection for the example
+
+        String userID = "1"; // Example user ID
 
         insertOrderIntoDatabase(userID, mealID, quantity, selectedDate);
+        updateInventory(mealID, currentStock - quantity);
+
+        inventoryPanel.refresh();
 
         model.addRow(new Object[]{getLatestOrderID(), userID, mealID, quantity, selectedDate, "Pending"});
-
         updateActivity(customerName, selectedMeal);
+
+        new ViewFrame(Integer.parseInt(mealID), dashBoardPanel);
     }
 
     private void insertOrderIntoDatabase(String userID, String mealID, int quantity, String orderDate) {
@@ -221,10 +178,43 @@ public class OrdersPanel extends JPanel {
             preparedStatement.setString(5, "Pending");
 
             preparedStatement.executeUpdate();
-            System.out.println("Order added to database!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private void updateInventory(String mealID, int newStock) {
+        String query = "UPDATE Inventory SET quantity = ? WHERE meal_id = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setInt(1, newStock);
+            preparedStatement.setInt(2, Integer.parseInt(mealID));
+
+            preparedStatement.executeUpdate();
+
+            inventoryPanel.refresh();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private int getMealStock(String mealID) {
+        String query = "SELECT quantity FROM Inventory WHERE meal_id = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setInt(1, Integer.parseInt(mealID));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getInt("quantity");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     private String getLatestOrderID() {
@@ -240,6 +230,27 @@ public class OrdersPanel extends JPanel {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void loadOrdersFromDatabase() {
+        String query = "SELECT * FROM Orders";
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                String orderID = String.valueOf(resultSet.getInt("id"));
+                String userID = String.valueOf(resultSet.getInt("user_id"));
+                String mealID = String.valueOf(resultSet.getInt("meal_id"));
+                int quantity = resultSet.getInt("order_quantity");
+                String orderDate = resultSet.getString("order_date");
+                String status = resultSet.getString("status");
+
+                model.addRow(new Object[]{orderID, userID, mealID, quantity, orderDate, status});
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void updateActivity(String customerName, String foodItem) {
@@ -330,32 +341,6 @@ public class OrdersPanel extends JPanel {
             years[i] = String.valueOf(currentYear - i);
         }
         return years;
-    }
-
-    private int getDaysInMonth(String month, int year) {
-        switch (month) {
-            case "January":
-            case "March":
-            case "May":
-            case "July":
-            case "August":
-            case "October":
-            case "December":
-                return 31;
-            case "April":
-            case "June":
-            case "September":
-            case "November":
-                return 30;
-            case "February":
-                return (isLeapYear(year) ? 29 : 28);
-            default:
-                return 31;
-        }
-    }
-
-    private boolean isLeapYear(int year) {
-        return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
     }
 
     private static class MultiLineTableCellRenderer extends JTextArea implements TableCellRenderer {
