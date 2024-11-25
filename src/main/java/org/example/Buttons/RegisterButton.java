@@ -3,6 +3,7 @@ package org.example.Buttons;
 import org.example.Frames.FigmaToCodeApp;
 import org.example.Frames.RegisterFrame;
 import org.example.Frames.RolePage;
+import org.example.Misc.DatabaseManager;
 import org.example.Misc.RoundedBorder;
 import org.example.TextFields.PasswordField;
 import org.example.TextFields.RoundedPassWordField;
@@ -26,9 +27,6 @@ public class RegisterButton extends JButton implements ActionListener {
     private JFrame parentFrame;
     private int borderRadius = 30;
     private int managerCode = 1108;
-
-
-    private static final String DB_URL = "jdbc:sqlite:" + RegisterButton.class.getResource("/Database.db").getPath();
 
     public RegisterButton(RoundedTextField usernameField, RoundedPassWordField passwordField, JComboBox<String> rolesBox, JFrame parentFrame, RoundedTextField emailField) {
         super("Register");
@@ -114,7 +112,8 @@ public class RegisterButton extends JButton implements ActionListener {
     private boolean addUser(String email, String username, String password, String role) {
         String insertSQL = "INSERT INTO Users (email, username, password, role) VALUES (?, ?, ?, ?)";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
 
             preparedStatement.setString(1, email); // Set email first
@@ -139,7 +138,7 @@ public class RegisterButton extends JButton implements ActionListener {
     private void refreshUserList() {
         // Re-fetch users from the database
         String query = "SELECT * FROM Users";
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
 

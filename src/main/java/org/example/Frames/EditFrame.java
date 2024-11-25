@@ -3,6 +3,7 @@ package org.example.Frames;
 import org.example.Buttons.*;
 import org.example.Misc.CrudInventory;
 import org.example.Misc.CrudMeal;
+import org.example.Misc.DatabaseManager;
 import org.example.Panels.DashBoardPanel;
 import org.example.TextFields.RoundedTextField;
 
@@ -46,8 +47,6 @@ public class EditFrame extends JFrame {
     private CrudInventory editInventory = new CrudInventory();
     private ViewFrame parentViewFrame;
     private int userID;
-
-    private static final String DB_URL = "jdbc:sqlite:" + EditFrame.class.getResource("/Database.db").getPath();
 
 
     public static Font loadCustomFont() {
@@ -354,7 +353,8 @@ public class EditFrame extends JFrame {
     private boolean isEmployee(int userId){
         String query = "SELECT role FROM Users WHERE id = ?";
 
-        try(Connection connection = DriverManager.getConnection(DB_URL);
+        try(Connection connection = DatabaseManager.getConnection();
+
             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setInt(1, userId);

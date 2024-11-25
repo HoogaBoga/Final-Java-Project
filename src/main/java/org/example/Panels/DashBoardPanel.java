@@ -3,6 +3,7 @@ package org.example.Panels;
 import org.example.Frames.AddMealFrame;
 import org.example.Frames.HomeFrame;
 import org.example.Frames.ViewFrame;
+import org.example.Misc.DatabaseManager;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -17,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DashBoardPanel extends JScrollPane {
     public final JPanel contentPanel;
-    private static final String DB_URL = "jdbc:sqlite:" + DashBoardPanel.class.getResource("/Database.db").getPath();
     private static final Map<Integer, ImageIcon> imageCache = new ConcurrentHashMap<>(); // Thread-safe cache
     private final Map<Integer, JPanel> mealPanelCache = new ConcurrentHashMap<>(); // Cache for meal panels
     private boolean needsRefresh = false;
@@ -74,7 +74,8 @@ public class DashBoardPanel extends JScrollPane {
                             .append(" ELSE 4 END");
                 }
 
-                try (Connection connection = DriverManager.getConnection(DB_URL);
+                try (Connection connection = DatabaseManager.getConnection();
+
                      PreparedStatement preparedStatement = connection.prepareStatement(query.toString())) {
                     int paramIndex = 1;
 
@@ -136,7 +137,8 @@ public class DashBoardPanel extends JScrollPane {
         Map<Integer, String> meals = new HashMap<>();
         String query = "SELECT meal_id, meal_name FROM Meals";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
 
@@ -266,7 +268,8 @@ public class DashBoardPanel extends JScrollPane {
 
         int amount = 0;
 
-        try(Connection connection = DriverManager.getConnection(DB_URL);
+        try(Connection connection = DatabaseManager.getConnection();
+
             PreparedStatement preparedStatement = connection.prepareStatement(query)){
 
             preparedStatement.setInt(1, meal_ID);
@@ -286,7 +289,8 @@ public class DashBoardPanel extends JScrollPane {
     public int getLoggedInUserId() {
         String query = "SELECT id FROM Users WHERE is_logged_in = 1";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query);
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -308,7 +312,8 @@ public class DashBoardPanel extends JScrollPane {
                 "FROM Meals INNER JOIN Inventory ON Meals.meal_id = Inventory.meal_id " +
                 "WHERE LOWER(Meals.meal_name) LIKE ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setString(1, searchQuery);

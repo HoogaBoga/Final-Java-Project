@@ -20,6 +20,7 @@ import org.example.Frames.AddMealFrame;
 import org.example.Frames.FigmaToCodeApp;
 import org.example.Frames.HomeFrame;
 import org.example.Frames.ViewFrame;
+import org.example.Misc.DatabaseManager;
 import org.example.Misc.UserSessionManager;
 
 public class OrdersPanel extends JPanel {
@@ -32,7 +33,6 @@ public class OrdersPanel extends JPanel {
     private Queue<JPanel> activityQueue;
     private HomeFrame parentFrame;
     private Set<String> generatedOrderIDs;
-    private static final String DB_URL = "jdbc:sqlite:" + OrdersPanel.class.getResource("/Database.db").getPath();
     private int useriD;
 
     public OrdersPanel(DashBoardPanel dashBoardPanel, InventoryPanel inventoryPanel, int usersID) {
@@ -238,7 +238,8 @@ public class OrdersPanel extends JPanel {
         String insertOrderItemsQuery = "INSERT INTO OrderItems (order_id, meal_id, quantity, subtotal) VALUES (?, ?, ?, ?)";
         String updateInventoryQuery = "UPDATE Inventory SET quantity = quantity - ? WHERE meal_id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL)) {
+        try (Connection connection = DatabaseManager.getConnection();
+) {
             connection.setAutoCommit(false); // Enable transaction
 
             int orderID;
@@ -300,7 +301,7 @@ public class OrdersPanel extends JPanel {
 
     private double getMealPrice(int mealID) throws SQLException {
         String query = "SELECT meal_price FROM Inventory WHERE meal_id = ?";
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, mealID);
             ResultSet rs = stmt.executeQuery();
@@ -313,7 +314,8 @@ public class OrdersPanel extends JPanel {
 
     private void insertOrderIntoDatabase(String userID, String mealID, int quantity, String orderDate) {
         String query = "INSERT INTO Orders (user_id, meal_id, order_quantity, order_date, status) VALUES (?, ?, ?, ?, ?)";
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setInt(1, Integer.parseInt(userID));
@@ -330,7 +332,7 @@ public class OrdersPanel extends JPanel {
 
     private void updateInventory(String mealID, int newStock) {
         String query = "UPDATE Inventory SET quantity = ? WHERE meal_id = ?";
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setInt(1, newStock);
@@ -347,7 +349,8 @@ public class OrdersPanel extends JPanel {
 
     private int getMealStock(String mealID) {
         String query = "SELECT quantity FROM Inventory WHERE meal_id = ?";
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setInt(1, Integer.parseInt(mealID));
@@ -364,7 +367,8 @@ public class OrdersPanel extends JPanel {
 
     private String getLatestOrderID() {
         String query = "SELECT id FROM Orders ORDER BY id DESC LIMIT 1";
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
 
@@ -387,7 +391,8 @@ public class OrdersPanel extends JPanel {
                 "JOIN Inventory ON Meals.meal_id = Inventory.meal_id " +
                 "GROUP BY Orders.id";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
 
@@ -493,7 +498,8 @@ public class OrdersPanel extends JPanel {
     private void updateOrderStatusInDatabase(int orderId, String newStatus) {
         String query = "UPDATE Orders SET status = ? WHERE id = ? AND user_id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setString(1, newStatus);
@@ -604,7 +610,8 @@ public class OrdersPanel extends JPanel {
         String query = "SELECT meal_id, quantity FROM OrderItems WHERE order_id = ?";
         String updateStockQuery = "UPDATE Inventory SET quantity = quantity + ? WHERE meal_id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement selectStmt = connection.prepareStatement(query);
              PreparedStatement updateStmt = connection.prepareStatement(updateStockQuery)) {
 
@@ -631,7 +638,8 @@ public class OrdersPanel extends JPanel {
         String deleteOrderItemsQuery = "DELETE FROM OrderItems WHERE order_id = ?";
         String deleteOrderQuery = "DELETE FROM Orders WHERE id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement deleteItemsStmt = connection.prepareStatement(deleteOrderItemsQuery);
              PreparedStatement deleteOrderStmt = connection.prepareStatement(deleteOrderQuery)) {
 
@@ -670,7 +678,8 @@ public class OrdersPanel extends JPanel {
                 "WHERE LOWER(Orders.id || '' || Orders.user_id || '' || Meals.meal_name || '' || Orders.status) LIKE ? " +
                 "GROUP BY Orders.id";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(searchQuery)) {
 
             preparedStatement.setString(1, query);

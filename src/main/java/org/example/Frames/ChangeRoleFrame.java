@@ -1,6 +1,7 @@
 package org.example.Frames;
 
 import org.example.Buttons.CloseChangeRoleFrame;
+import org.example.Misc.DatabaseManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +9,6 @@ import java.sql.*;
 import java.util.Objects;
 
 public class ChangeRoleFrame extends JFrame {
-    private static final String DB_URL = "jdbc:sqlite:" + ChangeRoleFrame.class.getResource("/Database.db").getPath();
 
     public ChangeRoleFrame() {
         JLabel changeRoleLabel = new JLabel("Change User Role");
@@ -181,7 +181,8 @@ public class ChangeRoleFrame extends JFrame {
         dropdown.removeAllItems();
         String query = "SELECT id, username FROM Users WHERE TRIM(role) IN ('Employee', 'Manager')";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
 
@@ -208,7 +209,8 @@ public class ChangeRoleFrame extends JFrame {
     private void updateUserRoleInDatabase(String userId, String newRole) {
         String query = "UPDATE Users SET role = ? WHERE id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setString(1, newRole);
@@ -234,7 +236,8 @@ public class ChangeRoleFrame extends JFrame {
      */
     private String getCurrentRole(String userId) {
         String query = "SELECT TRIM(role) AS role FROM Users WHERE id = ?";
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setInt(1, Integer.parseInt(userId));

@@ -1,6 +1,7 @@
 package org.example.Frames;
 
 import org.example.Buttons.*;
+import org.example.Misc.DatabaseManager;
 import org.example.Misc.UserSessionManager;
 import org.example.Panels.*;
 import org.example.TextFields.RoundedTextField;
@@ -22,9 +23,7 @@ public class HomeFrame extends JFrame {
     private JPanel cardPanel;
     private int userId;
     private String activePanelName = "Dashboard";
-
-    private static final String DB_URL = "jdbc:sqlite:" + HomeFrame.class.getResource("/Database.db").getPath();
-
+    
     public HomeFrame(int userId) throws IOException, SQLException {
         this.userId = userId;
         ImageIcon greeneryImage = new ImageIcon(Objects.requireNonNull(HomeFrame.class.getResource("/Frame 12.png")));
@@ -298,7 +297,8 @@ public class HomeFrame extends JFrame {
 
     private String getLoggedInUserName() {
         // Fetch the logged-in user's name from the database
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement stmt = connection.prepareStatement("SELECT username FROM Users WHERE id = ?")) {
             stmt.setInt(1, userId);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -314,7 +314,8 @@ public class HomeFrame extends JFrame {
 
     private String getLoggedInUserRole() {
         // Fetch the logged-in user's role from the database
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement stmt = connection.prepareStatement("SELECT role FROM Users WHERE id = ?")) {
             stmt.setInt(1, userId);
             try (ResultSet rs = stmt.executeQuery()) {

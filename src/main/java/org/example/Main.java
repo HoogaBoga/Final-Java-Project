@@ -2,8 +2,9 @@ package org.example;
 
 import org.example.Frames.FigmaToCodeApp;
     import org.example.Misc.CrudMeal;
+import org.example.Misc.DatabaseManager;
 
-    import javax.swing.*;
+import javax.swing.*;
     import java.awt.*;
     import java.io.IOException;
     import java.sql.Connection;
@@ -14,9 +15,7 @@ import org.example.Frames.FigmaToCodeApp;
     import java.sql.Statement;
 
     public class Main {
-
-        private static final String DB_URL = "jdbc:sqlite:" + Main.class.getResource("/Database.db").getPath();
-
+        
         public static void main(String[] args) throws IOException, FontFormatException {
             new FigmaToCodeApp();
         }
@@ -28,7 +27,8 @@ import org.example.Frames.FigmaToCodeApp;
                     + "password TEXT NOT NULL, "
                     + "role TEXT NOT NULL)";
 
-            try (Connection connection = DriverManager.getConnection(DB_URL);
+            try (Connection connection = DatabaseManager.getConnection();
+
                  Statement statement = connection.createStatement()) {
 
                 statement.execute(createTableSQL);
@@ -48,7 +48,8 @@ import org.example.Frames.FigmaToCodeApp;
                     + "order_date TEXT NOT NULL, "
                     + "status INTEGER NOT NULL)";
 
-            try (Connection connection = DriverManager.getConnection(DB_URL);
+            try (Connection connection = DatabaseManager.getConnection();
+
                  Statement statement = connection.createStatement()) {
 
                 statement.execute(createTableSQL);
@@ -66,7 +67,8 @@ import org.example.Frames.FigmaToCodeApp;
                     + "date TEXT NOT NULL, "
                     + "duration_in_days INTEGER NOT NULL)";
 
-            try (Connection connection = DriverManager.getConnection(DB_URL);
+            try (Connection connection = DatabaseManager.getConnection();
+
                  Statement statement = connection.createStatement()) {
 
                 statement.execute(createTableSQL);
@@ -89,7 +91,8 @@ import org.example.Frames.FigmaToCodeApp;
                     + "ingredients TEXT NOT NULL, "
                     + "image BLOB)";
 
-            try (Connection connection = DriverManager.getConnection(DB_URL);
+            try (Connection connection = DatabaseManager.getConnection();
+
                  Statement statement = connection.createStatement()) {
 
                 statement.execute(createTableSQL);
@@ -108,7 +111,8 @@ import org.example.Frames.FigmaToCodeApp;
                     + "meal_id INTEGER, "
                     + "FOREIGN KEY (meal_id) REFERENCES Meals(meal_id) ON DELETE CASCADE ON UPDATE CASCADE)";
 
-            try (Connection connection = DriverManager.getConnection(DB_URL);
+            try (Connection connection = DatabaseManager.getConnection();
+
                  Statement statement = connection.createStatement()) {
 
                 statement.execute(createTableSQL);
@@ -126,7 +130,8 @@ import org.example.Frames.FigmaToCodeApp;
                     + "amount DECIMAL(10, 2) NOT NULL, "
                     + "sales_date TEXT NOT NULL)";
 
-            try (Connection connection = DriverManager.getConnection(DB_URL);
+            try (Connection connection = DatabaseManager.getConnection();
+
                  Statement statement = connection.createStatement()) {
 
                 statement.execute(createTableSQL);
@@ -140,7 +145,8 @@ import org.example.Frames.FigmaToCodeApp;
         private static void addUser(String username, String password, String role) {
             String insertSQL = "INSERT INTO Users (username, password, role) VALUES (?, ?, ?)";
 
-            try (Connection connection = DriverManager.getConnection(DB_URL);
+            try (Connection connection = DatabaseManager.getConnection();
+
                  PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
 
                 preparedStatement.setString(1, username);
@@ -160,7 +166,8 @@ import org.example.Frames.FigmaToCodeApp;
         public static boolean authenticateUser(String username, String password) {
             String query = "SELECT * FROM Users WHERE username = ? AND password = ?";
 
-            try (Connection connection = DriverManager.getConnection(DB_URL);
+            try (Connection connection = DatabaseManager.getConnection();
+
                  PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
                 preparedStatement.setString(1, username);
@@ -179,13 +186,12 @@ import org.example.Frames.FigmaToCodeApp;
 
         public class SalesAnalysis {
 
-            private static final String DB_URL = "jdbc:sqlite:C:/Users/stakezy/IdeaProjects/MavenProject/Database.db";
-
             public void getTopSellingMeals() {
                 String query = "SELECT meal_id, SUM(quantity) AS total_quantity FROM Sales " +
                         "GROUP BY meal_id ORDER BY total_quantity DESC LIMIT 5";
 
-                try (Connection connection = DriverManager.getConnection(DB_URL);
+                try (Connection connection = DatabaseManager.getConnection();
+
                      PreparedStatement preparedStatement = connection.prepareStatement(query);
                      ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -202,7 +208,8 @@ import org.example.Frames.FigmaToCodeApp;
                 String query = "SELECT sales_date, SUM(amount) AS total_sales FROM Sales " +
                         "WHERE sales_date BETWEEN ? AND ? GROUP BY sales_date";
 
-                try (Connection connection = DriverManager.getConnection(DB_URL);
+                try (Connection connection = DatabaseManager.getConnection();
+
                      PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
                     preparedStatement.setString(1, startDate);
@@ -222,7 +229,8 @@ import org.example.Frames.FigmaToCodeApp;
                 String query = "SELECT meal_id, SUM(quantity) AS total_quantity FROM Sales " +
                         "GROUP BY meal_id ORDER BY total_quantity ASC LIMIT 5";
 
-                try (Connection connection = DriverManager.getConnection(DB_URL);
+                try (Connection connection = DatabaseManager.getConnection();
+
                      PreparedStatement preparedStatement = connection.prepareStatement(query);
                      ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -238,7 +246,8 @@ import org.example.Frames.FigmaToCodeApp;
         private static void addIsLoggedInColumn() {
             String alterTableSQL = "ALTER TABLE Users ADD COLUMN is_logged_in BOOLEAN DEFAULT 0";
 
-            try (Connection connection = DriverManager.getConnection(DB_URL);
+            try (Connection connection = DatabaseManager.getConnection();
+
                  Statement statement = connection.createStatement()) {
 
                 statement.executeUpdate(alterTableSQL);
@@ -305,7 +314,8 @@ import org.example.Frames.FigmaToCodeApp;
                    + "FOREIGN KEY (order_id) REFERENCES Orders (id), "
                    + "FOREIGN KEY (meal_id) REFERENCES Meals (id))";
 
-            try (Connection connection = DriverManager.getConnection(DB_URL);
+            try (Connection connection = DatabaseManager.getConnection();
+
                  Statement statement = connection.createStatement()) {
 
                 statement.execute(createSQLTable);
@@ -330,7 +340,8 @@ import org.example.Frames.FigmaToCodeApp;
                     "SELECT id, user_id, order_date, status FROM Orders_old;";
             String dropOldTableQuery = "DROP TABLE Orders_old;";
 
-            try (Connection connection = DriverManager.getConnection(DB_URL);
+            try (Connection connection = DatabaseManager.getConnection();
+
                  Statement statement = connection.createStatement()) {
 
                 // Start a transaction

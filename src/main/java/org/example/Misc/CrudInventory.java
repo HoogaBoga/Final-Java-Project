@@ -3,11 +3,11 @@ package org.example.Misc;
 import java.sql.*;
 
 public class CrudInventory {
-    private static final String DB_URL = "jdbc:sqlite:" + CrudInventory.class.getResource("/Database.db").getPath();
 
     public void addInventory(int quantity, double mealPrice, int mealID) {
         String insertSQL = "INSERT INTO Inventory (quantity, meal_price, meal_id) VALUES (?, ?, ?)";
-        try (Connection connection = DriverManager.getConnection(DB_URL)) {
+        try (Connection connection = DatabaseManager.getConnection();
+        ) {
 
             // Set PRAGMA journal_mode to WAL to help with database locking issues
             try (Statement stmt = connection.createStatement()) {
@@ -32,7 +32,8 @@ public class CrudInventory {
         String fetchSQL = "SELECT quantity, meal_price FROM Inventory WHERE meal_id = ?";
         String updateSQL = "UPDATE Inventory SET quantity = ?, meal_price = ? WHERE meal_id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL)) {
+        try (Connection connection = DatabaseManager.getConnection();
+        ) {
 
             // Set PRAGMA journal_mode to WAL to help with database locking issues
             try (Statement stmt = connection.createStatement()) {
@@ -81,7 +82,8 @@ public class CrudInventory {
     public void deleteInventory(int meal_id) {
         String deleteSQL = "DELETE FROM Inventory WHERE meal_id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL)) {
+        try (Connection connection = DatabaseManager.getConnection();
+        ) {
 
             // Set PRAGMA journal_mode to WAL to help with database locking issues
             try (Statement stmt = connection.createStatement()) {
@@ -106,7 +108,8 @@ public class CrudInventory {
     public void listInventory() throws SQLException {
         String query = "SELECT * FROM Inventory";
         StringBuilder inventorylist = new StringBuilder("Inventory:\n");
-        try (Connection connection = DriverManager.getConnection(DB_URL)) {
+        try (Connection connection = DatabaseManager.getConnection();
+        ) {
 
             // Set PRAGMA journal_mode to WAL to help with database locking issues
             try (Statement stmt = connection.createStatement()) {
