@@ -16,7 +16,7 @@ public class LogOutButton extends JButton{
 
     public LogOutButton(){
 
-        this.setBounds(475, 15, 15, 15 );
+        this.setBounds(495, 15, 15, 15 );
 
         try{
             image = ImageIO.read(Objects.requireNonNull(FilterButton.class.getResource("/LogOut.png")));
