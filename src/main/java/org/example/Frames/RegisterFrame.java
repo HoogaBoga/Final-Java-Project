@@ -117,7 +117,7 @@ public class RegisterFrame extends JFrame {
         backButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                RegisterFrame.this.dispose();
+                dispose();
             }
         });
 

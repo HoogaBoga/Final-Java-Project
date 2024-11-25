@@ -108,7 +108,7 @@ public class EmployeeFrame extends JFrame {
         cardPanel.add(dashBoardPanel, "Dashboard");
         cardPanel.add(new OrdersPanel(dashBoardPanel, inventoryPanel, userId), "Orders");
         cardPanel.add(new InventoryPanel(), "Inventory");
-        cardPanel.add(new SettingsPanel(getLoggedInUserName(), getLoggedInUserRole()),"Settings");
+        cardPanel.add(new SettingsPanel(this, getLoggedInUserName(), getLoggedInUserRole()),"Settings");
         cardPanel.setBounds(25, 40, 484, 318);
 
         // Image and layout setup

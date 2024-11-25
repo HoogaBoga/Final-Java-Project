@@ -1,9 +1,6 @@
 package org.example.Panels;
 
-import org.example.Frames.ChangePasswordEmail;
-import org.example.Frames.ChangeUserNameEmail;
-import org.example.Frames.FigmaToCodeApp;
-import org.example.Frames.RegisterFrame;
+import org.example.Frames.*;
 import org.example.Misc.UserSessionManager;
 
 import javax.swing.*;
@@ -12,11 +9,13 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.sql.*;
 
 public class SettingsPanel extends JScrollPane {
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
-    public SettingsPanel(String username, String role) {
+    public SettingsPanel(JFrame parentFrame, String username, String role) {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBackground(Color.WHITE);
@@ -70,13 +69,56 @@ public class SettingsPanel extends JScrollPane {
         bottomPanel.setBorder(new EmptyBorder(10, 20, 10, 20));
 
         JButton deleteAccountButton = createButton("Delete Account", Color.WHITE, new Color(0xFF7979), e -> {
-            System.out.println("Delete Account button clicked!");
-            // Delete account logic
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to delete your account? This action cannot be undone.",
+                    "Delete Account",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                // Perform account deletion
+                boolean isDeleted = deleteUserAccount(UserSessionManager.getLoggedInUserID());
+
+                if (isDeleted) {
+                    JOptionPane.showMessageDialog(this, "Account deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    Window parentWindow = SwingUtilities.getWindowAncestor(this);
+                    if (parentWindow != null) {
+                        parentWindow.dispose(); // Close the parent frame
+                    }
+                    try {
+                        new FigmaToCodeApp();
+                        UserSessionManager.markAsLoggedOut();// Redirect to login
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (FontFormatException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Failed to delete the account. Please try again later.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
         });
+
 
         JButton logoutButton = createButton("Logout", Color.WHITE, new Color(0xDDDDDD), e -> {
             System.out.println("Logout button clicked!");
-            // Logout logic
+
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to logout?",
+                    "Confirmation",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+
+            if(confirm == JOptionPane.YES_OPTION){
+                parentFrame.dispose();
+                try {
+                    new FigmaToCodeApp();// Logout logic
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (FontFormatException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
         });
 
         bottomPanel.add(deleteAccountButton);
@@ -117,15 +159,13 @@ public class SettingsPanel extends JScrollPane {
                 case "Delete Users":
                     actionListener = e -> {
                         System.out.println("Delete Users button clicked!");
-                        // Open the DeleteUserFrame
-                         // Replace with your frame class
+                        new DeleteUserFrame();
                     };
                     break;
                 case "Manage Roles":
                     actionListener = e -> {
                         System.out.println("Manage Roles button clicked!");
-                        // Open the ManageRolesFrame
-                         // Replace with your frame class
+                        new ChangeRoleFrame();
                     };
                     break;
                 case "Change Username":
@@ -164,5 +204,30 @@ public class SettingsPanel extends JScrollPane {
         button.addActionListener(actionListener);
         return button;
     }
+
+    /**
+     * Deletes the user's account from the database based on their user ID.
+     *
+     * @param userId The ID of the user whose account is to be deleted.
+     * @return true if the account was deleted successfully, false otherwise.
+     */
+    private boolean deleteUserAccount(int userId) {
+        String deleteQuery = "DELETE FROM Users WHERE id = ?";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
+
+            preparedStatement.setInt(1, userId);
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            return rowsAffected > 0; // Return true if a row was deleted
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Database error while deleting account. Please contact support.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+        return false; // Return false if the deletion failed
+    }
+
 }
 
