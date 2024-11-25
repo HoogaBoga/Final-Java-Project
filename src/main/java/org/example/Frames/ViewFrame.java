@@ -2,13 +2,14 @@ package org.example.Frames;
 
 import org.example.Misc.DatabaseManager;
 import org.example.Panels.DashBoardPanel;
-import org.example.Panels.InventoryPanel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -25,17 +26,16 @@ public class ViewFrame extends JFrame {
     private DashBoardPanel dashBoardPanel;
     private int userID;
 
-    public ViewFrame(int mealID, DashBoardPanel dashBoardPanel, int userId){
+    public ViewFrame(int mealID, DashBoardPanel dashBoardPanel, int userId) {
 
         this.dashBoardPanel = dashBoardPanel;
         this.userID = userId;
-
 
         setTitle("Meal Viewer");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        setSize(300, 480);
+        setSize(300, 520); // Slightly increased height to accommodate the Save button
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         add(scrollPane);
         loadMeals(mealID);
@@ -49,7 +49,6 @@ public class ViewFrame extends JFrame {
         String query = "SELECT * FROM Meals WHERE meal_id = ?";
 
         try (Connection connection = DatabaseManager.getConnection();
-
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setInt(1, mealID);
@@ -80,7 +79,6 @@ public class ViewFrame extends JFrame {
     public String displayPrice(int mealId) {
         String query = "SELECT meal_price FROM Inventory WHERE meal_id = ?";
         try (Connection connection = DatabaseManager.getConnection();
-
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, mealId);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -96,7 +94,6 @@ public class ViewFrame extends JFrame {
     public String displayAmount(int mealId) {
         String query = "SELECT quantity FROM Inventory WHERE meal_id = ?";
         try (Connection connection = DatabaseManager.getConnection();
-
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, mealId);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -175,13 +172,13 @@ public class ViewFrame extends JFrame {
         mealPanel.add(nutritionLabel);
 
         JLabel edit = new JLabel("Edit");
-        edit.setFont(AddMealFrame.INTER_FONT.deriveFont(12f));
+        edit.setFont(new Font("Arial", Font.PLAIN, 12));
         edit.setForeground(new Color(0x65B265));
         edit.setBounds(250, 125, 100, 50);
         edit.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                new EditFrame(mealId, dashBoardPanel, ViewFrame.this, userID); // Pass the current ViewFrame to EditFrame
+                new EditFrame(mealId, dashBoardPanel, ViewFrame.this, userID);
             }
         });
 
@@ -198,24 +195,83 @@ public class ViewFrame extends JFrame {
         tableScroll.setBounds(7, 250, 274, 180);
         mealPanel.add(tableScroll);
 
-        // Load and split ingredients from database string
-        String ingredientsString = getIngredients(mealId); // Method to retrieve ingredients as a single string
-        if (ingredientsString != null) {
-            String[] ingredientsArray = ingredientsString.split(","); // Adjust delimiter if needed
-            for (String ingredient : ingredientsArray) {
-                // Add each ingredient with default "Volume" and "Unit" as editable fields
-                tableModel.addRow(new Object[]{ingredient.trim(), "", ""});
+        // Load ingredients and split by '|'
+        String ingredientsString = getIngredients(mealId);
+        if (ingredientsString != null && !ingredientsString.isEmpty()) {
+            String[] ingredientsArray = ingredientsString.split(",");
+            for (String ingredientEntry : ingredientsArray) {
+                String[] parts = ingredientEntry.split("\\|");
+                String ingredient = parts.length > 0 ? parts[0] : "";
+                String volume = parts.length > 1 ? parts[1] : "";
+                String unit = parts.length > 2 ? parts[2] : "";
+                tableModel.addRow(new Object[]{ingredient, volume, unit});
             }
         }
+
+        // Save button
+        JButton saveButton = new JButton("Save");
+        saveButton.setBounds(100, 450, 100, 30);
+        saveButton.setBackground(new Color(0x58A558));
+        saveButton.setForeground(Color.WHITE);
+        saveButton.addActionListener(e -> saveIngredients(mealId, ingredientTable));
+        mealPanel.add(saveButton);
 
         return mealPanel;
     }
 
-    // Method to retrieve ingredients as a single string from the database
+
+    private void saveIngredients(int mealId, JTable ingredientTable) {
+        StringBuilder ingredientsBuilder = new StringBuilder();
+        DefaultTableModel tableModel = (DefaultTableModel) ingredientTable.getModel();
+
+        // Loop through the table rows to construct the ingredients string
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            String ingredient = (String) tableModel.getValueAt(i, 0);
+            String volume = (String) tableModel.getValueAt(i, 1);
+            String unit = (String) tableModel.getValueAt(i, 2);
+
+            // Skip empty rows
+            if (ingredient == null || ingredient.trim().isEmpty()) {
+                continue;
+            }
+
+            // Add to the string, separated by '|'
+            ingredientsBuilder.append(ingredient.trim()).append("|")
+                    .append(volume == null ? "" : volume.trim()).append("|")
+                    .append(unit == null ? "" : unit.trim()).append(",");
+        }
+
+        // Remove trailing comma
+        if (ingredientsBuilder.length() > 0) {
+            ingredientsBuilder.setLength(ingredientsBuilder.length() - 1);
+        }
+
+        String ingredientsString = ingredientsBuilder.toString();
+
+        // Update the database
+        String query = "UPDATE Meals SET ingredients = ? WHERE meal_id = ?";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, ingredientsString); // Save the updated ingredients string
+            preparedStatement.setInt(2, mealId);
+            int rowsUpdated = preparedStatement.executeUpdate();
+
+            if (rowsUpdated > 0) {
+                JOptionPane.showMessageDialog(this, "Ingredients saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to save ingredients. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Database error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
     private String getIngredients(int mealId) {
         String query = "SELECT ingredients FROM Meals WHERE meal_id = ?";
         try (Connection connection = DatabaseManager.getConnection();
-
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, mealId);
             ResultSet resultSet = preparedStatement.executeQuery();
