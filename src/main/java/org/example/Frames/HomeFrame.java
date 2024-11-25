@@ -110,7 +110,7 @@ public class HomeFrame extends JFrame {
         cardPanel.add(inventoryPanel, "Inventory");
         cardPanel.add(new SalesPanel(), "Sales");
         cardPanel.add(new PromotionsPanel(), "Promotions");
-        cardPanel.add(new SettingsPanel(getLoggedInUserName(), getLoggedInUserRole()), "Settings");
+        cardPanel.add(new SettingsPanel(this, getLoggedInUserName(), getLoggedInUserRole()), "Settings");
         cardPanel.setBounds(25, 40, 484, 318);
 
         // Image and layout setup
