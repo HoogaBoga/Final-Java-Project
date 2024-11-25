@@ -1,6 +1,7 @@
 package org.example.Buttons;
 
 import org.example.Frames.EmployeeFrame;
+import org.example.Misc.DatabaseManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,8 +14,6 @@ public class EmployeeButton extends JButton implements ActionListener {
 
     private JFrame parentFrame;
     private int userId; // Logged-in user's ID
-    private static final String DB_URL = "jdbc:sqlite:" + EmployeeButton.class.getResource("/Database.db").getPath();
-
 
     public EmployeeButton(JFrame parentFrame, int userId) {
         super("Employee");
@@ -50,7 +49,7 @@ public class EmployeeButton extends JButton implements ActionListener {
     private boolean isEmployee(int userId){
         String query = "SELECT role FROM Users WHERE id = ?";
 
-        try(Connection connection = DriverManager.getConnection(DB_URL);
+        try(Connection connection = DatabaseManager.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setInt(1, userId);

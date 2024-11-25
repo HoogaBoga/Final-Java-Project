@@ -1,5 +1,7 @@
 package org.example.Panels;
 
+import org.example.Misc.DatabaseManager;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -7,7 +9,6 @@ import java.sql.*;
 
 public class InventoryPanel extends JScrollPane {
 
-    private static final String DB_URL = "jdbc:sqlite:" + InventoryPanel.class.getResource("/Database.db").getPath();
     private DefaultTableModel lowInventoryModel;
     private DefaultTableModel outofStocksModel;
     private DefaultTableModel inventoryModel;
@@ -128,7 +129,8 @@ public class InventoryPanel extends JScrollPane {
 
     // Method to load data and categorize items
     private void loadAndCategorizeData(String query) {
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
 
@@ -172,7 +174,8 @@ public class InventoryPanel extends JScrollPane {
                 "WHERE LOWER(Meals.meal_name) LIKE ? OR LOWER(Meals.meal_category) LIKE ? " +
                 "ORDER BY " + (currentSort.equals("name_asc") ? "Meals.meal_name ASC" : currentSort.equals("name_desc") ? "Meals.meal_name DESC" : currentSort.equals("stock_asc") ? "Inventory.quantity ASC" : "Inventory.quantity DESC");
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(searchQuery)) {
 
             preparedStatement.setString(1, query);

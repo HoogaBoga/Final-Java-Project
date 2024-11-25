@@ -1,6 +1,7 @@
 package org.example.Buttons;
 
 import org.example.Frames.FigmaToCodeApp;
+import org.example.Misc.DatabaseManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +13,6 @@ import java.util.Objects;
 public class UserNameBox extends JButton {
 
     private int loggedInUserId;
-    private static final String DB_URL = "jdbc:sqlite:" + UserNameBox.class.getResource("/Database.db").getPath();
 
     public UserNameBox(int userId) {
         super("Username");
@@ -36,7 +36,8 @@ public class UserNameBox extends JButton {
     public void setUserName() {
         String query = "SELECT username FROM Users WHERE id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setInt(1, loggedInUserId);

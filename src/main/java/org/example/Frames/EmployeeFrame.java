@@ -1,6 +1,7 @@
 package org.example.Frames;
 
 import org.example.Buttons.*;
+import org.example.Misc.DatabaseManager;
 import org.example.Misc.UserSessionManager;
 import org.example.Panels.*;
 import org.example.TextFields.RoundedTextField;
@@ -22,8 +23,6 @@ public class EmployeeFrame extends JFrame {
     private OrdersPanel ordersPanel;
     private int userId;
     private String activePanelName = "Dashboard";
-
-    private static final String DB_URL = "jdbc:sqlite:" + EmployeeFrame.class.getResource("/Database.db").getPath();
 
     public EmployeeFrame(int userId) throws IOException, SQLException {
         this.userId = userId;
@@ -282,7 +281,8 @@ public class EmployeeFrame extends JFrame {
                 "FROM Meals INNER JOIN Inventory ON Meals.meal_id = Inventory.meal_id " +
                 "WHERE LOWER(Meals.meal_name) LIKE ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setString(1, searchQuery); // Set the search text in the query
@@ -327,7 +327,8 @@ public class EmployeeFrame extends JFrame {
 
     private String getLoggedInUserName() {
         // Fetch the logged-in user's name from the database
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement stmt = connection.prepareStatement("SELECT username FROM Users WHERE id = ?")) {
             stmt.setInt(1, userId);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -343,7 +344,8 @@ public class EmployeeFrame extends JFrame {
 
     private String getLoggedInUserRole() {
         // Fetch the logged-in user's role from the database
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement stmt = connection.prepareStatement("SELECT role FROM Users WHERE id = ?")) {
             stmt.setInt(1, userId);
             try (ResultSet rs = stmt.executeQuery()) {

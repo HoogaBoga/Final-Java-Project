@@ -1,6 +1,7 @@
 package org.example.Panels;
 
 import org.example.Frames.*;
+import org.example.Misc.DatabaseManager;
 import org.example.Misc.UserSessionManager;
 
 import javax.swing.*;
@@ -13,7 +14,6 @@ import java.io.IOException;
 import java.sql.*;
 
 public class SettingsPanel extends JScrollPane {
-    private static final String DB_URL = "jdbc:sqlite:" + SettingsPanel.class.getResource("/Database.db").getPath();
 
     public SettingsPanel(JFrame parentFrame, String username, String role) {
         JPanel mainPanel = new JPanel();
@@ -214,7 +214,8 @@ public class SettingsPanel extends JScrollPane {
     private boolean deleteUserAccount(int userId) {
         String deleteQuery = "DELETE FROM Users WHERE id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
 
             preparedStatement.setInt(1, userId);

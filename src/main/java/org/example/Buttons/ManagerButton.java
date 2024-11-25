@@ -1,6 +1,7 @@
 package org.example.Buttons;
 
 import org.example.Frames.HomeFrame;
+import org.example.Misc.DatabaseManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +15,6 @@ public class ManagerButton extends JButton implements ActionListener {
     private JFrame parentFrame;
     private int userId; // Logged-in user's ID
     private int managerCode = 1108;
-    private static final String DB_URL = "jdbc:sqlite:" + ManagerButton.class.getResource("/Database.db").getPath();
 
     public ManagerButton(JFrame parentFrame, int userId) {
         super("Manager");
@@ -67,7 +67,8 @@ public class ManagerButton extends JButton implements ActionListener {
     private boolean isManagerRole(int userId) {
         String query = "SELECT role FROM Users WHERE id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setInt(1, userId);

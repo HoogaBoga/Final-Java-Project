@@ -1,5 +1,6 @@
 package org.example.Frames;
 
+import org.example.Misc.DatabaseManager;
 import org.example.Panels.DashBoardPanel;
 import org.example.Panels.InventoryPanel;
 
@@ -22,7 +23,6 @@ public class ViewFrame extends JFrame {
     private JPanel contentPanel;
     private final Map<Integer, ImageIcon> imageCache = new HashMap<>();
     private DashBoardPanel dashBoardPanel;
-    private static final String DB_URL = "jdbc:sqlite:" + ViewFrame.class.getResource("/Database.db").getPath();
     private int userID;
 
     public ViewFrame(int mealID, DashBoardPanel dashBoardPanel, int userId){
@@ -48,7 +48,8 @@ public class ViewFrame extends JFrame {
         contentPanel.removeAll();
         String query = "SELECT * FROM Meals WHERE meal_id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setInt(1, mealID);
@@ -78,7 +79,8 @@ public class ViewFrame extends JFrame {
 
     public String displayPrice(int mealId) {
         String query = "SELECT meal_price FROM Inventory WHERE meal_id = ?";
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, mealId);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -93,7 +95,8 @@ public class ViewFrame extends JFrame {
 
     public String displayAmount(int mealId) {
         String query = "SELECT quantity FROM Inventory WHERE meal_id = ?";
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, mealId);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -211,7 +214,8 @@ public class ViewFrame extends JFrame {
     // Method to retrieve ingredients as a single string from the database
     private String getIngredients(int mealId) {
         String query = "SELECT ingredients FROM Meals WHERE meal_id = ?";
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, mealId);
             ResultSet resultSet = preparedStatement.executeQuery();

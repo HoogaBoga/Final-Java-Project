@@ -1,6 +1,7 @@
 package org.example.Frames;
 
 import org.example.Buttons.CloseDeleteUserFrame;
+import org.example.Misc.DatabaseManager;
 import org.example.Misc.UserSessionManager;
 import org.example.TextFields.RoundedTextField;
 
@@ -10,7 +11,6 @@ import java.sql.*;
 import java.util.Objects;
 
 public class DeleteUserFrame extends JFrame {
-    private static final String DB_URL = "jdbc:sqlite:" + DeleteUserFrame.class.getResource("/Database.db").getPath();
 
     public DeleteUserFrame() {
         JLabel deleteUser = new JLabel("Delete User");
@@ -138,7 +138,8 @@ public class DeleteUserFrame extends JFrame {
         dropdown.removeAllItems();
         String query = "SELECT id, username FROM Users";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
 
@@ -156,7 +157,8 @@ public class DeleteUserFrame extends JFrame {
     private void deleteUserFromDatabase(String userId) {
         String query = "DELETE FROM Users WHERE id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setInt(1, Integer.parseInt(userId));

@@ -13,7 +13,6 @@ import java.util.List;
 
 public class CrudMeal {
 
-    private static final String DB_URL = "jdbc:sqlite:" + CrudMeal.class.getResource("/Database.db").getPath();
     private DashBoardPanel dashBoardPanel;
 
     public CrudMeal(DashBoardPanel dashBoardPanel) {
@@ -24,7 +23,7 @@ public class CrudMeal {
                        String spice, String ingredients, File imageFile) {
         String insertSQL = "INSERT INTO Meals (meal_name, meal_category, serving_size, meal_type, nutritional_value, "
                 + "spicy_or_not_spicy, ingredients, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(insertSQL, Statement.RETURN_GENERATED_KEYS)) {
 
             // Set PRAGMA settings
@@ -79,7 +78,8 @@ public class CrudMeal {
         String updateSQL = "UPDATE Meals SET meal_name = ?, meal_category = ?, serving_size = ?, meal_type = ?, " +
                 "nutritional_value = ?, spicy_or_not_spicy = ?, ingredients = ?, image = ? WHERE meal_id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL)) {
+        try (Connection connection = DatabaseManager.getConnection();
+        ) {
             // Set PRAGMA settings
             setPragmas(connection);
 
@@ -165,7 +165,7 @@ public class CrudMeal {
         if (confirm == JOptionPane.YES_OPTION) {
             String deleteSQL = "DELETE FROM Meals WHERE meal_id = ?";
 
-            try (Connection connection = DriverManager.getConnection(DB_URL);
+            try (Connection connection = DatabaseManager.getConnection();
                  PreparedStatement preparedStatement = connection.prepareStatement(deleteSQL)) {
 
                 // Set PRAGMA settings
@@ -198,7 +198,7 @@ public class CrudMeal {
     public void listMeals() throws SQLException {
         String query = "SELECT * FROM Meals";
         StringBuilder mealList = new StringBuilder("Meals:\n");
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
 

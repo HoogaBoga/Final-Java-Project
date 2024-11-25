@@ -10,9 +10,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 public class UserSessionManager {
-
-    private static final String DB_URL = "jdbc:sqlite:" + UserSessionManager.class.getResource("/Database.db").getPath();
-
+    
     /**
      * Retrieves the ID of the currently logged-in user.
      *
@@ -21,7 +19,8 @@ public class UserSessionManager {
     public static int getLoggedInUserID() {
         String query = "SELECT id FROM Users WHERE is_logged_in = 1";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
 
@@ -38,7 +37,8 @@ public class UserSessionManager {
     public static int getUserIdByCredentials(String username, String password) {
         String query = "SELECT id FROM Users WHERE username = ? AND password = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setString(1, username);
@@ -65,7 +65,8 @@ public class UserSessionManager {
         String resetQuery = "UPDATE Users SET is_logged_in = 0"; // Log out all users
         String loginQuery = "UPDATE Users SET is_logged_in = 1 WHERE id = ?"; // Log in the specific user
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              Statement resetStatement = connection.createStatement();
              PreparedStatement loginStatement = connection.prepareStatement(loginQuery)) {
 
@@ -89,7 +90,8 @@ public class UserSessionManager {
     public static void markAsLoggedOut() {
         String query = "UPDATE Users SET is_logged_in = 0";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              Statement statement = connection.createStatement()) {
 
             statement.executeUpdate(query);
@@ -105,7 +107,8 @@ public class UserSessionManager {
         String updateQuery = "UPDATE Users SET reset_token = ?, reset_token_time = datetime('now', 'localtime') WHERE email = ?";
         String token = UUID.randomUUID().toString(); // Generate a unique token
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement selectStatement = connection.prepareStatement(query);
              PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
 
@@ -182,7 +185,8 @@ public class UserSessionManager {
         String selectQuery = "SELECT id, reset_token_time FROM Users WHERE reset_token = ?";
         String updateQuery = "UPDATE Users SET password = ?, reset_token = NULL, reset_token_time = NULL WHERE id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement selectStatement = connection.prepareStatement(selectQuery);
              PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
 
@@ -232,7 +236,8 @@ public class UserSessionManager {
     public static boolean sendUsername(String email) {
         String query = "SELECT username FROM Users WHERE email = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             // Check if email exists and retrieve the username
@@ -258,7 +263,8 @@ public class UserSessionManager {
         String selectQuery = "SELECT id, reset_token_time FROM Users WHERE reset_token = ?";
         String updateQuery = "UPDATE Users SET username = ?, reset_token = NULL, reset_token_time = NULL WHERE id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement selectStatement = connection.prepareStatement(selectQuery);
              PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
 
@@ -310,7 +316,8 @@ public class UserSessionManager {
         String updateQuery = "UPDATE Users SET reset_token = ?, reset_token_time = datetime('now', 'localtime') WHERE email = ?";
         String token = UUID.randomUUID().toString(); // Generate a unique token
 
-        try (Connection connection = DriverManager.getConnection(DB_URL);
+        try (Connection connection = DatabaseManager.getConnection();
+
              PreparedStatement selectStatement = connection.prepareStatement(query);
              PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
 

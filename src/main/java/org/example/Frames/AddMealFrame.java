@@ -7,6 +7,7 @@ import org.example.Buttons.DashBoardButton;
 import org.example.Buttons.FinalAddButton;
 import org.example.Misc.CrudInventory;
 import org.example.Misc.CrudMeal;
+import org.example.Misc.DatabaseManager;
 import org.example.Panels.DashBoardPanel;
 import org.example.TextFields.RoundedTextField;
 
@@ -53,8 +54,6 @@ public class AddMealFrame extends JFrame {
     private int userID;
     private CrudMeal addMeals = new CrudMeal(dashBoardPanel);
     private CrudInventory addInventory = new CrudInventory();
-
-    private static final String DB_URL = "jdbc:sqlite:" + AddMealFrame.class.getResource("/Database.db").getPath();
 
 
     public static final Font INTER_FONT = loadCustomFont();
@@ -298,7 +297,8 @@ public class AddMealFrame extends JFrame {
     private boolean isEmployee(int userId){
         String query = "SELECT role FROM Users WHERE id = ?";
 
-        try(Connection connection = DriverManager.getConnection(DB_URL);
+        try(Connection connection = DatabaseManager.getConnection();
+
             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setInt(1, userId);
