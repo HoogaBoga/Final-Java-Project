@@ -23,7 +23,7 @@ public class HomeFrame extends JFrame {
     private int userId;
     private String activePanelName = "Dashboard";
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + HomeFrame.class.getResource("/Database.db").getPath();
 
     public HomeFrame(int userId) throws IOException, SQLException {
         this.userId = userId;

@@ -14,7 +14,7 @@ public class ManagerButton extends JButton implements ActionListener {
     private JFrame parentFrame;
     private int userId; // Logged-in user's ID
     private int managerCode = 1108;
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + ManagerButton.class.getResource("/Database.db").getPath();
 
     public ManagerButton(JFrame parentFrame, int userId) {
         super("Manager");

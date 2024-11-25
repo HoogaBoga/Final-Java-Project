@@ -28,7 +28,7 @@ public class RegisterButton extends JButton implements ActionListener {
     private int managerCode = 1108;
 
 
-    final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + RegisterButton.class.getResource("/Database.db").getPath();
 
     public RegisterButton(RoundedTextField usernameField, RoundedPassWordField passwordField, JComboBox<String> rolesBox, JFrame parentFrame, RoundedTextField emailField) {
         super("Register");

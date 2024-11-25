@@ -7,7 +7,7 @@ import java.sql.*;
 
 public class InventoryPanel extends JScrollPane {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + InventoryPanel.class.getResource("/Database.db").getPath();
     private DefaultTableModel lowInventoryModel;
     private DefaultTableModel outofStocksModel;
     private DefaultTableModel inventoryModel;

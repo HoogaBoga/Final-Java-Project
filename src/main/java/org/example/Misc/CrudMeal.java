@@ -13,7 +13,7 @@ import java.util.List;
 
 public class CrudMeal {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + CrudMeal.class.getResource("/Database.db").getPath();
     private DashBoardPanel dashBoardPanel;
 
     public CrudMeal(DashBoardPanel dashBoardPanel) {

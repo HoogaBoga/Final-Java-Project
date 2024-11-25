@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.sql.*;
 
 public class SettingsPanel extends JScrollPane {
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + SettingsPanel.class.getResource("/Database.db").getPath();
 
     public SettingsPanel(JFrame parentFrame, String username, String role) {
         JPanel mainPanel = new JPanel();

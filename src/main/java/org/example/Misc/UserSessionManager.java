@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public class UserSessionManager {
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + UserSessionManager.class.getResource("/Database.db").getPath();
 
     /**
      * Retrieves the ID of the currently logged-in user.

@@ -10,7 +10,7 @@ import java.sql.*;
 import java.util.Objects;
 
 public class DeleteUserFrame extends JFrame {
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + DeleteUserFrame.class.getResource("/Database.db").getPath();
 
     public DeleteUserFrame() {
         JLabel deleteUser = new JLabel("Delete User");

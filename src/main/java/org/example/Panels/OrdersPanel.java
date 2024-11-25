@@ -32,7 +32,7 @@ public class OrdersPanel extends JPanel {
     private Queue<JPanel> activityQueue;
     private HomeFrame parentFrame;
     private Set<String> generatedOrderIDs;
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + OrdersPanel.class.getResource("/Database.db").getPath();
     private int useriD;
 
     public OrdersPanel(DashBoardPanel dashBoardPanel, InventoryPanel inventoryPanel, int usersID) {

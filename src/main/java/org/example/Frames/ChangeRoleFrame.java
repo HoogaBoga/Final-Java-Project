@@ -8,7 +8,7 @@ import java.sql.*;
 import java.util.Objects;
 
 public class ChangeRoleFrame extends JFrame {
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + ChangeRoleFrame.class.getResource("/Database.db").getPath();
 
     public ChangeRoleFrame() {
         JLabel changeRoleLabel = new JLabel("Change User Role");

@@ -54,7 +54,7 @@ public class AddMealFrame extends JFrame {
     private CrudMeal addMeals = new CrudMeal(dashBoardPanel);
     private CrudInventory addInventory = new CrudInventory();
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + AddMealFrame.class.getResource("/Database.db").getPath();
 
 
     public static final Font INTER_FONT = loadCustomFont();
