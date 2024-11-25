@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DashBoardPanel extends JScrollPane {
     public final JPanel contentPanel;
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + DashBoardPanel.class.getResource("/Database.db").getPath();
     private static final Map<Integer, ImageIcon> imageCache = new ConcurrentHashMap<>(); // Thread-safe cache
     private final Map<Integer, JPanel> mealPanelCache = new ConcurrentHashMap<>(); // Cache for meal panels
     private boolean needsRefresh = false;

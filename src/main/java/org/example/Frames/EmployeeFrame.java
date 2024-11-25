@@ -23,7 +23,7 @@ public class EmployeeFrame extends JFrame {
     private int userId;
     private String activePanelName = "Dashboard";
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + EmployeeFrame.class.getResource("/Database.db").getPath();
 
     public EmployeeFrame(int userId) throws IOException, SQLException {
         this.userId = userId;

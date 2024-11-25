@@ -4,6 +4,9 @@
     <root id="archive" name="CRUDD.jar">
       <element id="module-output" name="CRUDD" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/xerial/sqlite-jdbc/3.46.1.3/sqlite-jdbc-3.46.1.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/sun/mail/javax.mail/1.6.2/javax.mail-1.6.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/javax/mail/javax.mail-api/1.6.2/javax.mail-api-1.6.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/javax/activation/activation/1.1/activation-1.1.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

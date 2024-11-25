@@ -47,7 +47,7 @@ public class EditFrame extends JFrame {
     private ViewFrame parentViewFrame;
     private int userID;
 
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + EditFrame.class.getResource("/Database.db").getPath();
 
 
     public static Font loadCustomFont() {

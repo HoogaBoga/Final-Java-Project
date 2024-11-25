@@ -15,7 +15,7 @@ import org.example.Frames.FigmaToCodeApp;
 
     public class Main {
 
-        private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+        private static final String DB_URL = "jdbc:sqlite:" + Main.class.getResource("/Database.db").getPath();
 
         public static void main(String[] args) throws IOException, FontFormatException {
             new FigmaToCodeApp();

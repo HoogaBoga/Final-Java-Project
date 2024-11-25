@@ -13,7 +13,7 @@ public class EmployeeButton extends JButton implements ActionListener {
 
     private JFrame parentFrame;
     private int userId; // Logged-in user's ID
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + EmployeeButton.class.getResource("/Database.db").getPath();
 
 
     public EmployeeButton(JFrame parentFrame, int userId) {

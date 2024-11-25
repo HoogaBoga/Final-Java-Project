@@ -22,7 +22,7 @@ public class ViewFrame extends JFrame {
     private JPanel contentPanel;
     private final Map<Integer, ImageIcon> imageCache = new HashMap<>();
     private DashBoardPanel dashBoardPanel;
-    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private static final String DB_URL = "jdbc:sqlite:" + ViewFrame.class.getResource("/Database.db").getPath();
     private int userID;
 
     public ViewFrame(int mealID, DashBoardPanel dashBoardPanel, int userId){
