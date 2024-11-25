@@ -1,5 +1,6 @@
 package org.example.Frames;
 
+import com.sun.jdi.IntegerValue;
 import org.example.Buttons.AddImageLabel;
 import org.example.Buttons.CloseAddButton;
 import org.example.Buttons.DashBoardButton;
@@ -10,11 +11,13 @@ import org.example.Panels.DashBoardPanel;
 import org.example.TextFields.RoundedTextField;
 
 import javax.imageio.ImageIO;
+import javax.management.StringValueExp;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.*;
 
 public class AddMealFrame extends JFrame {
 
@@ -47,8 +50,12 @@ public class AddMealFrame extends JFrame {
     private RoundedTextField priceFoodText = new RoundedTextField();
     private RoundedTextField amountFoodText = new RoundedTextField();
     private RoundedTextField mealIDText = new RoundedTextField();
+    private int userID;
     private CrudMeal addMeals = new CrudMeal(dashBoardPanel);
     private CrudInventory addInventory = new CrudInventory();
+
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+
 
     public static final Font INTER_FONT = loadCustomFont();
 
@@ -69,8 +76,9 @@ public class AddMealFrame extends JFrame {
         }
     }
 
-    public AddMealFrame(DashBoardPanel dashBoardPanel) {
+    public AddMealFrame(DashBoardPanel dashBoardPanel, int userID) {
 
+        this.userID = userID;
         Font inter = loadCustomFont();
         CloseAddButton closeAddButton = new CloseAddButton(this);
 
@@ -172,9 +180,9 @@ public class AddMealFrame extends JFrame {
                     String price = String.valueOf(mealPriceInput);
                     Image image = ImageIO.read(imageFile);
                     ImageIcon image2 = new ImageIcon(image);
-                    dashBoardPanel.contentPanel.add(dashBoardPanel.createItemPanel(mealID, mealNameInput, price, image2));
+                    dashBoardPanel.contentPanel.add(dashBoardPanel.createItemPanel(mealID, mealNameInput, price, image2, mealTypeInput, mealCategoryInput));
 
-                    dashBoardPanel.refreshMealsDisplay();
+                    dashBoardPanel.setNeedsRefresh(true);
 
                     this.dispose();
 
@@ -259,6 +267,15 @@ public class AddMealFrame extends JFrame {
         centerPanel.add(spiceLevelText);
         centerPanel.add(ingredientsNeed);
         centerPanel.add(ingredientsNeedText);
+        if(isEmployee(userID)){
+            priceFoodText.setPlaceholder("Enter Price");
+            priceFoodText.setText("0");
+            priceFoodText.setEditable(false);
+
+            amountFoodText.setPlaceholder("Enter Price");
+            amountFoodText.setText("0");
+            amountFoodText.setEditable(false);
+        }
         centerPanel.add(priceFood);
         centerPanel.add(priceFoodText);
         centerPanel.add(amountFood);
@@ -278,5 +295,25 @@ public class AddMealFrame extends JFrame {
         this.setVisible(true);
     }
 
+    private boolean isEmployee(int userId){
+        String query = "SELECT role FROM Users WHERE id = ?";
+
+        try(Connection connection = DriverManager.getConnection(DB_URL);
+            PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setInt(1, userId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if(resultSet.next()){
+                String role = resultSet.getString("role").trim();
+                System.out.println("DEBUG: Role retrieved from database for userId " + userId + " is: " + role);
+                return "Employee".equalsIgnoreCase(role);
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 
 }

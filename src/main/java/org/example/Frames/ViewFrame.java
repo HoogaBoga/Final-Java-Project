@@ -23,10 +23,13 @@ public class ViewFrame extends JFrame {
     private final Map<Integer, ImageIcon> imageCache = new HashMap<>();
     private DashBoardPanel dashBoardPanel;
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private int userID;
 
-    public ViewFrame(int mealID, DashBoardPanel dashBoardPanel){
+    public ViewFrame(int mealID, DashBoardPanel dashBoardPanel, int userId){
 
         this.dashBoardPanel = dashBoardPanel;
+        this.userID = userId;
+
 
         setTitle("Meal Viewer");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -175,7 +178,7 @@ public class ViewFrame extends JFrame {
         edit.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                new EditFrame(mealId, dashBoardPanel, ViewFrame.this); // Pass the current ViewFrame to EditFrame
+                new EditFrame(mealId, dashBoardPanel, ViewFrame.this, userID); // Pass the current ViewFrame to EditFrame
             }
         });
 

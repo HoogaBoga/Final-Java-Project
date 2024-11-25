@@ -11,6 +11,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.*;
 
 public class EditFrame extends JFrame {
     private DashBoardPanel dashBoardPanel;
@@ -44,6 +45,10 @@ public class EditFrame extends JFrame {
     private CrudMeal editMeals;
     private CrudInventory editInventory = new CrudInventory();
     private ViewFrame parentViewFrame;
+    private int userID;
+
+    private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+
 
     public static Font loadCustomFont() {
         try (InputStream is = AddMealFrame.class.getResourceAsStream("/Inter-VariableFont_opsz,wght.ttf")) {
@@ -61,10 +66,11 @@ public class EditFrame extends JFrame {
         }
     }
 
-    public EditFrame(int mealID, DashBoardPanel dashBoardPanel, ViewFrame viewFrame) {
+    public EditFrame(int mealID, DashBoardPanel dashBoardPanel, ViewFrame viewFrame, int userId) {
         this.dashBoardPanel = dashBoardPanel;
         this.parentViewFrame = viewFrame;
         this.editMeals = new CrudMeal(dashBoardPanel);
+        this.userID = userId;
 
         Font inter = loadCustomFont();
         CloseAddButton2 closeAddButton = new CloseAddButton2(this);
@@ -152,8 +158,7 @@ public class EditFrame extends JFrame {
                 editInventory.deleteInventory(mealID);
 
                 // Refresh the dashboard panel
-                dashBoardPanel.refreshMealsDisplay();
-
+                dashBoardPanel.setNeedsRefresh(true);
                 // Close the view frame if it exists
                 if (parentViewFrame != null) {
                     parentViewFrame.dispose(); // Close the ViewFrame
@@ -169,7 +174,7 @@ public class EditFrame extends JFrame {
 
         finalAddButton.addActionListener(e -> {
             try {
-                // Collect and validate inputs
+                // Collect inputs and perform validation
                 String mealNameInput = getValidText(mealName, "Enter dish name");
                 String mealCategoryInput = getValidText(mealCategories, "Enter meal category");
                 String mealTypeInput = getValidText(mealTypeText, "Enter meal type");
@@ -180,28 +185,31 @@ public class EditFrame extends JFrame {
                 // Initialize error message collector
                 StringBuilder errorMessages = new StringBuilder();
 
-                // Parse numeric inputs
                 Integer servingSizeInput = parseInteger(serveSizeText, "Enter serving size", errorMessages);
                 Integer nutritionalValueInput = parseInteger(nutritionalValue, "Enter nutritional value", errorMessages);
                 Double priceInput = parseDouble(priceFoodText, "Enter price", errorMessages);
                 Integer quantityInput = parseInteger(amountFoodText, "Enter amount", errorMessages);
 
-                // Show error dialog if validation issues exist
                 if (errorMessages.length() > 0) {
                     JOptionPane.showMessageDialog(null, errorMessages.toString(), "Input Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // Perform the edit operation
+                // Edit meal details in the database
                 editMeals.editMeal(mealID, mealNameInput, mealCategoryInput, servingSizeInput, mealTypeInput,
                         nutritionalValueInput, spiceLevelInput, ingredientsInput, imageFile);
 
+                // Update inventory details in the database
                 editInventory.editInventory(quantityInput, priceInput, mealID);
 
-                // Refresh the dashboard panel
+                // Clear cached data for the edited meal
+                dashBoardPanel.clearMealFromCache(mealID);
+
+                // Mark the panel for refresh and refresh it
+                dashBoardPanel.setNeedsRefresh(true);
                 dashBoardPanel.refreshMealsDisplay();
 
-                // Refresh the view frame
+                // Refresh parent view frame if applicable
                 if (parentViewFrame != null) {
                     parentViewFrame.loadMeals(mealID);
                 }
@@ -283,6 +291,15 @@ public class EditFrame extends JFrame {
         centerPanel.add(spiceLevelText);
         centerPanel.add(ingredientsNeed);
         centerPanel.add(ingredientsNeedText);
+        if(isEmployee(userID)){
+            priceFoodText.setPlaceholder("Enter Price");
+            priceFoodText.setText("0");
+            priceFoodText.setEditable(false);
+
+            amountFoodText.setPlaceholder("Enter Price");
+            amountFoodText.setText("0");
+            amountFoodText.setEditable(false);
+        }
         centerPanel.add(priceFood);
         centerPanel.add(priceFoodText);
         centerPanel.add(amountFood);
@@ -332,5 +349,26 @@ public class EditFrame extends JFrame {
             errorMessages.append("Please enter a valid decimal number for ").append(placeholder).append(".\n");
             return null;
         }
+    }
+
+    private boolean isEmployee(int userId){
+        String query = "SELECT role FROM Users WHERE id = ?";
+
+        try(Connection connection = DriverManager.getConnection(DB_URL);
+            PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setInt(1, userId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if(resultSet.next()){
+                String role = resultSet.getString("role").trim();
+                System.out.println("DEBUG: Role retrieved from database for userId " + userId + " is: " + role);
+                return "Employee".equalsIgnoreCase(role);
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

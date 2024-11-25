@@ -11,11 +11,39 @@ public class InventoryPanel extends JScrollPane {
     private DefaultTableModel lowInventoryModel;
     private DefaultTableModel outofStocksModel;
     private DefaultTableModel inventoryModel;
+    private JComboBox<String> sortComboBox; // Sorting dropdown
+    private String currentSort = "name_asc"; // Default sort order
 
     public InventoryPanel() {
         // Main panel with BoxLayout for vertical stacking
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+        // Sorting options
+        JPanel sortingPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        sortingPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        JLabel sortLabel = new JLabel("Sort by:");
+        sortComboBox = new JComboBox<>(new String[]{"Name (A-Z)", "Name (Z-A)", "Stock (Low to High)", "Stock (High to Low)"});
+        sortComboBox.addActionListener(e -> {
+            String selectedSort = (String) sortComboBox.getSelectedItem();
+            switch (selectedSort) {
+                case "Name (A-Z)":
+                    currentSort = "name_asc";
+                    break;
+                case "Name (Z-A)":
+                    currentSort = "name_desc";
+                    break;
+                case "Stock (Low to High)":
+                    currentSort = "stock_asc";
+                    break;
+                case "Stock (High to Low)":
+                    currentSort = "stock_desc";
+                    break;
+            }
+            refresh(); // Refresh the panel with the selected sorting option
+        });
+        sortingPanel.add(sortLabel);
+        sortingPanel.add(sortComboBox);
 
         // Low Inventory Section
         JPanel lowInventoryPanel = new JPanel(new BorderLayout());
@@ -45,6 +73,7 @@ public class InventoryPanel extends JScrollPane {
         inventoryPanel.add(new JScrollPane(inventoryTable), BorderLayout.CENTER);
 
         // Add panels to the main panel
+        mainPanel.add(sortingPanel); // Add sorting panel
         mainPanel.add(lowInventoryPanel);  // First panel
         mainPanel.add(Box.createVerticalStrut(10)); // Add spacing
         mainPanel.add(outofStocksPanel);    // Second panel
@@ -60,65 +89,118 @@ public class InventoryPanel extends JScrollPane {
 
     // Method to refresh all data in the tables
     public void refresh() {
-        // Clear existing data from all tables
         System.out.println("Refreshing InventoryPanel...");
         clearTableData();
 
-        // Reload data for Low Inventory Table
-        String lowInventoryQuery = "SELECT Meals.meal_name, Inventory.quantity " +
-                "FROM Meals " +
-                "INNER JOIN Inventory ON Meals.meal_id = Inventory.meal_id " +
-                "WHERE Inventory.quantity <= 5 AND Inventory.quantity > 0";
-        loadData(lowInventoryQuery, lowInventoryModel);
-
-        // Reload data for Out of Stocks Table
-        String outofStocksQuery = "SELECT Meals.meal_name " +
-                "FROM Meals " +
-                "INNER JOIN Inventory ON Meals.meal_id = Inventory.meal_id " +
-                "WHERE Inventory.quantity = 0";
-        loadData(outofStocksQuery, outofStocksModel);
-
-        // Reload data for Inventory Table
-        String inventoryQuery = "SELECT Meals.meal_name, Meals.meal_category, Inventory.meal_price, Inventory.quantity " +
-                "FROM Meals " +
-                "LEFT JOIN Inventory ON Meals.meal_id = Inventory.meal_id";
-        loadData(inventoryQuery, inventoryModel);
-
-        // Revalidate and repaint to update the UI
+        // Query to load all inventory data with sorting
+        String inventoryQuery = getInventoryQueryWithSorting();
+        loadAndCategorizeData(inventoryQuery);
         revalidate();
         repaint();
         System.out.println("InventoryPanel refresh complete.");
     }
 
-    // Method to clear all table data
-    private void clearTableData() {
-        // Clear Low Inventory Table
-        lowInventoryModel.setRowCount(0);
-
-        // Clear Out of Stocks Table
-        outofStocksModel.setRowCount(0);
-
-        // Clear Inventory Table
-        inventoryModel.setRowCount(0);
+    // Generate the inventory query based on the selected sorting option
+    private String getInventoryQueryWithSorting() {
+        String orderBy;
+        switch (currentSort) {
+            case "name_asc":
+                orderBy = "LOWER(Meals.meal_name) ASC"; // Case-insensitive ascending sort
+                break;
+            case "name_desc":
+                orderBy = "LOWER(Meals.meal_name) DESC"; // Case-insensitive descending sort
+                break;
+            case "stock_asc":
+                orderBy = "Inventory.quantity ASC";
+                break;
+            case "stock_desc":
+                orderBy = "Inventory.quantity DESC";
+                break;
+            default:
+                orderBy = "LOWER(Meals.meal_name) ASC"; // Default case-insensitive ascending sort
+                break;
+        }
+        return "SELECT Meals.meal_name, Meals.meal_category, Inventory.meal_price, Inventory.quantity " +
+                "FROM Meals " +
+                "LEFT JOIN Inventory ON Meals.meal_id = Inventory.meal_id " +
+                "ORDER BY " + orderBy;
     }
 
-    // Method to load data into a table model from a query
-    private static void loadData(String query, DefaultTableModel model) {
+    // Method to load data and categorize items
+    private void loadAndCategorizeData(String query) {
         try (Connection connection = DriverManager.getConnection(DB_URL);
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
 
             while (resultSet.next()) {
-                int columnCount = model.getColumnCount();
-                Object[] rowData = new Object[columnCount];
-                for (int i = 0; i < columnCount; i++) {
-                    rowData[i] = resultSet.getObject(i + 1);
+                String mealName = resultSet.getString("meal_name");
+                String mealCategory = resultSet.getString("meal_category");
+                double price = resultSet.getDouble("meal_price");
+                int quantity = resultSet.getInt("quantity");
+
+                if (quantity == 0) {
+                    // Move to Out of Stocks model
+                    outofStocksModel.addRow(new Object[]{mealName});
+                } else if (quantity <= 5) {
+                    // Move to Low Inventory model
+                    lowInventoryModel.addRow(new Object[]{mealName, quantity});
+                } else {
+                    // Keep in Inventory model
+                    inventoryModel.addRow(new Object[]{mealName, mealCategory, price, quantity});
                 }
-                model.addRow(rowData);
             }
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error loading data: " + e.getMessage());
+        }
+    }
+
+    // Method to clear all table data
+    private void clearTableData() {
+        lowInventoryModel.setRowCount(0);
+        outofStocksModel.setRowCount(0);
+        inventoryModel.setRowCount(0);
+    }
+
+    public void search(String searchText) {
+        String query = "%" + searchText.toLowerCase() + "%";
+
+        // Search query to filter all data
+        String searchQuery = "SELECT Meals.meal_name, Meals.meal_category, Inventory.meal_price, Inventory.quantity " +
+                "FROM Meals " +
+                "LEFT JOIN Inventory ON Meals.meal_id = Inventory.meal_id " +
+                "WHERE LOWER(Meals.meal_name) LIKE ? OR LOWER(Meals.meal_category) LIKE ? " +
+                "ORDER BY " + (currentSort.equals("name_asc") ? "Meals.meal_name ASC" : currentSort.equals("name_desc") ? "Meals.meal_name DESC" : currentSort.equals("stock_asc") ? "Inventory.quantity ASC" : "Inventory.quantity DESC");
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(searchQuery)) {
+
+            preparedStatement.setString(1, query);
+            preparedStatement.setString(2, query);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                clearTableData(); // Clear all models before applying search
+
+                while (resultSet.next()) {
+                    String mealName = resultSet.getString("meal_name");
+                    String mealCategory = resultSet.getString("meal_category");
+                    double price = resultSet.getDouble("meal_price");
+                    int quantity = resultSet.getInt("quantity");
+
+                    if (quantity == 0) {
+                        // Add to Out of Stocks model
+                        outofStocksModel.addRow(new Object[]{mealName});
+                    } else if (quantity <= 5) {
+                        // Add to Low Inventory model
+                        lowInventoryModel.addRow(new Object[]{mealName, quantity});
+                    } else {
+                        // Add to Inventory model
+                        inventoryModel.addRow(new Object[]{mealName, mealCategory, price, quantity});
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

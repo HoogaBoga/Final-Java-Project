@@ -89,6 +89,10 @@ public class RoundedTextField extends JTextField {
         repaint();
     }
 
+    public String getPlaceholder() {
+        return placeholder;
+    }
+
     private class TextUI extends BasicTextFieldUI {
         @Override
         protected void paintBackground(Graphics grphcs) {
