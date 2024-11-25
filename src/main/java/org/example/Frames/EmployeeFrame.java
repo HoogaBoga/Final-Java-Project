@@ -19,7 +19,10 @@ public class EmployeeFrame extends JFrame {
     private DashBoardPanel dashBoardPanel;
     private InventoryPanel inventoryPanel;
     public JPanel cardPanel;
+    private OrdersPanel ordersPanel;
     private int userId;
+    private String activePanelName = "Dashboard";
+
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
     public EmployeeFrame(int userId) throws IOException, SQLException {
@@ -33,19 +36,26 @@ public class EmployeeFrame extends JFrame {
         cardPanel = new JPanel(cardLayout);
 
         // Initialize DashBoardPanel and buttons
+        // Initialize DashBoardPanel, InventoryPanel, and OrdersPanel
         dashBoardPanel = new DashBoardPanel();
         inventoryPanel = new InventoryPanel();
-        PlusAddButton plusAddButton = new PlusAddButton(dashBoardPanel);
+        ordersPanel = new OrdersPanel(dashBoardPanel, inventoryPanel, userId);
+
+        dashBoardPanel.setName("Dashboard");
+        ordersPanel.setName("Orders");
+        inventoryPanel.setName("Inventory");
+
         FilterButton filterButton = new FilterButton();
         JLabel removeFilter = new JLabel("Remove Filter");
 
-        removeFilter.setBounds(285, 13, 100, 20);
+        removeFilter.setBounds(275, 13, 100, 20);
         removeFilter.setFont(DashBoardButton.ACTOR_REGULAR_FONT.deriveFont(Font.PLAIN, 12f));
         removeFilter.setForeground(new Color(0x58A558));
 
         removeFilter.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                dashBoardPanel.setNeedsRefresh(true);
                 dashBoardPanel.refreshMealsDisplay();
             }
         });
@@ -59,34 +69,46 @@ public class EmployeeFrame extends JFrame {
         refreshButton.addActionListener(e -> {
             dashBoardPanel.refreshMealsDisplay();
             inventoryPanel.refresh();
+            ordersPanel.loadOrdersFromDatabase();
         });
 
         LogOutButton logOutButton = new LogOutButton();
+
         logOutButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    UserSessionManager.markAsLoggedOut();
-                    new FigmaToCodeApp();
-                    dispose();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                } catch (FontFormatException ex) {
-                    throw new RuntimeException(ex);
-                }
+                int response = JOptionPane.showConfirmDialog(
+                        EmployeeFrame.this, // Use the EmployeeFrame as the parent component
+                        "Are you sure you want to logout?",
+                        "Confirmation",
+                        JOptionPane.YES_NO_OPTION
+                );
 
+                if (response == JOptionPane.YES_OPTION) {
+                    try {
+                        UserSessionManager.markAsLoggedOut();
+                        new FigmaToCodeApp(); // Redirect to the login screen
+                        dispose(); // Close the EmployeeFrame
+                    } catch (IOException | FontFormatException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(
+                                EmployeeFrame.this,
+                                "An error occurred while logging out.",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                    }
+                }
             }
         });
 
         // Set button properties
-        plusAddButton.setBounds(37, 308, 31, 31);
-        plusAddButton.setOpaque(false);
 
         // Set up card layout and add panels
         cardPanel.add(dashBoardPanel, "Dashboard");
-        cardPanel.add(new OrdersPanel(dashBoardPanel, inventoryPanel), "Orders");
+        cardPanel.add(new OrdersPanel(dashBoardPanel, inventoryPanel, userId), "Orders");
         cardPanel.add(new InventoryPanel(), "Inventory");
-        cardPanel.add(new SettingsPanel(), "Settings");
+        cardPanel.add(new SettingsPanel(getLoggedInUserName(), getLoggedInUserRole()),"Settings");
         cardPanel.setBounds(25, 40, 484, 318);
 
         // Image and layout setup
@@ -94,7 +116,7 @@ public class EmployeeFrame extends JFrame {
         greeneryImg.setIcon(greeneryImage);
 
         RoundedTextField searchBar = new RoundedTextField();
-        searchBar.setBounds(24, 10, 220, 21);
+        searchBar.setBounds(24, 10, 210, 21);
         searchBar.setBackground(Color.WHITE);
         searchBar.setForeground(Color.BLACK);
         searchBar.setFont(DashBoardButton.ACTOR_REGULAR_FONT.deriveFont(10f));
@@ -102,7 +124,53 @@ public class EmployeeFrame extends JFrame {
         searchBar.setMargin(new Insets(0, 10, 0, 0));
         searchBar.setPlaceholder("Search");
 
-        searchBar.addActionListener(e -> searchMeals(searchBar.getText()));
+        searchBar.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                performSearch();
+            }
+
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                performSearch();
+            }
+
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                performSearch();
+            }
+
+            private void performSearch() {
+                String searchText = searchBar.getText();
+
+                // Check if the search bar is empty or contains the placeholder
+                if (searchText.equals(searchBar.getPlaceholder())) {
+                    // Restore all meals
+                    System.out.println("Search is empty. Reloading full meal data.");
+                    dashBoardPanel.setNeedsRefresh(true);
+                    dashBoardPanel.refreshMealsDisplay();// This should reload all meals
+                    return;
+                }
+
+                // Perform the search only if there's valid input
+                System.out.println("Searching in panel: " + activePanelName + " with text: " + searchText);
+                switch (activePanelName) {
+                    case "Dashboard":
+                        dashBoardPanel.search(searchText); // Perform search in dashboard panel
+                        break;
+                    case "Orders":
+                        ordersPanel.search(searchText); // Perform search in orders panel
+                        break;
+                    case "Inventory":
+                        inventoryPanel.search(searchText); // Perform search in inventory panel
+                        break;
+                    default:
+                        System.out.println("Search not supported for panel: " + activePanelName);
+                        break;
+                }
+            }
+
+        });
 
         // Panel setup
         JPanel panel1 = new JPanel();
@@ -129,7 +197,7 @@ public class EmployeeFrame extends JFrame {
         panel1.add(cardPanel);
 
         panel2.add(greeneryImg);
-        panel2.add(plusAddButton);
+
 
         panel3.add(searchBar);
         panel3.add(filterButton);
@@ -140,17 +208,45 @@ public class EmployeeFrame extends JFrame {
 
         // Buttons for navigation
         DashBoardButton dashBoardButton = new DashBoardButton(cardLayout, cardPanel, "Dashboard");
+        dashBoardButton.addActionListener(e -> {
+            cardLayout.show(cardPanel, "Dashboard");
+            activePanelName = "Dashboard";
+
+            // Only refresh if needed
+            if (dashBoardPanel.needsRefresh()) {
+                dashBoardPanel.refreshMealsDisplay();
+            }
+
+            System.out.println("Switched to DashboardPanel");
+        });
+
+
         panel2.add(dashBoardButton);
 
         OrdersButton ordersButton = new OrdersButton(cardLayout, cardPanel, "Orders");
+        ordersButton.addActionListener(e -> {
+            cardLayout.show(cardPanel, "Orders");
+            activePanelName = "Orders";
+            ordersPanel.loadOrdersFromDatabase(); // Ensure orders data is refreshed
+            System.out.println("Switched to OrdersPanel");
+        });
+
         panel2.add(ordersButton);
 
         InventoryButton inventoryButton = new InventoryButton(cardLayout, cardPanel, "Inventory");
+        inventoryButton.addActionListener(e -> {
+            cardLayout.show(cardPanel, "Inventory");
+            activePanelName = "Inventory";
+            inventoryPanel.refresh(); // Ensure inventory is refreshed
+            System.out.println("Switched to InventoryPanel");
+        });
+
         panel2.add(inventoryButton);
 
         SettingsButton settingsButton = new SettingsButton(cardLayout, cardPanel, "Settings");
         settingsButton.setBounds(12, 124, 86, 16);
         panel2.add(settingsButton);
+
 
         // Frame settings
         this.setTitle("Restaurant Management System");
@@ -182,7 +278,7 @@ public class EmployeeFrame extends JFrame {
     public void searchMeals(String searchText) {
         String searchQuery = "%" + searchText.toLowerCase() + "%";
 
-        String query = "SELECT Meals.meal_id, Meals.meal_name, Inventory.meal_price, Meals.image " +
+        String query = "SELECT Meals.meal_id, Meals.meal_name, Meals.meal_type, Meals.meal_category, Inventory.meal_price, Meals.image " +
                 "FROM Meals INNER JOIN Inventory ON Meals.meal_id = Inventory.meal_id " +
                 "WHERE LOWER(Meals.meal_name) LIKE ?";
 
@@ -196,6 +292,8 @@ public class EmployeeFrame extends JFrame {
                 while (resultSet.next()) {
                     int mealID = resultSet.getInt("meal_id");
                     String mealName = resultSet.getString("meal_name");
+                    String mealType = resultSet.getString("meal_type");
+                    String mealCategory = resultSet.getString("meal_category");
                     double mealPrice = resultSet.getDouble("meal_price");
                     byte[] imageBytes = resultSet.getBytes("image");
 
@@ -207,7 +305,7 @@ public class EmployeeFrame extends JFrame {
                     }
 
                     // Add filtered meal to the dashboard
-                    JPanel mealPanel = dashBoardPanel.createItemPanel(mealID, mealName, "₱" + mealPrice, mealImage);
+                    JPanel mealPanel = dashBoardPanel.createItemPanel(mealID, mealName, "₱" + mealPrice, mealImage, mealType, mealCategory);
                     dashBoardPanel.contentPanel.add(mealPanel);
                 }
 
@@ -219,8 +317,44 @@ public class EmployeeFrame extends JFrame {
         }
     }
 
+    private String getCurrentPanelName() {
+        return activePanelName;
+    }
+
     public int getUserId() {
         return userId;
+    }
+
+    private String getLoggedInUserName() {
+        // Fetch the logged-in user's name from the database
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement stmt = connection.prepareStatement("SELECT username FROM Users WHERE id = ?")) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("username");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "Unknown User";
+    }
+
+    private String getLoggedInUserRole() {
+        // Fetch the logged-in user's role from the database
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement stmt = connection.prepareStatement("SELECT role FROM Users WHERE id = ?")) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("role");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "Unknown Role";
     }
 
 }

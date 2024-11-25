@@ -14,8 +14,13 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
+import org.example.Buttons.AddImageLabel;
+import org.example.Buttons.DashBoardButton;
+import org.example.Frames.AddMealFrame;
+import org.example.Frames.FigmaToCodeApp;
 import org.example.Frames.HomeFrame;
 import org.example.Frames.ViewFrame;
+import org.example.Misc.UserSessionManager;
 
 public class OrdersPanel extends JPanel {
     private DashBoardPanel dashBoardPanel;
@@ -28,16 +33,20 @@ public class OrdersPanel extends JPanel {
     private HomeFrame parentFrame;
     private Set<String> generatedOrderIDs;
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
+    private int useriD;
 
-    public OrdersPanel(DashBoardPanel dashBoardPanel, InventoryPanel inventoryPanel) {
+    public OrdersPanel(DashBoardPanel dashBoardPanel, InventoryPanel inventoryPanel, int usersID) {
         this.dashBoardPanel = dashBoardPanel;
         this.parentFrame = parentFrame;
         this.inventoryPanel = inventoryPanel;
         this.activityQueue = new LinkedList<>();
         this.generatedOrderIDs = new HashSet<>();
+        this.useriD = usersID;
 
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+
+
 
         // Activity Section
         activityPanel = new JPanel(new GridLayout(1, 2, 10, 10));
@@ -78,8 +87,9 @@ public class OrdersPanel extends JPanel {
         headerPanel.add(buttonPanel, BorderLayout.EAST);
 
         // Orders Table
-        String[] columnNames = {"Order ID", "User ID", "Meal ID", "Quantity", "Date", "Status"};
+        String[] columnNames = {"Order ID", "User ID", "Meal Details", "Date", "Total Price", "Status"};
         model = new DefaultTableModel(columnNames, 0);
+
         ordersTable = new JTable(model) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -102,7 +112,7 @@ public class OrdersPanel extends JPanel {
         JScrollPane tableScrollPane = new JScrollPane(ordersTable);
 
         JButton updateStatusButton = new JButton("Update Status");
-        updateStatusButton.setFont(new Font("Actor", Font.PLAIN, 14));
+        updateStatusButton.setFont(DashBoardButton.ACTOR_REGULAR_FONT.deriveFont(14f));
         updateStatusButton.setBackground(Color.decode("#4CAF50"));
         updateStatusButton.setForeground(Color.WHITE);
         updateStatusButton.setFocusPainted(false);
@@ -112,6 +122,28 @@ public class OrdersPanel extends JPanel {
         JPanel statusButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         statusButtonPanel.setBackground(Color.WHITE);
         statusButtonPanel.add(updateStatusButton);
+
+        JButton deleteOrderButton = new JButton("Delete Order");
+        deleteOrderButton.setFont(DashBoardButton.ACTOR_REGULAR_FONT.deriveFont(14f));
+        deleteOrderButton.setBackground(new Color(0xFF7979));
+        deleteOrderButton.setForeground(Color.WHITE);
+        deleteOrderButton.setFocusPainted(false);
+        statusButtonPanel.add(deleteOrderButton);
+
+        deleteOrderButton.addActionListener(e -> deleteOrder());
+
+        // Apply MultiLineTableCellRenderer to the Meal Details column
+        TableColumn mealDetailsColumn = ordersTable.getColumnModel().getColumn(2); // Index 2 is Meal Details
+        mealDetailsColumn.setCellRenderer(new MultiLineTableCellRenderer());
+        mealDetailsColumn.setPreferredWidth(100); // Wrap text at a width of ~200px
+
+// Adjust auto-resize mode
+        ordersTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+// Refresh table layout
+        ordersTable.revalidate();
+        ordersTable.repaint();
+
 
         contentPanel.add(activityPanel, BorderLayout.NORTH);
         contentPanel.add(tableScrollPane, BorderLayout.CENTER);
@@ -127,43 +159,156 @@ public class OrdersPanel extends JPanel {
         String customerName = JOptionPane.showInputDialog(this, "Enter customer name:", "Customer Name", JOptionPane.PLAIN_MESSAGE);
         if (customerName == null || customerName.trim().isEmpty()) return;
 
-        Map<Integer, String> meals = dashBoardPanel.getMealData();
-        String[] mealOptions = meals.values().toArray(new String[0]);
+        Map<Integer, Integer> selectedMeals = new HashMap<>(); // Meal ID -> Quantity mapping
+        boolean addMoreMeals = true;
 
-        String selectedMeal = (String) JOptionPane.showInputDialog(this, "Select a food item:", "Food Item", JOptionPane.PLAIN_MESSAGE, null, mealOptions, mealOptions[0]);
-        if (selectedMeal == null) return;
+        while (addMoreMeals) {
+            Map<Integer, String> meals = dashBoardPanel.getMealData(); // Meal ID -> Meal Name mapping
+            String[] mealOptions = meals.values().toArray(new String[0]);
 
-        String quantityStr = JOptionPane.showInputDialog(this, "Enter quantity:", "Quantity", JOptionPane.PLAIN_MESSAGE);
-        if (quantityStr == null || quantityStr.trim().isEmpty()) return;
+            String selectedMeal = (String) JOptionPane.showInputDialog(this,
+                    "Select a food item:",
+                    "Food Item",
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    mealOptions,
+                    mealOptions[0]);
+            if (selectedMeal == null) break;
 
-        int quantity;
-        try {
-            quantity = Integer.parseInt(quantityStr);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Invalid quantity entered. Please enter a numeric value.", "Error", JOptionPane.ERROR_MESSAGE);
+            String quantityStr = JOptionPane.showInputDialog(this, "Enter quantity:", "Quantity", JOptionPane.PLAIN_MESSAGE);
+            if (quantityStr == null || quantityStr.trim().isEmpty()) break;
+
+            int quantity;
+            try {
+                quantity = Integer.parseInt(quantityStr);
+                if (quantity <= 0) throw new NumberFormatException();
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Invalid quantity. Please enter a positive number.", "Error", JOptionPane.ERROR_MESSAGE);
+                continue;
+            }
+
+            int mealID = Integer.parseInt(getMealID(selectedMeal));
+            if (mealID == -1) {
+                JOptionPane.showMessageDialog(this, "Invalid meal selection.", "Error", JOptionPane.ERROR_MESSAGE);
+                continue;
+            }
+
+            // **Validate Inventory Stock**
+            int availableStock = getMealStock(String.valueOf(mealID));
+            if (quantity > availableStock) {
+                JOptionPane.showMessageDialog(this, "Not enough stock for " + selectedMeal + ". Available: " + availableStock, "Insufficient Stock", JOptionPane.WARNING_MESSAGE);
+                continue;
+            }
+
+            selectedMeals.put(mealID, selectedMeals.getOrDefault(mealID, 0) + quantity);
+            dashBoardPanel.setNeedsRefresh(true);
+
+            int choice = JOptionPane.showConfirmDialog(this,
+                    "Do you want to add another meal to this order?",
+                    "Add Another Meal",
+                    JOptionPane.YES_NO_OPTION);
+            if (choice == JOptionPane.NO_OPTION) {
+                addMoreMeals = false;
+            }
+        }
+
+        if (selectedMeals.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No meals selected for the order.", "No Meals Selected", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        String mealID = getMealID(selectedMeal);
-        int currentStock = getMealStock(mealID);
-        if (currentStock < quantity) {
-            JOptionPane.showMessageDialog(this, "Not enough stock for the selected item.", "Insufficient Stock", JOptionPane.WARNING_MESSAGE);
-            return;
+        int userID = UserSessionManager.getLoggedInUserID();
+        createOrderWithItems(userID, selectedMeals);
+
+        // **Call updateActivity() here**
+        for (Map.Entry<Integer, Integer> entry : selectedMeals.entrySet()) {
+            String mealName = dashBoardPanel.getMealData().get(entry.getKey());
+            int quantity = entry.getValue();
+            updateActivity(customerName, mealName + " x" + quantity);
         }
 
-        String selectedDate = new Date().toString(); // Simplified date selection for the example
+        JOptionPane.showMessageDialog(this, "Order created successfully.", "Order Created", JOptionPane.INFORMATION_MESSAGE);
+        loadOrdersFromDatabase();
+    }
 
-        String userID = "1"; // Example user ID
 
-        insertOrderIntoDatabase(userID, mealID, quantity, selectedDate);
-        updateInventory(mealID, currentStock - quantity);
 
-        inventoryPanel.refresh();
+    private void createOrderWithItems(int userID, Map<Integer, Integer> items) {
+        String insertOrderQuery = "INSERT INTO Orders (user_id, order_date, status) VALUES (?, datetime('now', 'localtime'), 'Pending')";
+        String insertOrderItemsQuery = "INSERT INTO OrderItems (order_id, meal_id, quantity, subtotal) VALUES (?, ?, ?, ?)";
+        String updateInventoryQuery = "UPDATE Inventory SET quantity = quantity - ? WHERE meal_id = ?";
 
-        model.addRow(new Object[]{getLatestOrderID(), userID, mealID, quantity, selectedDate, "Pending"});
-        updateActivity(customerName, selectedMeal);
+        try (Connection connection = DriverManager.getConnection(DB_URL)) {
+            connection.setAutoCommit(false); // Enable transaction
 
-        new ViewFrame(Integer.parseInt(mealID), dashBoardPanel);
+            int orderID;
+            // Insert the order and get its ID
+            try (PreparedStatement orderStmt = connection.prepareStatement(insertOrderQuery, Statement.RETURN_GENERATED_KEYS)) {
+                orderStmt.setInt(1, userID);
+                orderStmt.executeUpdate();
+
+                ResultSet rs = orderStmt.getGeneratedKeys();
+                if (rs.next()) {
+                    orderID = rs.getInt(1); // Get the generated order ID
+                } else {
+                    connection.rollback();
+                    throw new SQLException("Failed to create order.");
+                }
+            }
+
+            // Insert items into OrderItems and update inventory
+            try (PreparedStatement itemStmt = connection.prepareStatement(insertOrderItemsQuery);
+                 PreparedStatement inventoryStmt = connection.prepareStatement(updateInventoryQuery)) {
+
+                for (Map.Entry<Integer, Integer> entry : items.entrySet()) {
+                    int mealID = entry.getKey();
+                    int quantity = entry.getValue();
+
+                    // **Validate Inventory Stock**
+                    int availableStock = getMealStock(String.valueOf(mealID));
+                    if (quantity > availableStock) {
+                        connection.rollback();
+                        throw new SQLException("Not enough stock for Meal ID: " + mealID);
+                    }
+
+                    double price = getMealPrice(mealID); // Get price from Inventory
+                    double subtotal = price * quantity;
+
+                    // Insert into OrderItems
+                    itemStmt.setInt(1, orderID);
+                    itemStmt.setInt(2, mealID);
+                    itemStmt.setInt(3, quantity);
+                    itemStmt.setDouble(4, subtotal);
+                    itemStmt.addBatch();
+
+                    // Update Inventory
+                    inventoryStmt.setInt(1, quantity); // Subtract quantity
+                    inventoryStmt.setInt(2, mealID);
+                    inventoryStmt.addBatch();
+                }
+
+                itemStmt.executeBatch();
+                inventoryStmt.executeBatch();
+            }
+
+            connection.commit(); // Commit the transaction
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to create order. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private double getMealPrice(int mealID) throws SQLException {
+        String query = "SELECT meal_price FROM Inventory WHERE meal_id = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, mealID);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("meal_price");
+            }
+        }
+        throw new SQLException("Meal not found in Inventory.");
     }
 
     private void insertOrderIntoDatabase(String userID, String mealID, int quantity, String orderDate) {
@@ -232,26 +377,38 @@ public class OrdersPanel extends JPanel {
         return null;
     }
 
-    private void loadOrdersFromDatabase() {
-        String query = "SELECT * FROM Orders";
+    public void loadOrdersFromDatabase() {
+        String query = "SELECT Orders.id AS order_id, Orders.user_id, Orders.order_date, Orders.status, " +
+                "GROUP_CONCAT(Meals.meal_name || ' (x' || OrderItems.quantity || ')', ', ') AS meal_details, " +
+                "SUM(OrderItems.quantity * Inventory.meal_price) AS total_price " +
+                "FROM Orders " +
+                "JOIN OrderItems ON Orders.id = OrderItems.order_id " +
+                "JOIN Meals ON OrderItems.meal_id = Meals.meal_id " +
+                "JOIN Inventory ON Meals.meal_id = Inventory.meal_id " +
+                "GROUP BY Orders.id";
+
         try (Connection connection = DriverManager.getConnection(DB_URL);
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
 
+            model.setRowCount(0); // Clear existing rows
+
             while (resultSet.next()) {
-                String orderID = String.valueOf(resultSet.getInt("id"));
-                String userID = String.valueOf(resultSet.getInt("user_id"));
-                String mealID = String.valueOf(resultSet.getInt("meal_id"));
-                int quantity = resultSet.getInt("order_quantity");
+                int orderId = resultSet.getInt("order_id");
+                int userId = resultSet.getInt("user_id");
+                String mealDetails = resultSet.getString("meal_details");
                 String orderDate = resultSet.getString("order_date");
+                double totalPrice = resultSet.getDouble("total_price");
                 String status = resultSet.getString("status");
 
-                model.addRow(new Object[]{orderID, userID, mealID, quantity, orderDate, status});
+                model.addRow(new Object[]{orderId, userId, mealDetails, orderDate, totalPrice, status});
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
+
 
     private void updateActivity(String customerName, String foodItem) {
         if (noActivityLabel != null) {
@@ -296,21 +453,67 @@ public class OrdersPanel extends JPanel {
     }
 
     private void updateOrderStatus() {
-        int selectedRow = ordersTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select an order to update.", "No Order Selected", JOptionPane.WARNING_MESSAGE);
+        int[] selectedRows = ordersTable.getSelectedRows();
+
+        if (selectedRows.length == 0) {
+            JOptionPane.showMessageDialog(this, "Please select one or more orders to update.", "No Order Selected", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        String currentStatus = (String) model.getValueAt(selectedRow, 5);
-        if ("Pending".equals(currentStatus)) {
-            model.setValueAt("Paid", selectedRow, 5);
-        } else if ("Paid".equals(currentStatus)) {
-            model.setValueAt("Pending", selectedRow, 5);
+        int loggedInUserId = UserSessionManager.getLoggedInUserID();
+        for (int selectedRow : selectedRows) {
+            Object userIdObj = model.getValueAt(selectedRow, 1); // Column 1 is User ID
+            int orderUserId = Integer.parseInt(userIdObj.toString());
+
+            if (orderUserId != loggedInUserId) {
+                JOptionPane.showMessageDialog(this, "You can only edit your own orders.", "Access Denied", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
         }
 
-        JOptionPane.showMessageDialog(this, "Order status updated successfully.", "Status Updated", JOptionPane.INFORMATION_MESSAGE);
+        for (int selectedRow : selectedRows) {
+            int orderId = Integer.parseInt(model.getValueAt(selectedRow, 0).toString()); // Column 0 is Order ID
+            String currentStatus = model.getValueAt(selectedRow, 5).toString(); // Column 5 is Status
+            String newStatus = "Pending".equals(currentStatus) ? "Paid" : "Pending";
+
+            model.setValueAt(newStatus, selectedRow, 5);
+            updateOrderStatusInDatabase(orderId, newStatus);
+
+            // **Call updateActivity() here**
+            String mealDetails = model.getValueAt(selectedRow, 2).toString(); // Column 2 is Meal Details
+            updateActivity("Order #" + orderId, "Status updated to " + newStatus + ": " + mealDetails);
+        }
+
+        JOptionPane.showMessageDialog(this, "Order statuses updated successfully.", "Status Updated", JOptionPane.INFORMATION_MESSAGE);
     }
+
+
+
+
+    private void updateOrderStatusInDatabase(int orderId, String newStatus) {
+        String query = "UPDATE Orders SET status = ? WHERE id = ? AND user_id = ?";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, newStatus);
+            preparedStatement.setInt(2, orderId);
+            preparedStatement.setInt(3, UserSessionManager.getLoggedInUserID()); // Ensure user owns the order
+            int rowsUpdated = preparedStatement.executeUpdate();
+
+            if (rowsUpdated == 0) {
+                JOptionPane.showMessageDialog(this, "You can only update your own orders.", "Access Denied", JOptionPane.WARNING_MESSAGE);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to update order status for Order ID: " + orderId, "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
+
+
 
     private String getMealID(String mealName) {
         Map<Integer, String> meals = dashBoardPanel.getMealData();
@@ -343,29 +546,191 @@ public class OrdersPanel extends JPanel {
         return years;
     }
 
+    private void deleteOrder() {
+        int[] selectedRows = ordersTable.getSelectedRows();
+
+        if (selectedRows.length == 0) {
+            JOptionPane.showMessageDialog(this, "Please select one or more orders to delete.", "No Order Selected", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int loggedInUserId = UserSessionManager.getLoggedInUserID(); // Get logged-in user's ID
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to delete the selected orders?",
+                "Confirm Deletion",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        for (int i = selectedRows.length - 1; i >= 0; i--) {
+            int rowIndex = selectedRows[i];
+
+            // Retrieve the User ID and Order ID for the selected row
+            int orderId = Integer.parseInt(model.getValueAt(rowIndex, 0).toString()); // Column 0 is Order ID
+            int userId = Integer.parseInt(model.getValueAt(rowIndex, 1).toString()); // Column 1 is User ID
+
+            // Check if the logged-in user owns the order
+            if (userId != loggedInUserId) {
+                JOptionPane.showMessageDialog(this, "You can only delete your own orders.", "Access Denied", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // Retrieve meal details for activity logging
+            String mealDetails = model.getValueAt(rowIndex, 2).toString(); // Column 2 is Meal Details
+
+            // Restore inventory and delete the order
+            restoreInventoryStock(orderId);
+            deleteOrderFromDatabase(orderId);
+
+            // Update recent activity
+            updateActivity("Order #" + orderId, "Deleted: " + mealDetails);
+
+            // Remove the order from the table
+            model.removeRow(rowIndex);
+
+            dashBoardPanel.setNeedsRefresh(true);
+        }
+
+        JOptionPane.showMessageDialog(this, "Selected orders deleted successfully.", "Orders Deleted", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+
+
+    private void restoreInventoryStock(int orderID) {
+        String query = "SELECT meal_id, quantity FROM OrderItems WHERE order_id = ?";
+        String updateStockQuery = "UPDATE Inventory SET quantity = quantity + ? WHERE meal_id = ?";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement selectStmt = connection.prepareStatement(query);
+             PreparedStatement updateStmt = connection.prepareStatement(updateStockQuery)) {
+
+            selectStmt.setInt(1, orderID);
+            ResultSet rs = selectStmt.executeQuery();
+
+            while (rs.next()) {
+                int mealID = rs.getInt("meal_id");
+                int quantity = rs.getInt("quantity");
+
+                // Update stock in Inventory
+                updateStmt.setInt(1, quantity);
+                updateStmt.setInt(2, mealID);
+                updateStmt.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to restore inventory stock for order ID: " + orderID, "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void deleteOrderFromDatabase(int orderID) {
+        String deleteOrderItemsQuery = "DELETE FROM OrderItems WHERE order_id = ?";
+        String deleteOrderQuery = "DELETE FROM Orders WHERE id = ?";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement deleteItemsStmt = connection.prepareStatement(deleteOrderItemsQuery);
+             PreparedStatement deleteOrderStmt = connection.prepareStatement(deleteOrderQuery)) {
+
+            // Delete associated OrderItems first
+            deleteItemsStmt.setInt(1, orderID);
+            deleteItemsStmt.executeUpdate();
+
+            // Delete the order
+            deleteOrderStmt.setInt(1, orderID);
+            deleteOrderStmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to delete order with ID: " + orderID, "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void search(String searchText) {
+        // If the search bar is empty, reload the original data
+        if (searchText == null || searchText.trim().isEmpty()) {
+            loadOrdersFromDatabase();
+            return;
+        }
+
+        // Prepare the search query
+        String query = "%" + searchText.toLowerCase() + "%";
+
+        String searchQuery = "SELECT Orders.id AS order_id, Orders.user_id, " +
+                "GROUP_CONCAT(Meals.meal_name || ' (x' || OrderItems.quantity || ')', ', ') AS meal_details, " +
+                "Orders.order_date, Orders.status, " +
+                "SUM(OrderItems.quantity * Inventory.meal_price) AS total_price " +
+                "FROM Orders " +
+                "JOIN OrderItems ON Orders.id = OrderItems.order_id " +
+                "JOIN Meals ON OrderItems.meal_id = Meals.meal_id " +
+                "JOIN Inventory ON Meals.meal_id = Inventory.meal_id " +
+                "WHERE LOWER(Orders.id || '' || Orders.user_id || '' || Meals.meal_name || '' || Orders.status) LIKE ? " +
+                "GROUP BY Orders.id";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement preparedStatement = connection.prepareStatement(searchQuery)) {
+
+            preparedStatement.setString(1, query);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                model.setRowCount(0); // Clear the table model
+
+                while (resultSet.next()) {
+                    int orderId = resultSet.getInt("order_id");
+                    int userId = resultSet.getInt("user_id");
+                    String mealDetails = resultSet.getString("meal_details");
+                    String orderDate = resultSet.getString("order_date");
+                    double totalPrice = resultSet.getDouble("total_price");
+                    String status = resultSet.getString("status");
+
+                    // Add matching rows to the table
+                    model.addRow(new Object[]{orderId, userId, mealDetails, orderDate, totalPrice, status});
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Refresh table UI
+        ordersTable.revalidate();
+        ordersTable.repaint();
+    }
+
     private static class MultiLineTableCellRenderer extends JTextArea implements TableCellRenderer {
         public MultiLineTableCellRenderer() {
             setLineWrap(true);
             setWrapStyleWord(true);
-            setOpaque(true);
+            setOpaque(true); // Ensure the background is visible
         }
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            // Set the text for the cell
+            setText(value != null ? value.toString() : "");
+
+            // Get the width of the column
+            TableColumnModel columnModel = table.getColumnModel();
+            int columnWidth = columnModel.getColumn(column).getWidth();
+
+            // Set the preferred size of the JTextArea to trigger wrapping
+            setSize(columnWidth, Short.MAX_VALUE);
+            int preferredHeight = getPreferredSize().height;
+
+            // Adjust the row height to fit wrapped text
+            if (table.getRowHeight(row) != preferredHeight) {
+                table.setRowHeight(row, preferredHeight);
+            }
+
+            // Set selection colors
             if (isSelected) {
                 setBackground(table.getSelectionBackground());
                 setForeground(table.getSelectionForeground());
             } else {
                 setBackground(table.getBackground());
                 setForeground(table.getForeground());
-            }
-
-            setFont(table.getFont());
-            setText(value != null ? value.toString() : "");
-
-            int height = getPreferredSize().height;
-            if (table.getRowHeight(row) != height) {
-                table.setRowHeight(row, height);
             }
 
             return this;

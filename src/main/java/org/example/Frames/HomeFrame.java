@@ -18,8 +18,11 @@ import java.util.Objects;
 public class HomeFrame extends JFrame {
     private DashBoardPanel dashBoardPanel;
     private InventoryPanel inventoryPanel;
-    public JPanel cardPanel;
+    private OrdersPanel ordersPanel;
+    private JPanel cardPanel;
     private int userId;
+    private String activePanelName = "Dashboard";
+
     private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
     public HomeFrame(int userId) throws IOException, SQLException {
@@ -32,49 +35,68 @@ public class HomeFrame extends JFrame {
         CardLayout cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
 
-        // Initialize DashBoardPanel and buttons
+        // Initialize DashBoardPanel, InventoryPanel, and OrdersPanel
         dashBoardPanel = new DashBoardPanel();
         inventoryPanel = new InventoryPanel();
-        PlusAddButton plusAddButton = new PlusAddButton(dashBoardPanel);
+        ordersPanel = new OrdersPanel(dashBoardPanel, inventoryPanel, userId);
+
+        dashBoardPanel.setName("Dashboard");
+        ordersPanel.setName("Orders");
+        inventoryPanel.setName("Inventory");
+
+
+        PlusAddButton plusAddButton = new PlusAddButton(dashBoardPanel, userId);
         FilterButton filterButton = new FilterButton();
         JLabel removeFilter = new JLabel("Remove Filter");
 
-        removeFilter.setBounds(285, 13, 100, 20);
+        removeFilter.setBounds(275, 13, 100, 20);
         removeFilter.setFont(DashBoardButton.ACTOR_REGULAR_FONT.deriveFont(Font.PLAIN, 12f));
         removeFilter.setForeground(new Color(0x58A558));
 
         removeFilter.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                dashBoardPanel.setNeedsRefresh(true);
                 dashBoardPanel.refreshMealsDisplay();
             }
         });
 
-        filterButton.addActionListener(e -> {
-            new SortingFrame(dashBoardPanel);
-        });
+        filterButton.addActionListener(e -> new SortingFrame(dashBoardPanel));
 
         RefreshButton refreshButton = new RefreshButton();
 
         refreshButton.addActionListener(e -> {
             dashBoardPanel.refreshMealsDisplay();
             inventoryPanel.refresh();
+            ordersPanel.loadOrdersFromDatabase();
         });
 
         LogOutButton logOutButton = new LogOutButton();
         logOutButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    UserSessionManager.markAsLoggedOut();
-                    new FigmaToCodeApp();
-                    dispose();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                } catch (FontFormatException ex) {
-                    throw new RuntimeException(ex);
-                }
+                int response = JOptionPane.showConfirmDialog(
+                        HomeFrame.this, // Use the EmployeeFrame as the parent component
+                        "Are you sure you want to logout?",
+                        "Confirmation",
+                        JOptionPane.YES_NO_OPTION
+                );
 
+                if (response == JOptionPane.YES_OPTION) {
+                    try {
+                        UserSessionManager.markAsLoggedOut();
+                        new FigmaToCodeApp(); // Redirect to the login screen
+                        dispose(); // Close the EmployeeFrame
+                    } catch (IOException | FontFormatException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(
+                                HomeFrame.this,
+                                "An error occurred while logging out.",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                    }
+                }
             }
         });
 
@@ -84,19 +106,20 @@ public class HomeFrame extends JFrame {
 
         // Set up card layout and add panels
         cardPanel.add(dashBoardPanel, "Dashboard");
-        cardPanel.add(new OrdersPanel(dashBoardPanel, inventoryPanel), "Orders");
-        cardPanel.add(new InventoryPanel(), "Inventory");
+        cardPanel.add(ordersPanel, "Orders");
+        cardPanel.add(inventoryPanel, "Inventory");
         cardPanel.add(new SalesPanel(), "Sales");
         cardPanel.add(new PromotionsPanel(), "Promotions");
-        cardPanel.add(new SettingsPanel(), "Settings");
+        cardPanel.add(new SettingsPanel(getLoggedInUserName(), getLoggedInUserRole()), "Settings");
         cardPanel.setBounds(25, 40, 484, 318);
 
         // Image and layout setup
         greeneryImg.setBounds(11, 15, greeneryImage.getIconWidth(), greeneryImage.getIconHeight());
         greeneryImg.setIcon(greeneryImage);
 
+        // Search bar
         RoundedTextField searchBar = new RoundedTextField();
-        searchBar.setBounds(24, 10, 220, 21);
+        searchBar.setBounds(24, 10, 210, 21);
         searchBar.setBackground(Color.WHITE);
         searchBar.setForeground(Color.BLACK);
         searchBar.setFont(DashBoardButton.ACTOR_REGULAR_FONT.deriveFont(10f));
@@ -104,29 +127,78 @@ public class HomeFrame extends JFrame {
         searchBar.setMargin(new Insets(0, 10, 0, 0));
         searchBar.setPlaceholder("Search");
 
-        searchBar.addActionListener(e -> searchMeals(searchBar.getText()));
+        searchBar.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                performSearch();
+            }
+
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                performSearch();
+            }
+
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                performSearch();
+            }
+
+            private void performSearch() {
+                String searchText = searchBar.getText();
+
+                // Check if the search bar is empty or contains the placeholder
+                if (searchText.equals(searchBar.getPlaceholder())) {
+                    // Restore all meals
+                    System.out.println("Search is empty. Reloading full meal data.");
+                    dashBoardPanel.setNeedsRefresh(true);
+                    dashBoardPanel.refreshMealsDisplay();// This should reload all meals
+                    return;
+                }
+
+                // Perform the search only if there's valid input
+                System.out.println("Searching in panel: " + activePanelName + " with text: " + searchText);
+                switch (activePanelName) {
+                    case "Dashboard":
+                        dashBoardPanel.search(searchText); // Perform search in dashboard panel
+                        break;
+                    case "Orders":
+                        ordersPanel.search(searchText); // Perform search in orders panel
+                        break;
+                    case "Inventory":
+                        inventoryPanel.search(searchText); // Perform search in inventory panel
+                        break;
+                    default:
+                        System.out.println("Search not supported for panel: " + activePanelName);
+                        break;
+                }
+            }
+
+
+        });
+
+
 
         // Panel setup
         JPanel panel1 = new JPanel();
         JPanel panel2 = new JPanel();
         JPanel panel3 = new JPanel();
 
-        //Panel Layouts
+        // Panel Layouts
         panel1.setLayout(null);
         panel2.setLayout(null);
         panel3.setLayout(null);
 
-        //Panel Backgrounds
+        // Panel Backgrounds
         panel1.setBackground(new Color(0xE8E8E8));
         panel2.setBackground(Color.WHITE);
         panel3.setBackground(new Color(0xE8E8E8));
 
-        //Panel Sizes
+        // Panel Sizes
         panel1.setPreferredSize(new Dimension(516, 358));
         panel2.setPreferredSize(new Dimension(105, 358));
         panel3.setBounds(0, 0, 516, 36);
 
-        //Panel Components
+        // Panel Components
         panel1.add(panel3, BorderLayout.NORTH);
         panel1.add(cardPanel);
 
@@ -142,12 +214,39 @@ public class HomeFrame extends JFrame {
 
         // Buttons for navigation
         DashBoardButton dashBoardButton = new DashBoardButton(cardLayout, cardPanel, "Dashboard");
+        dashBoardButton.addActionListener(e -> {
+            cardLayout.show(cardPanel, "Dashboard");
+            activePanelName = "Dashboard";
+
+            // Only refresh if needed
+            if (dashBoardPanel.needsRefresh()) {
+                dashBoardPanel.refreshMealsDisplay();
+            }
+
+            System.out.println("Switched to DashboardPanel");
+        });
+
+
         panel2.add(dashBoardButton);
 
         OrdersButton ordersButton = new OrdersButton(cardLayout, cardPanel, "Orders");
+        ordersButton.addActionListener(e -> {
+            cardLayout.show(cardPanel, "Orders");
+            activePanelName = "Orders";
+            ordersPanel.loadOrdersFromDatabase(); // Ensure orders data is refreshed
+            System.out.println("Switched to OrdersPanel");
+        });
+
         panel2.add(ordersButton);
 
         InventoryButton inventoryButton = new InventoryButton(cardLayout, cardPanel, "Inventory");
+        inventoryButton.addActionListener(e -> {
+            cardLayout.show(cardPanel, "Inventory");
+            activePanelName = "Inventory";
+            inventoryPanel.refresh(); // Ensure inventory is refreshed
+            System.out.println("Switched to InventoryPanel");
+        });
+
         panel2.add(inventoryButton);
 
         SalesButton salesButton = new SalesButton(cardLayout, cardPanel, "Sales");
@@ -186,47 +285,46 @@ public class HomeFrame extends JFrame {
         panel3.addMouseListener(clickListener);
     }
 
-    public void searchMeals(String searchText) {
-        String searchQuery = "%" + searchText.toLowerCase() + "%";
+    private String getCurrentPanelName() {
+        return activePanelName;
+    }
 
-        String query = "SELECT Meals.meal_id, Meals.meal_name, Inventory.meal_price, Meals.image " +
-                "FROM Meals INNER JOIN Inventory ON Meals.meal_id = Inventory.meal_id " +
-                "WHERE LOWER(Meals.meal_name) LIKE ?";
+    /**
+     * Gets the logged-in user ID.
+     */
+    public int getUserId() {
+        return userId;
+    }
 
+    private String getLoggedInUserName() {
+        // Fetch the logged-in user's name from the database
         try (Connection connection = DriverManager.getConnection(DB_URL);
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
-            preparedStatement.setString(1, searchQuery); // Set the search text in the query
-
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                dashBoardPanel.contentPanel.removeAll(); // Clear current content
-                while (resultSet.next()) {
-                    int mealID = resultSet.getInt("meal_id");
-                    String mealName = resultSet.getString("meal_name");
-                    double mealPrice = resultSet.getDouble("meal_price");
-                    byte[] imageBytes = resultSet.getBytes("image");
-
-                    // Convert image bytes to an ImageIcon
-                    ImageIcon mealImage = null;
-                    if (imageBytes != null) {
-                        mealImage = new ImageIcon(Toolkit.getDefaultToolkit().createImage(imageBytes)
-                                .getScaledInstance(121, 91, Image.SCALE_SMOOTH));
-                    }
-
-                    // Add filtered meal to the dashboard
-                    JPanel mealPanel = dashBoardPanel.createItemPanel(mealID, mealName, "₱" + mealPrice, mealImage);
-                    dashBoardPanel.contentPanel.add(mealPanel);
+             PreparedStatement stmt = connection.prepareStatement("SELECT username FROM Users WHERE id = ?")) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("username");
                 }
-
-                dashBoardPanel.contentPanel.revalidate();
-                dashBoardPanel.contentPanel.repaint();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return "Unknown User";
     }
 
-    public int getUserId() {
-        return userId;
+    private String getLoggedInUserRole() {
+        // Fetch the logged-in user's role from the database
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement stmt = connection.prepareStatement("SELECT role FROM Users WHERE id = ?")) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("role");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "Unknown Role";
     }
 }

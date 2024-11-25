@@ -1,7 +1,6 @@
 package org.example.Frames;
 
 import org.example.Buttons.CloseSortButton;
-import org.example.Buttons.DashBoardButton;
 import org.example.Misc.DropShadowBorder;
 import org.example.Panels.DashBoardPanel;
 
@@ -14,7 +13,7 @@ public class SortingFrame extends JFrame {
 
     private DashBoardPanel dashBoardPanel;
 
-    public SortingFrame(DashBoardPanel dashBoardPanel){
+    public SortingFrame(DashBoardPanel dashBoardPanel) {
         this.dashBoardPanel = dashBoardPanel;
 
         CloseSortButton closeSortButton = new CloseSortButton(this);
@@ -92,7 +91,7 @@ public class SortingFrame extends JFrame {
         dietLabel.setForeground(Color.BLACK); // Ensure text is visible
         centerPanel.add(dietLabel);
 
-        JPanel vegetarian = createCheckboxPanel(unchecked, checked, "Vegetarian", 12, 231,109, 37);
+        JPanel vegetarian = createCheckboxPanel(unchecked, checked, "Vegetarian", 12, 231, 109, 37);
         JCheckBox vegetarianCheck = (JCheckBox) vegetarian.getComponent(0);
         centerPanel.add(vegetarian);
 
@@ -100,8 +99,18 @@ public class SortingFrame extends JFrame {
         JCheckBox nonVegetarianCheck = (JCheckBox) nonVegetarian.getComponent(0);
         centerPanel.add(nonVegetarian);
 
+        // Sort by Name Checkbox
+        JPanel sortByNamePanel = createCheckboxPanel(unchecked, checked, "Sort by Name", 12, 295, 150, 37);
+        JCheckBox sortByNameCheck = (JCheckBox) sortByNamePanel.getComponent(0);
+        centerPanel.add(sortByNamePanel);
+
+        // Sort by Category Checkbox
+        JPanel sortByCategoryPanel = createCheckboxPanel(unchecked, checked, "Sort by Category", 175, 295, 150, 37);
+        JCheckBox sortByCategoryCheck = (JCheckBox) sortByCategoryPanel.getComponent(0);
+        centerPanel.add(sortByCategoryPanel);
+
         JButton sortButton = new JButton("Sort");
-        sortButton.setBounds(250, 285, 76, 21);
+        sortButton.setBounds(250, 345, 76, 21);
         sortButton.setBackground(new Color(0x987284));
         sortButton.setForeground(Color.WHITE);
         sortButton.setFocusPainted(false);
@@ -134,26 +143,27 @@ public class SortingFrame extends JFrame {
                 selectedDiet = "Non-Vegetarian";
             }
 
-            // Pass filters to DashBoardPanel
-            dashBoardPanel.loadDataInBackground(selectedCategories, selectedSpiciness, selectedDiet);
+            boolean sortByName = sortByNameCheck.isSelected();
+            boolean sortByCategory = sortByCategoryCheck.isSelected();
+
+            // Pass filters and sorting options to DashBoardPanel
+            dashBoardPanel.loadDataInBackground(selectedCategories, selectedSpiciness, selectedDiet, sortByName, sortByCategory);
 
             // Close the SortingFrame
-
             this.dispose();
         });
 
-
-        // Add logic to unselect all if all are selected
+        // Add logic to ensure only one sorting option can be selected
         categoryCheckAll(breakFastCheck, lunchCheck, dinnerCheck);
-        categoryCheckEither(spicyCheck, nonSpicyCheck);
         categoryCheckEither(vegetarianCheck, nonVegetarianCheck);
+        categoryCheckEither(sortByNameCheck, sortByCategoryCheck);
 
         // Add topPanel and centerPanel to the frame
         add(topPanel, BorderLayout.NORTH);
         add(centerPanel, BorderLayout.CENTER);
 
         // Frame settings
-        setSize(337, 345); // Increase height to ensure visibility
+        setSize(337, 400); // Adjusted height for additional options
         setResizable(false);
         setUndecorated(true);
         setVisible(true);
@@ -182,10 +192,6 @@ public class SortingFrame extends JFrame {
         return panel;
     }
 
-
-    /**
-     * Adds functionality to uncheck all checkboxes if all are selected.
-     */
     public void categoryCheckAll(JCheckBox... checkBoxes) {
         // Logic for individual checkboxes
         for (JCheckBox checkBox : checkBoxes) {

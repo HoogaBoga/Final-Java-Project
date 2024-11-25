@@ -1,6 +1,7 @@
 package org.example.Buttons;
 
 import org.example.*;
+import org.example.Frames.FigmaToCodeApp;
 import org.example.Frames.RolePage;
 import org.example.Misc.RoundedBorder;
 import org.example.Misc.UserSessionManager;
@@ -18,6 +19,9 @@ public class LoginButton extends JButton implements ActionListener {
     private PasswordField passwordField;
     private JFrame parentFrame;
     private JLabel noUser;
+    private JLabel emptyUser;
+    private JLabel emptyPass;
+    private JLabel emptyBoth;
     private int borderRadius = 30;
 
 
@@ -38,10 +42,28 @@ public class LoginButton extends JButton implements ActionListener {
         this.setBorder(new RoundedBorder(borderRadius));
 
         noUser = new JLabel("Username or Password does not exist!");
-        noUser.setForeground(new Color(255, 0, 0));
-        noUser.setFont(new Font("Readex Pro", Font.PLAIN, 13));
-        noUser.setBounds(333, 295, 273, 15); // Adjust bounds as needed
+        noUser.setForeground(new Color(191, 11, 11));
+        noUser.setFont(FigmaToCodeApp.READEX_PRO_FONT.deriveFont(11f));
+        noUser.setBounds(333, 293, 273, 15); // Adjust bounds as needed
         noUser.setVisible(false); // Hide initially
+
+        emptyPass = new JLabel("Password cannot be empty!");
+        emptyPass.setForeground(new Color(191, 11, 11));
+        emptyPass.setFont(FigmaToCodeApp.READEX_PRO_FONT.deriveFont(11f));
+        emptyPass.setBounds(333, 293, 273, 15); // Adjust bounds as needed
+        emptyPass.setVisible(false); // Hide initially
+
+        emptyUser = new JLabel("Username cannot be empty!");
+        emptyUser.setForeground(new Color(191, 11, 11));
+        emptyUser.setFont(FigmaToCodeApp.READEX_PRO_FONT.deriveFont(11f));
+        emptyUser.setBounds(333, 293, 273, 15); // Adjust bounds as needed
+        emptyUser.setVisible(false); // Hide initially
+
+        emptyBoth = new JLabel("Both fields cannot be empty!");
+        emptyBoth.setForeground(new Color(191, 11, 11));
+        emptyBoth.setFont(FigmaToCodeApp.READEX_PRO_FONT.deriveFont(11f));
+        emptyBoth.setBounds(333, 293, 273, 15); // Adjust bounds as needed
+        emptyBoth.setVisible(false); // Hide initially
 
         // Add ActionListener
         this.addActionListener(this);
@@ -78,12 +100,42 @@ public class LoginButton extends JButton implements ActionListener {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
+        } else if(!username.isEmpty() && password.isEmpty()){
+            emptyUser.setVisible(false);
+            noUser.setVisible(false);
+            emptyBoth.setVisible(false);
+            emptyPass.setVisible(true);
+        } else if(!password.isEmpty() && username.isEmpty()) {
+            emptyPass.setVisible(false);
+            noUser.setVisible(false);
+            emptyBoth.setVisible(false);
+            emptyUser.setVisible(true);
+        } else if(password.isEmpty() && username.isEmpty()){
+            emptyUser.setVisible(false);
+            emptyPass.setVisible(false);
+            noUser.setVisible(false);
+            emptyBoth.setVisible(true);
         } else {
+            emptyUser.setVisible(false);
+            emptyPass.setVisible(false);
+            emptyBoth.setVisible(false);
             noUser.setVisible(true);
         }
     }
 
     public JLabel getNoUser(){
         return noUser;
+    }
+
+    public JLabel getEmptyUser(){
+        return emptyUser;
+    }
+
+    public JLabel getEmptyPass(){
+        return emptyPass;
+    }
+
+    public JLabel getEmptyBoth(){
+        return emptyBoth;
     }
 }

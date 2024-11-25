@@ -59,7 +59,7 @@ public class CrudMeal {
                         List<String> categories = new ArrayList<>();
                         categories.add(category); // Add the single category to the list
                         dashBoardPanel.refreshMealsDisplay();
-                        dashBoardPanel.loadDataInBackground(categories, spice, type);
+                        dashBoardPanel.loadDataInBackground(categories, spice, type, false, false);
                         return mealId; // Return the generated meal_id
                     }
                 }
@@ -177,6 +177,7 @@ public class CrudMeal {
                 if (rowsAffected > 0) {
                     System.out.println("Meal with ID " + meal_id + " deleted successfully.");
                     JOptionPane.showMessageDialog(null, "Meal Deleted Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    dashBoardPanel.setNeedsRefresh(true);
                     dashBoardPanel.refreshMealsDisplay();
                 } else {
                     System.out.println("No meal found with ID " + meal_id);

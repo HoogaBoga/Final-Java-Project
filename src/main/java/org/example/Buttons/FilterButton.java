@@ -16,7 +16,7 @@ public class FilterButton extends JButton{
 
     public FilterButton(){
 
-        this.setBounds(250, 15, 15, 15 );
+        this.setBounds(240, 15, 15, 15 );
 
         try{
             image = ImageIO.read(Objects.requireNonNull(FilterButton.class.getResource("/filter.png")));

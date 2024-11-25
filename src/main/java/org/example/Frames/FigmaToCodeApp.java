@@ -11,6 +11,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Objects;
 
 public class FigmaToCodeApp extends JFrame {
@@ -116,7 +118,7 @@ public class FigmaToCodeApp extends JFrame {
         JLabel forgotPasswordLabel = new JLabel("Forgot Password");
         forgotPasswordLabel.setForeground(new Color(192, 191, 191));
         forgotPasswordLabel.setFont(readexPro.deriveFont(12f));
-        forgotPasswordLabel.setBounds(505, 315, 100, 20);
+        forgotPasswordLabel.setBounds(495, 305, 100, 20);
 
         forgotPasswordLabel.addMouseListener(new MouseAdapter() {
             @Override
@@ -126,10 +128,16 @@ public class FigmaToCodeApp extends JFrame {
         });
         backgroundPanel.add(forgotPasswordLabel);
 
+        JLabel cutter = new JLabel("|");
+        cutter.setForeground(new Color(192, 191, 191));
+        cutter.setFont(readexPro.deriveFont(12f));
+        cutter.setBounds(487,299, 100, 30);
+        backgroundPanel.add(cutter);
+
         JLabel forgotUsername = new JLabel("Forgot Username");
         forgotUsername.setForeground(new Color(192, 191, 191));
         forgotUsername.setFont(readexPro.deriveFont(12f));
-        forgotUsername.setBounds(490, 187, 150, 20);
+        forgotUsername.setBounds(380, 305, 150, 20);
 
         forgotUsername.addMouseListener(new MouseAdapter() {
             @Override
@@ -140,18 +148,23 @@ public class FigmaToCodeApp extends JFrame {
 
         backgroundPanel.add(forgotUsername);
 
-        JLabel registerNewUser = new JLabel("Not a User? Register Here");
-        registerNewUser.setForeground(Color.WHITE);
-        registerNewUser.setFont(readexPro.deriveFont(12f));
-        registerNewUser.setBounds(335, 315, 155, 20);
-        backgroundPanel.add(registerNewUser);
-
-        registerNewUser.addMouseListener(new MouseAdapter() {
+        JLabel helpLabel = new JLabel("<html><a style='color: rgb(192, 191, 191);' href=''>Help</a></html>");
+        helpLabel.setForeground(new Color(192,191,191));
+        helpLabel.setFont(readexPro.deriveFont(12f));
+        helpLabel.setBounds(567, 315, 100, 50);
+        helpLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                new RegisterFrame();
+                try {
+                    // Open the link in the default web browser
+                    Desktop.getDesktop().browse(new URI("https://docs.google.com/document/d/1FrimEXG2kmXiYH4HcZBdlJiCVI-0bEp3RXpv22sUnIs/edit?tab=t.0#heading=h.nup4ro2alub5"));
+                } catch (IOException | URISyntaxException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(FigmaToCodeApp.this, "Failed to open the link!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
+        backgroundPanel.add(helpLabel);
 
         backgroundPanel.add(greeneryyImage, BorderLayout.EAST);
 
@@ -161,6 +174,9 @@ public class FigmaToCodeApp extends JFrame {
         backgroundPanel.add(loginButton);
 
         backgroundPanel.add(loginButton.getNoUser());
+        backgroundPanel.add(loginButton.getEmptyBoth());
+        backgroundPanel.add(loginButton.getEmptyPass());
+        backgroundPanel.add(loginButton.getEmptyUser());
 
         add(backgroundPanel, BorderLayout.CENTER);
 
@@ -181,8 +197,5 @@ public class FigmaToCodeApp extends JFrame {
 
         setResizable(false);
     }
-
-
-
 }
 

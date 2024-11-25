@@ -19,7 +19,7 @@ public class RefreshButton extends JButton {
 
     public RefreshButton(){
 
-        this.setBounds(267, 15, 15, 15 );
+        this.setBounds(257, 15, 15, 15 );
 
         try{
             image = ImageIO.read(Objects.requireNonNull(RefreshButton.class.getResource("/refresh-cw.png")));

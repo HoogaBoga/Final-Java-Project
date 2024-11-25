@@ -62,19 +62,26 @@ public class UserSessionManager {
      * @param userId The ID of the user to mark as logged in.
      */
     public static void markAsLoggedIn(int userId) {
-        String query = "UPDATE Users SET is_logged_in = 1 WHERE id = ?";
+        String resetQuery = "UPDATE Users SET is_logged_in = 0"; // Log out all users
+        String loginQuery = "UPDATE Users SET is_logged_in = 1 WHERE id = ?"; // Log in the specific user
 
         try (Connection connection = DriverManager.getConnection(DB_URL);
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+             Statement resetStatement = connection.createStatement();
+             PreparedStatement loginStatement = connection.prepareStatement(loginQuery)) {
 
-            preparedStatement.setInt(1, userId);
-            preparedStatement.executeUpdate();
+            // Reset all users' `is_logged_in` to 0
+            resetStatement.executeUpdate(resetQuery);
+
+            // Set `is_logged_in = 1` for the logged-in user
+            loginStatement.setInt(1, userId);
+            loginStatement.executeUpdate();
+
             System.out.println("User with ID " + userId + " is now marked as logged in.");
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
 
     /**
      * Marks all users as logged out.
@@ -247,4 +254,88 @@ public class UserSessionManager {
         }
     }
 
+    public static boolean updateUsernameWithToken(String resetToken, String newUsername) {
+        String selectQuery = "SELECT id, reset_token_time FROM Users WHERE reset_token = ?";
+        String updateQuery = "UPDATE Users SET username = ?, reset_token = NULL, reset_token_time = NULL WHERE id = ?";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement selectStatement = connection.prepareStatement(selectQuery);
+             PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
+
+            // Check if the reset token exists and is valid
+            selectStatement.setString(1, resetToken);
+            ResultSet resultSet = selectStatement.executeQuery();
+
+            if (resultSet.next()) {
+                int userId = resultSet.getInt("id");
+                Timestamp resetTokenTime = resultSet.getTimestamp("reset_token_time");
+
+                System.out.println("DEBUG: User ID = " + userId);
+                System.out.println("DEBUG: Reset Token Time = " + resetTokenTime);
+
+                // Check if the token is expired (e.g., valid for 15 minutes)
+                ZonedDateTime currentTime = ZonedDateTime.now(ZoneId.systemDefault());
+                long currentTimeMillis = Timestamp.valueOf(currentTime.toLocalDateTime()).getTime();
+
+                System.out.println("DEBUG: User ID = " + userId);
+                System.out.println("DEBUG: Reset Token Time = " + resetTokenTime);
+
+                long tokenTimeMillis = resetTokenTime.getTime();
+
+                if ((currentTimeMillis - tokenTimeMillis) > (15 * 60 * 1000)) { // 15 minutes
+                    System.out.println("DEBUG: Token expired");
+                    return false; // Token is expired
+                }
+
+                // Update the password
+                updateStatement.setString(1, newUsername);
+                updateStatement.setInt(2, userId);
+                int rowsUpdated = updateStatement.executeUpdate();
+
+                System.out.println("DEBUG: Username updated, rows affected = " + rowsUpdated);
+                return rowsUpdated > 0; // Return true if the password was updated
+            } else {
+                System.out.println("DEBUG: Reset token not found in the database");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false; // Return false if the token is invalid or any error occurred
+    }
+
+    public static boolean sendUsernameResetToken(String email) {
+        String query = "SELECT id FROM Users WHERE email = ?";
+        String updateQuery = "UPDATE Users SET reset_token = ?, reset_token_time = datetime('now', 'localtime') WHERE email = ?";
+        String token = UUID.randomUUID().toString(); // Generate a unique token
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+             PreparedStatement selectStatement = connection.prepareStatement(query);
+             PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
+
+            // Check if email exists
+            selectStatement.setString(1, email);
+            ResultSet resultSet = selectStatement.executeQuery();
+
+            if (!resultSet.next()) {
+                System.out.println("Email not found in the database.");
+                return false; // Email does not exist
+            }
+
+            // Update the reset token and timestamp
+            updateStatement.setString(1, token);
+            updateStatement.setString(2, email);
+            updateStatement.executeUpdate();
+
+            // Send the token via email
+            sendEmail(email, "Username Reset Token", "Here is your username reset token: " + token);
+
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

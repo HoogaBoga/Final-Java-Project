@@ -1,8 +1,9 @@
-    package org.example;
+package org.example;
 
-    import org.example.Frames.FigmaToCodeApp;
+import org.example.Frames.FigmaToCodeApp;
     import org.example.Misc.CrudMeal;
 
+    import javax.swing.*;
     import java.awt.*;
     import java.io.IOException;
     import java.sql.Connection;
@@ -12,16 +13,12 @@
     import java.sql.SQLException;
     import java.sql.Statement;
 
-
     public class Main {
 
         private static final String DB_URL = "jdbc:sqlite:C:/Users/Spyke/IdeaProjects/FinalJavaProject/Database.db";
 
         public static void main(String[] args) throws IOException, FontFormatException {
-
             new FigmaToCodeApp();
-
-
         }
 
         private static void createUsersTable() {
@@ -298,4 +295,66 @@
             }
         }
 
+        private static void createOrdersItemTable(){
+            String createSQLTable = "CREATE TABLE OrderItems ("
+                   + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                   + "order_id INTEGER NOT NULL, "
+                   + "meal_id INTEGER NOT NULL, "
+                   + "quantity INTEGER NOT NULL, "
+                   + "subtotal REAL NOT NULL, "
+                   + "FOREIGN KEY (order_id) REFERENCES Orders (id), "
+                   + "FOREIGN KEY (meal_id) REFERENCES Meals (id))";
+
+            try (Connection connection = DriverManager.getConnection(DB_URL);
+                 Statement statement = connection.createStatement()) {
+
+                statement.execute(createSQLTable);
+                System.out.println("Table 'OrdersItem' created successfully!");
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        private static void modifyOrdersTable() {
+            String renameTableQuery = "ALTER TABLE Orders RENAME TO Orders_old;";
+            String createNewTableQuery = "CREATE TABLE Orders (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "user_id INTEGER NOT NULL, " +
+                    "order_date TEXT NOT NULL, " +
+                    "status TEXT NOT NULL, " +
+                    "FOREIGN KEY(user_id) REFERENCES Users(id)" +
+                    ");";
+            String migrateDataQuery = "INSERT INTO Orders (id, user_id, order_date, status) " +
+                    "SELECT id, user_id, order_date, status FROM Orders_old;";
+            String dropOldTableQuery = "DROP TABLE Orders_old;";
+
+            try (Connection connection = DriverManager.getConnection(DB_URL);
+                 Statement statement = connection.createStatement()) {
+
+                // Start a transaction
+                connection.setAutoCommit(false);
+
+                // Rename the old table
+                statement.execute(renameTableQuery);
+
+                // Create the new table structure
+                statement.execute(createNewTableQuery);
+
+                // Migrate data to the new table
+                statement.execute(migrateDataQuery);
+
+                // Drop the old table
+                statement.execute(dropOldTableQuery);
+
+                // Commit the transaction
+                connection.commit();
+
+                System.out.println("Orders table modified successfully.");
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Failed to modify Orders table: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }

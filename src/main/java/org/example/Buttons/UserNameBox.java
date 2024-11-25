@@ -20,7 +20,7 @@ public class UserNameBox extends JButton {
 
         ImageIcon dashBoardIcon = new ImageIcon(Objects.requireNonNull(FigmaToCodeApp.class.getResource("/UserName.png")));
 
-        this.setBounds(380, 13, 80, 20);
+        this.setBounds(410, 13, 80, 20);
         this.setBackground(new Color(255, 255, 255));
         this.setForeground(Color.BLACK);
         this.setIcon(dashBoardIcon);
@@ -33,7 +33,7 @@ public class UserNameBox extends JButton {
         setUserName();
     }
 
-    private void setUserName() {
+    public void setUserName() {
         String query = "SELECT username FROM Users WHERE id = ?";
 
         try (Connection connection = DriverManager.getConnection(DB_URL);
